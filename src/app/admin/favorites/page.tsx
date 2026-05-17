@@ -83,7 +83,7 @@ export default function AdminFavoritesPage() {
         {/* Топ товаров */}
         <div className="bg-white/5 rounded-2xl p-6 border border-white/10 mb-6">
           <h2 className="text-xl font-bold text-white mb-4">🔥 Топ товаров в избранном</h2>
-          {stats?.top_items?.length > 0 ? (
+          {stats?.top_items && stats.top_items.length > 0 ? (
             <div className="space-y-3">
               {stats.top_items.map((item: any, idx: number) => (
                 <div key={idx} className="flex items-center justify-between bg-white/5 rounded-xl p-4">
@@ -108,7 +108,7 @@ export default function AdminFavoritesPage() {
         {/* Топ пользователей */}
         <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
           <h2 className="text-xl font-bold text-white mb-4">👥 Активные пользователи</h2>
-          {stats?.top_users?.length > 0 ? (
+          {stats?.top_users && stats.top_users.length > 0 ? (
             <div className="space-y-3">
               {stats.top_users.map((user: any, idx: number) => (
                 <div key={idx} className="flex items-center justify-between bg-white/5 rounded-xl p-4">

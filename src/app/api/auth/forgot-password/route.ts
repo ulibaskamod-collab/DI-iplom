@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
-import crypto from 'crypto'
 
 const prisma = new PrismaClient()
 
@@ -12,24 +11,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email обязателен' }, { status: 400 })
     }
 
-    const user = await prisma.user.findUnique({ where: { email } })
+    const user = await prisma.users.findUnique({ where: { email } })
 
+    // Для безопасности не сообщаем, существует пользователь или нет
     if (!user) {
+      // Просто возвращаем успешный ответ, даже если пользователь не найден
       return NextResponse.json({ message: 'Если пользователь существует, инструкция отправлена' })
     }
 
-    const token = crypto.randomBytes(32).toString('hex')
-    const expires = new Date(Date.now() + 3600000) // 1 час
-
-    await prisma.verificationToken.create({
-      data: {
-        identifier: email,
-        token,
-        expires,
-      },
-    })
-
-    console.log(`Ссылка для сброса пароля: http://localhost:3000/auth/reset-password?token=${token}`)
+    // TODO: Здесь нужно отправить email со ссылкой для сброса пароля
+    // Пока просто логируем
+    console.log(`Сброс пароля для: ${email}`)
 
     return NextResponse.json({ message: 'Инструкция отправлена на email' })
   } catch (error) {

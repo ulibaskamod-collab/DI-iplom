@@ -64,13 +64,13 @@ export default function ProfilePage() {
       })
 
       if (res.ok) {
-        setMessage(' Профиль успешно обновлен!')
+        setMessage('✅ Профиль успешно обновлен!')
         setTimeout(() => setMessage(''), 3000)
       } else {
-        setMessage(' Ошибка при обновлении')
+        setMessage('❌ Ошибка при обновлении')
       }
     } catch (error) {
-      setMessage(' Ошибка при обновлении')
+      setMessage('❌ Ошибка при обновлении')
     } finally {
       setLoading(false)
     }
@@ -89,11 +89,11 @@ export default function ProfilePage() {
       <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
         <div className="flex items-center gap-4 mb-6 pb-4 border-b">
           <div className="w-16 h-16 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-            {session.user?.name?.[0] || session.user?.email?.[0]?.toUpperCase()}
+            {session?.user?.name?.[0] || session?.user?.email?.[0]?.toUpperCase() || '?'}
           </div>
           <div>
             <p className="text-gray-500 text-sm">Email</p>
-            <p className="font-medium">{session.user?.email}</p>
+            <p className="font-medium">{session?.user?.email}</p>
           </div>
         </div>
 
@@ -140,7 +140,6 @@ export default function ProfilePage() {
           </button>
         </form>
       </div>
-
 
     </div>
   )

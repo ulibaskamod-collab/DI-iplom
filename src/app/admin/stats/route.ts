@@ -6,10 +6,10 @@ const prisma = new PrismaClient()
 export async function GET() {
   try {
     const [users, zodiacSigns, clothingItems, designers] = await Promise.all([
-      prisma.user.count(),
+      prisma.users.count(),        // Исправлено: users (множественное число)
       prisma.zodiacSign.count(),
       prisma.clothingItem.count(),
-      prisma.designer.count(),
+      prisma.designers.count(),    // Исправлено: designers (множественное число)
     ])
 
     return NextResponse.json({
