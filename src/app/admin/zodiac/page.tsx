@@ -35,17 +35,19 @@ export default function AdminZodiacPage() {
     fetchZodiacSigns()
   }, [status, router])
 
-  const fetchZodiacSigns = async () => {
-    try {
-      const res = await fetch('/api/zodiac')
-      const data = await res.json()
-      setSigns(data)
-    } catch (error) {
-      console.error('Error fetching zodiac signs:', error)
-    } finally {
-      setLoading(false)
-    }
+const fetchZodiacSigns = async () => {
+  try {
+    const res = await fetch('/api/zodiac')
+    const data = await res.json()
+    // Важно: проверяем, что data - это массив
+    setSigns(Array.isArray(data) ? data : [])
+  } catch (error) {
+    console.error('Error fetching zodiac signs:', error)
+    setSigns([])
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleDelete = async (id: number) => {
     if (confirm('Вы уверены, что хотите удалить этот знак? Это действие необратимо.')) {

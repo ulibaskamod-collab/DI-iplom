@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Shield, Users, Star, Shirt, Palette, Heart, LayoutDashboard, Sparkles } from 'lucide-react'
+import { Shield, Users, Star, Shirt, Palette, Heart, Sparkles } from 'lucide-react'
 
 export default function AdminPage() {
   const { data: session, status } = useSession()
@@ -33,7 +33,16 @@ export default function AdminPage() {
             setIsAdmin(true)
             fetch('/api/admin/stats')
               .then(res => res.json())
-              .then(setStats)
+              .then(data => {
+                // Защита от некорректных данных
+                setStats({
+                  users: typeof data?.users === 'number' ? data.users : 0,
+                  zodiacSigns: typeof data?.zodiacSigns === 'number' ? data.zodiacSigns : 0,
+                  clothingItems: typeof data?.clothingItems === 'number' ? data.clothingItems : 0,
+                  designers: typeof data?.designers === 'number' ? data.designers : 0,
+                  favorites: typeof data?.favorites === 'number' ? data.favorites : 0,
+                })
+              })
               .catch(console.error)
           } else {
             router.push('/')
@@ -192,4 +201,4 @@ export default function AdminPage() {
       </div>
     </div>
   )
-}
+} 

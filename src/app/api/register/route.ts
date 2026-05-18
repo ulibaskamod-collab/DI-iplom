@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
 
 const pool = new Pool({
-  host: 'localhost',
+  host: 'postgres-mkz5.railway.internal',
   port: 5432,
-  database: 'zadiac',
+  database: 'railway',
   user: 'postgres',
-  password: '1234',
+  password: 'UMcfAdDERHhHvIHctCVfDYJNFfeEhjlL',
+  ssl: { rejectUnauthorized: false }
 })
 
 export async function POST(req: NextRequest) {
