@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
+
 const pool = new Pool({
-  host: process.env.DB_HOST || "localhost",
-  port: parseInt(process.env.DB_PORT || "5432"),
-  database: process.env.DB_NAME || "zadiac",
-  user: process.env.DB_USER || "postgres",
-  password: process.env.DB_PASSWORD || "1234",
-});
+  connectionString: process.env.DATABASE_URL,
+  ssl: false
+})
 
 export async function GET(req: NextRequest) {
   const email = req.nextUrl.searchParams.get('email')
@@ -24,6 +22,8 @@ export async function GET(req: NextRequest) {
     if (result.rows.length === 0) {
       return NextResponse.json({ role: 'user' })
     }
+
+    console.log('Role for', email, ':', result.rows[0].user_role) // Добавьте для диагностики
 
     return NextResponse.json({ role: result.rows[0].user_role })
   } catch (error) {

@@ -9,8 +9,6 @@ import { Shield, Users, Star, Shirt, Palette, Heart, Sparkles } from 'lucide-rea
 export default function AdminPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [checking, setChecking] = useState(true)
   const [stats, setStats] = useState({
     users: 0,
     zodiacSigns: 0,
@@ -25,35 +23,23 @@ export default function AdminPage() {
       return
     }
 
-    if (session?.user?.email) {
-      fetch(`/api/user/role?email=${session.user.email}`)
+    if (session?.user) {
+      fetch('/api/admin/stats')
         .then(res => res.json())
         .then(data => {
-          if (data.role === 'admin') {
-            setIsAdmin(true)
-            fetch('/api/admin/stats')
-              .then(res => res.json())
-              .then(data => {
-                // Защита от некорректных данных
-                setStats({
-                  users: typeof data?.users === 'number' ? data.users : 0,
-                  zodiacSigns: typeof data?.zodiacSigns === 'number' ? data.zodiacSigns : 0,
-                  clothingItems: typeof data?.clothingItems === 'number' ? data.clothingItems : 0,
-                  designers: typeof data?.designers === 'number' ? data.designers : 0,
-                  favorites: typeof data?.favorites === 'number' ? data.favorites : 0,
-                })
-              })
-              .catch(console.error)
-          } else {
-            router.push('/')
-          }
+          setStats({
+            users: typeof data?.users === 'number' ? data.users : 0,
+            zodiacSigns: typeof data?.zodiacSigns === 'number' ? data.zodiacSigns : 0,
+            clothingItems: typeof data?.clothingItems === 'number' ? data.clothingItems : 0,
+            designers: typeof data?.designers === 'number' ? data.designers : 0,
+            favorites: typeof data?.favorites === 'number' ? data.favorites : 0,
+          })
         })
-        .catch(() => router.push('/'))
-        .finally(() => setChecking(false))
+        .catch(console.error)
     }
   }, [session, status, router])
 
-  if (status === 'loading' || checking) {
+  if (status === 'loading') {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
@@ -61,19 +47,8 @@ export default function AdminPage() {
     )
   }
 
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-center">
-          <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">Доступ запрещён</h1>
-          <p className="text-gray-400 mb-4">У вас нет прав администратора</p>
-          <Link href="/" className="text-pink-400 hover:text-pink-300">
-            ← Вернуться на сайт
-          </Link>
-        </div>
-      </div>
-    )
+  if (!session) {
+    return null
   }
 
   const menuItems = [
@@ -201,4 +176,4 @@ export default function AdminPage() {
       </div>
     </div>
   )
-} 
+}
