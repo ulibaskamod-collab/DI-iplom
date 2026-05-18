@@ -1,11 +1,15 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { Pool } from "pg";
+import bcrypt from "bcryptjs"; // ДОБАВИТЬ ЭТОТ ИМПОРТ
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-})
+  host: process.env.DB_HOST || "localhost",
+  port: parseInt(process.env.DB_PORT || "5432"),
+  database: process.env.DB_NAME || "zadiac",
+  user: process.env.DB_USER || "postgres",
+  password: process.env.DB_PASSWORD || "1234",
+});
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -32,14 +36,13 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
-          // ВРЕМЕННО: прямое сравнение (потом замените на bcrypt)
-          const isValid = credentials.password === user.password;
+          // ИСПРАВЛЕНО: сравниваем хеш пароля
+          const isValid = await bcrypt.compare(credentials.password, user.password);
 
           if (!isValid) {
             return null;
           }
 
-          // ВОЗВРАЩАЕМ ПОЛЬЗОВАТЕЛЯ С РОЛЬЮ
           return {
             id: user.id,
             email: user.email,
@@ -57,14 +60,14 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        (token as any).role = (user as any).role; // Используем as any
+        (token as any).role = (user as any).role;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        (session.user as any).role = (token as any).role; // Используем as any
+        (session.user as any).role = (token as any).role;
       }
       return session;
     },
