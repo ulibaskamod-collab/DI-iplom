@@ -1,103 +1,102 @@
-'use client'
+"use client";
 
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { Shield, Users, Star, Shirt, Palette, Heart, Sparkles } from 'lucide-react'
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Shield, Users, Star, Shirt, Palette, Heart, Sparkles } from "lucide-react";
 
 export default function AdminPage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [stats, setStats] = useState({
     users: 0,
     zodiacSigns: 0,
     clothingItems: 0,
     designers: 0,
     favorites: 0,
-  })
+  });
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin')
-      return
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+      return;
     }
 
     if (session?.user) {
-      fetch('/api/admin/stats')
+      fetch("/api/admin/stats")
         .then(res => res.json())
         .then(data => {
           setStats({
-            users: typeof data?.users === 'number' ? data.users : 0,
-            zodiacSigns: typeof data?.zodiacSigns === 'number' ? data.zodiacSigns : 0,
-            clothingItems: typeof data?.clothingItems === 'number' ? data.clothingItems : 0,
-            designers: typeof data?.designers === 'number' ? data.designers : 0,
-            favorites: typeof data?.favorites === 'number' ? data.favorites : 0,
-          })
+            users: typeof data?.users === "number" ? data.users : 0,
+            zodiacSigns: typeof data?.zodiacSigns === "number" ? data.zodiacSigns : 0,
+            clothingItems: typeof data?.clothingItems === "number" ? data.clothingItems : 0,
+            designers: typeof data?.designers === "number" ? data.designers : 0,
+            favorites: typeof data?.favorites === "number" ? data.favorites : 0,
+          });
         })
-        .catch(console.error)
+        .catch(console.error);
     }
-  }, [session, status, router])
+  }, [session, status, router]);
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
       </div>
-    )
+    );
   }
 
   if (!session) {
-    return null
+    return null;
   }
 
   const menuItems = [
     {
-      title: 'Знаки зодиака',
-      description: 'Редактировать описания, стили, цвета',
+      title: "Знаки зодиака",
+      description: "Редактировать описания, стили, цвета",
       icon: Star,
-      href: '/admin/zodiac',
-      color: 'from-yellow-500 to-orange-500',
+      href: "/admin/zodiac",
+      color: "from-yellow-500 to-orange-500",
       count: stats.zodiacSigns,
     },
     {
-      title: 'Одежда',
-      description: 'Добавлять, удалять и редактировать предметы',
+      title: "Одежда",
+      description: "Добавлять, удалять и редактировать предметы",
       icon: Shirt,
-      href: '/admin/clothing',
-      color: 'from-green-500 to-emerald-500',
+      href: "/admin/clothing",
+      color: "from-green-500 to-emerald-500",
       count: stats.clothingItems,
     },
     {
-      title: 'Дизайнеры',
-      description: 'Управление дизайнерами и их работами',
+      title: "Дизайнеры",
+      description: "Управление дизайнерами и их работами",
       icon: Palette,
-      href: '/admin/designers',
-      color: 'from-purple-500 to-pink-500',
+      href: "/admin/designers",
+      color: "from-purple-500 to-pink-500",
       count: stats.designers,
     },
     {
-      title: 'Пользователи',
-      description: 'Список пользователей и управление ролями',
+      title: "Пользователи",
+      description: "Список пользователей и управление ролями",
       icon: Users,
-      href: '/admin/users',
-      color: 'from-blue-500 to-cyan-500',
+      href: "/admin/users",
+      color: "from-blue-500 to-cyan-500",
       count: stats.users,
     },
     {
-      title: 'Избранное',
-      description: 'Статистика избранных товаров',
+      title: "Избранное",
+      description: "Статистика избранных товаров",
       icon: Heart,
-      href: '/admin/favorites',
-      color: 'from-red-500 to-pink-500',
+      href: "/admin/favorites",
+      color: "from-red-500 to-pink-500",
       count: stats.favorites,
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Shield className="w-10 h-10 text-pink-500" />
@@ -172,8 +171,7 @@ export default function AdminPage() {
             Перейти на сайт
           </Link>
         </div>
-
       </div>
     </div>
-  )
+  );
 }

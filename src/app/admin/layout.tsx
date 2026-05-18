@@ -23,7 +23,6 @@ export default function AdminLayout({
     }
 
     if (session?.user?.email) {
-      // Проверяем роль через API
       fetch(`/api/user/role?email=${session.user.email}`)
         .then(res => res.json())
         .then(data => {
