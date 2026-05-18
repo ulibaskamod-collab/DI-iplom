@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
-
+console.log('DB_HOST:', process.env.DB_HOST);
+console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? '****' : 'NOT SET');
 const pool = new Pool({
   host: process.env.DB_HOST || process.env.PGHOST || 'localhost',
   port: parseInt(process.env.DB_PORT || process.env.PGPORT || '5432'),
