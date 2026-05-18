@@ -215,7 +215,6 @@ export default function HomePage() {
               </ul>
             </div>
             <div className="footer-address">
-              <h4>Контакты</h4>
               <p>Адрес: Улица Пушкина, дом Колотушкина, 111</p>
               <p><a href="mailto:rotaralena661@gmail.com">rotaralena661@gmail.com</a></p>
               <p><a href="tel:+79629493596">+7 (962) 4949-35-05</a></p>
