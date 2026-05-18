@@ -3,11 +3,8 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { Pool } from 'pg'
 
 const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  database: 'zadiac',
-  user: 'postgres',
-  password: '1234',
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 })
 
 export const authOptions: NextAuthOptions = {
@@ -19,8 +16,6 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Пароль', type: 'password' },
       },
       async authorize(credentials) {
-        console.log('🔍 Поиск пользователя:', credentials?.email)
-
         if (!credentials?.email || !credentials?.password) {
           return null
         }
@@ -33,21 +28,16 @@ export const authOptions: NextAuthOptions = {
 
           const user = result.rows[0]
 
-          console.log(' Пользователь найден:', user ? 'да' : 'нет')
-
           if (!user) {
             return null
           }
 
+          // ⚠️ ВРЕМЕННО: прямое сравнение паролей (без хеширования)
           const isValid = credentials.password === user.password
-
-          console.log(' Пароль верен:', isValid)
 
           if (!isValid) {
             return null
           }
-
-          console.log(' Авторизация успешна!')
 
           return {
             id: user.id,
@@ -55,7 +45,7 @@ export const authOptions: NextAuthOptions = {
             name: user.name,
           }
         } catch (error) {
-          console.error(' Ошибка:', error)
+          console.error('Auth error:', error)
           return null
         }
       },

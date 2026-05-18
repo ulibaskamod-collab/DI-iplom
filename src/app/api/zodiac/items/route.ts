@@ -2,13 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
 
 const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  database: 'zadiac',
-  user: 'postgres',
-  password: '1234',
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 })
-
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams

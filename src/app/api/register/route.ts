@@ -2,11 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
 
 const pool = new Pool({
-  host: 'postgres-mkz5.railway.internal',
-  port: 5432,
-  database: 'railway',
-  user: 'postgres',
-  password: 'UMcfAdDERHhHvIHctCVfDYJNFfeEhjlL',
+  connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 })
 
