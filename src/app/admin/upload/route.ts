@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     const originalName = file.name.replace(/\s/g, '_');
     const fileName = `${timestamp}_${originalName}`;
 
-    // ✅ Сохраняем в папку public/uploads/название_папки
+    // ✅ ПРАВИЛЬНЫЙ ПУТЬ: сохраняем в папку public/uploads/
     const uploadDir = path.join(process.cwd(), 'public', 'uploads', folder);
     await mkdir(uploadDir, { recursive: true });
 
