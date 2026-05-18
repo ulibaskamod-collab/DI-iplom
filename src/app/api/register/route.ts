@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
-console.log('DB_HOST:', process.env.DB_HOST);
-console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? '****' : 'NOT SET');
+
 const pool = new Pool({
   host: 'postgres-mkz5.railway.internal',
   port: 5432,
