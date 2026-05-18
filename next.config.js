@@ -1,9 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   images: {
-    domains: ['avatars.yandex.net', 'lh3.googleusercontent.com', 'avatars.githubusercontent.com'],
+    domains: ['localhost', 'stellarfit.onrender.com'],
   },
-  reactStrictMode: true,
+  // Разрешаем доступ к папке uploads
+  async rewrites() {
+    return [
+      {
+        source: '/uploads/:path*',
+        destination: '/uploads/:path*',
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig
