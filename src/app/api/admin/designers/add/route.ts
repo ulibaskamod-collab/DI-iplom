@@ -1,47 +1,30 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { Pool } from 'pg'
+import { NextRequest, NextResponse } from 'next/server';
+import { Pool } from 'pg';
 
 const pool = new Pool({
-  host: process.env.DB_HOST || "localhost",
-  port: parseInt(process.env.DB_PORT || "5432"),
-  database: process.env.DB_NAME || "zadiac",
-  user: process.env.DB_USER || "postgres",
-  password: process.env.DB_PASSWORD || "1234",
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const { designer_name, bio, designer_image, social_links } = body
-
-    console.log('POST designer - body:', body)
+    const body = await req.json();
+    const { designer_name, bio, designer_image, social_links } = body;
 
     if (!designer_name || !bio) {
-      return NextResponse.json({ error: 'Имя и био обязательны' }, { status: 400 })
+      return NextResponse.json({ error: 'Имя и био обязательны' }, { status: 400 });
     }
 
     const result = await pool.query(
-      `INSERT INTO designers (designer_name, bio, designer_image, social_links) 
-       VALUES ($1, $2, $3, $4) 
+      `INSERT INTO designers (designer_name, bio, designer_image, social_links)
+       VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [
-        designer_name, 
-        bio, 
-        designer_image || '/images/designers/default.jpg', 
-        JSON.stringify(social_links || {})
-      ]
-    )
+      [designer_name, bio, designer_image || '', JSON.stringify(social_links || {})]
+    );
 
-    console.log('POST designer - success:', result.rows[0])
-
-    return NextResponse.json({ 
-      success: true, 
-      designer: result.rows[0],
-      message: 'Дизайнер успешно добавлен!' 
-    })
+    return NextResponse.json({ success: true, designer: result.rows[0] });
   } catch (error: any) {
-    console.error('POST designer error:', error)
-    return NextResponse.json({ 
-      error: error.message || 'Ошибка сервера' 
-    }, { status: 500 })
+    console.error('POST designer error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

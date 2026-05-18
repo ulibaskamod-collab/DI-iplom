@@ -2,12 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
 
 const pool = new Pool({
-  host: process.env.DB_HOST || "localhost",
-  port: parseInt(process.env.DB_PORT || "5432"),
-  database: process.env.DB_NAME || "zadiac",
-  user: process.env.DB_USER || "postgres",
-  password: process.env.DB_PASSWORD || "1234",
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
+
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const result = await pool.query('SELECT * FROM designer_works WHERE designer_id = $1 ORDER BY id DESC', [params.id])
   return NextResponse.json(result.rows)
