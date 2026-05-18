@@ -1,75 +1,82 @@
-import { NextAuthOptions } from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
-import { Pool } from 'pg'
+import { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { Pool } from "pg";
+import bcrypt from "bcryptjs"; // ДОБАВИТЬ ЭТОТ ИМПОРТ
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-})
+  host: process.env.DB_HOST || "localhost",
+  port: parseInt(process.env.DB_PORT || "5432"),
+  database: process.env.DB_NAME || "zadiac",
+  user: process.env.DB_USER || "postgres",
+  password: process.env.DB_PASSWORD || "1234",
+});
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: 'credentials',
+      name: "credentials",
       credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Пароль', type: 'password' },
+        email: { label: "Email", type: "email" },
+        password: { label: "Пароль", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          return null;
         }
 
         try {
           const result = await pool.query(
-            'SELECT id, name, email, password FROM users WHERE email = $1',
+            "SELECT id, name, email, password, user_role FROM users WHERE email = $1",
             [credentials.email]
-          )
+          );
 
-          const user = result.rows[0]
+          const user = result.rows[0];
 
           if (!user) {
-            return null
+            return null;
           }
 
-          // ⚠️ ВРЕМЕННО: прямое сравнение паролей (без хеширования)
-          const isValid = credentials.password === user.password
+          // ИСПРАВЛЕНО: сравниваем хеш пароля
+          const isValid = await bcrypt.compare(credentials.password, user.password);
 
           if (!isValid) {
-            return null
+            return null;
           }
 
           return {
             id: user.id,
             email: user.email,
-            name: user.name,
-          }
+            name: user.name || "",
+            role: user.user_role,
+          };
         } catch (error) {
-          console.error('Auth error:', error)
-          return null
+          console.error("Auth error:", error);
+          return null;
         }
       },
     }),
   ],
-  session: {
-    strategy: 'jwt',
-  },
-  pages: {
-    signIn: '/auth/signin',
-  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
+        token.id = user.id;
+        (token as any).role = (user as any).role;
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
-      if (session.user && token.id) {
-        session.user.id = token.id as string
+      if (session.user) {
+        session.user.id = token.id as string;
+        (session.user as any).role = (token as any).role;
       }
-      return session
+      return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
-}
+  session: {
+    strategy: "jwt",
+  },
+  pages: {
+    signIn: "/auth/signin",
+  },
+  secret: process.env.NEXTAUTH_SECRET || "your-secret-key",
+};
