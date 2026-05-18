@@ -238,6 +238,11 @@ function FavoriteButton({ itemId }: { itemId: number }) {
 
 function ClothingCard({ item, idx }: { item: any; idx: number }) {
   const [imgError, setImgError] = useState(false)
+  
+  // Если нет image_url или ошибка загрузки — показываем заглушку
+  const imageUrl = (!item.image_url || imgError) 
+    ? 'https://via.placeholder.com/400x500?text=No+Image' 
+    : item.image_url
 
   return (
     <motion.div
@@ -248,20 +253,13 @@ function ClothingCard({ item, idx }: { item: any; idx: number }) {
       className="group bg-white/[0.03] backdrop-blur-sm rounded-2xl overflow-hidden border border-white/[0.08] hover:border-white/20 transition-all duration-500 shadow-lg hover:shadow-2xl hover:shadow-black/30"
     >
       <div className="aspect-[3/4] bg-gradient-to-br from-white/[0.02] to-white/[0.05] relative overflow-hidden">
-        {item.image_url && !imgError ? (
-          <img
-            src={item.image_url}
-            alt={item.title || 'Одежда'}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-            loading="lazy"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-500/10 to-pink-500/10">
-            <ShoppingBag className="w-12 h-12 text-white/20 mb-2" />
-            <span className="text-white/30 text-xs">Нет фото</span>
-          </div>
-        )}
+        <img
+          src={imageUrl}
+          alt={item.title || 'Одежда'}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+          loading="lazy"
+          onError={() => setImgError(true)}
+        />
         
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
         
@@ -300,7 +298,6 @@ function ClothingCard({ item, idx }: { item: any; idx: number }) {
     </motion.div>
   )
 }
-
 
 export default function ZodiacDetailPage() {
   const params = useParams()
