@@ -1,9 +1,12 @@
-import { PrismaClient } from '@prisma/client'
+import { Pool } from 'pg'
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
+const pool = new Pool({
+  host: process.env.DB_HOST || process.env.PGHOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || process.env.PGPORT || '5432'),
+  database: process.env.DB_NAME || process.env.PGDATABASE || 'zadiac',
+  user: process.env.DB_USER || process.env.PGUSER || 'postgres',
+  password: process.env.DB_PASSWORD || process.env.PGPASSWORD || '1234',
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+})
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient()
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+export { pool }
