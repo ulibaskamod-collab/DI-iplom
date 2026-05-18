@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-})
+  host: process.env.DB_HOST || "localhost",
+  port: parseInt(process.env.DB_PORT || "5432"),
+  database: process.env.DB_NAME || "zadiac",
+  user: process.env.DB_USER || "postgres",
+  password: process.env.DB_PASSWORD || "1234",
+});
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const result = await pool.query('SELECT * FROM designers WHERE id = $1', [params.id])
   if (result.rows.length === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 })
