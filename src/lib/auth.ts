@@ -1,7 +1,9 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { Pool } from 'pg'
+import bcrypt from 'bcryptjs'
 
+// Объявляем pool прямо здесь
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
@@ -32,8 +34,14 @@ export const authOptions: NextAuthOptions = {
             return null
           }
 
-          // Прямое сравнение паролей (так как пароль в БД в открытом виде)
-          if (credentials.password !== user.password) {
+          let isValid = false
+          if (user.password.startsWith('$2a$')) {
+            isValid = await bcrypt.compare(credentials.password, user.password)
+          } else {
+            isValid = credentials.password === user.password
+          }
+
+          if (!isValid) {
             return null
           }
 

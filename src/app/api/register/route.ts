@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { pool } from '@/lib/db'
+import { Pool } from 'pg'
+
+// Создаём пул подключений прямо в файле, используя переменную окружения
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+})
 
 export async function POST(req: NextRequest) {
   console.log('=== API /api/register ===')
