@@ -3,27 +3,22 @@ import { Pool } from 'pg'
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: false
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 })
 
 export async function GET(req: NextRequest) {
   const email = req.nextUrl.searchParams.get('email')
-  
+
   if (!email) {
     return NextResponse.json({ error: 'Email required' }, { status: 400 })
   }
 
   try {
-    const result = await pool.query(
-      'SELECT user_role FROM users WHERE email = $1',
-      [email]
-    )
+    const result = await pool.query('SELECT user_role FROM users WHERE email = $1', [email])
 
     if (result.rows.length === 0) {
       return NextResponse.json({ role: 'user' })
     }
-
-    console.log('Role for', email, ':', result.rows[0].user_role) // Добавьте для диагностики
 
     return NextResponse.json({ role: result.rows[0].user_role })
   } catch (error) {
