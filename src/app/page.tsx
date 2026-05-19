@@ -153,7 +153,6 @@ export default function HomePage() {
             {zodiacButtons.map((name) => (
               <button
                 key={name}
-                className={name === 'Скорпион' ? 'disabled' : ''}
                 onClick={() => {
                   const element = document.getElementById(`zodiac-${name}`)
                   if (element) element.scrollIntoView({ behavior: 'smooth' })
