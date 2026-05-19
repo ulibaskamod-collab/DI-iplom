@@ -71,24 +71,7 @@ export default function FavoritesPage() {
       console.error('Error removing favorite:', error)
     }
   }
-// Функция для преобразования названия знака в slug
-function getZodiacSlug(zodiacName: string): string {
-  const slugMap: Record<string, string> = {
-    'Овен': 'oven',
-    'Телец': 'telec',
-    'Близнецы': 'bliznetsy',
-    'Рак': 'rak',
-    'Лев': 'lev',
-    'Дева': 'deva',
-    'Весы': 'vesy',
-    'Скорпион': 'skorpion',
-    'Стрелец': 'strelets',
-    'Козерог': 'kozerog',
-    'Водолей': 'vodoley',
-    'Рыбы': 'ryby',
-  };
-  return slugMap[zodiacName] || 'oven';
-}
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
@@ -157,13 +140,14 @@ function getZodiacSlug(zodiacName: string): string {
           <>
 <div className="mb-8">
   <Link
-    href={session?.user?.zodiacSign ? `/zodiac/${getZodiacSlug(session.user.zodiacSign)}` : '/zodiac/oven'}
+    href="/"
     className="inline-flex items-center gap-2 text-white/40 hover:text-white/80 transition-colors text-sm"
   >
     <ArrowLeft size={16} />
-    Мой знак зодиака
+    Продолжить просмотр
   </Link>
 </div>
+
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
               <AnimatePresence>
                 {favorites.map((fav, idx) => (
