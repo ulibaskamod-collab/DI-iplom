@@ -140,14 +140,13 @@ export default function FavoritesPage() {
           <>
 <div className="mb-8">
   <Link
-    href="/zodiac"
+    href={`/zodiac/${session?.user?.zodiacSign?.toLowerCase() || 'oven'}`}
     className="inline-flex items-center gap-2 text-white/40 hover:text-white/80 transition-colors text-sm"
   >
     <ArrowLeft size={16} />
-    Продолжить просмотр
+    Мой знак зодиака
   </Link>
 </div>
-
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
               <AnimatePresence>
                 {favorites.map((fav, idx) => (
