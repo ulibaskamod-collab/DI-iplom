@@ -4,117 +4,91 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Sparkles, Star, ArrowRight } from 'lucide-react'
+import { Sparkles, ArrowRight } from 'lucide-react'
 
-// Данные о знаках для отображения на главной
-const zodiacData: Record<string, any> = {
+// Данные о знаках (копия из zodiac/[slug]/page.tsx)
+const zodiacFullData: Record<string, any> = {
   oven: {
-    name: 'Овен',
-    symbol: '♈',
-    element: 'Огонь',
-    description: 'Смелый, энергичный, первопроходец',
-    accentColor: '#FF4500',
-    heroImage: '🔥'
+    name: 'Овен', symbol: '♈', element: 'Огонь', planet: 'Марс',
+    dates: '21 марта – 19 апреля', accentColor: '#FF4500', heroImage: '🔥',
+    title: 'Стиль Овна: Смелость и Спорт-ШИК',
+    description: 'Пионер, воин, первооткрыватель. Овен — первый знак зодиака, заряженный динамикой, мужеством и страстью.',
   },
   telec: {
-    name: 'Телец',
-    symbol: '♉',
-    element: 'Земля',
-    description: 'Надёжный, чувственный, терпеливый',
-    accentColor: '#2ECC71',
-    heroImage: '🌿'
+    name: 'Телец', symbol: '♉', element: 'Земля', planet: 'Венера',
+    dates: '20 апреля – 20 мая', accentColor: '#2ECC71', heroImage: '🌿',
+    title: 'Стиль Тельца: Природная элегантность',
+    description: 'Чувственность, стойкость, любовь к роскоши. Телец — знак земной силы и красоты.',
   },
   bliznetsy: {
-    name: 'Близнецы',
-    symbol: '♊',
-    element: 'Воздух',
-    description: 'Общительный, любознательный, адаптивный',
-    accentColor: '#FFD700',
-    heroImage: '🌀'
+    name: 'Близнецы', symbol: '♊', element: 'Воздух', planet: 'Меркурий',
+    dates: '21 мая – 20 июня', accentColor: '#FFD700', heroImage: '🌀',
+    title: 'Стиль Близнецов: Эклектика и игра',
+    description: 'Двойственность, коммуникабельность, жажда перемен. Близнецы — самый любознательный знак.',
   },
   rak: {
-    name: 'Рак',
-    symbol: '♋',
-    element: 'Вода',
-    description: 'Заботливый, интуитивный, эмоциональный',
-    accentColor: '#6C5CE7',
-    heroImage: '🌙'
+    name: 'Рак', symbol: '♋', element: 'Вода', planet: 'Луна',
+    dates: '21 июня – 22 июля', accentColor: '#6C5CE7', heroImage: '🌙',
+    title: 'Стиль Рака: Лунная женственность',
+    description: 'Эмпатия, глубина чувств, любовь к дому. Рак — самый заботливый и интуитивный знак.',
   },
   lev: {
-    name: 'Лев',
-    symbol: '♌',
-    element: 'Огонь',
-    description: 'Щедрый, творческий, уверенный',
-    accentColor: '#FFA500',
-    heroImage: '👑'
+    name: 'Лев', symbol: '♌', element: 'Огонь', planet: 'Солнце',
+    dates: '23 июля – 22 августа', accentColor: '#FFD700', heroImage: '👑',
+    title: 'Стиль Льва: Старый Голливуд',
+    description: 'Величественный, страстный, королевский знак. Солнце правит Львом, даря магнетизм и любовь к роскоши.',
   },
   deva: {
-    name: 'Дева',
-    symbol: '♍',
-    element: 'Земля',
-    description: 'Аналитичный, практичный, внимательный',
-    accentColor: '#95A5A6',
-    heroImage: '🍃'
+    name: 'Дева', symbol: '♍', element: 'Земля', planet: 'Меркурий',
+    dates: '23 августа – 22 сентября', accentColor: '#95A5A6', heroImage: '🍃',
+    title: 'Стиль Девы: Элегантный минимализм',
+    description: 'Элегантность, аналитический ум, безупречный вкус. Дева — знак чистоты и порядка.',
   },
   vesy: {
-    name: 'Весы',
-    symbol: '♎',
-    element: 'Воздух',
-    description: 'Дипломатичный, гармоничный, справедливый',
-    accentColor: '#FFB6C1',
-    heroImage: '🌸'
+    name: 'Весы', symbol: '♎', element: 'Воздух', planet: 'Венера',
+    dates: '23 сентября – 22 октября', accentColor: '#FFB6C1', heroImage: '🌸',
+    title: 'Стиль Весов: Утончённая элегантность',
+    description: 'Гармония, дипломатичность, утончённость. Весы — знак равновесия и эстетики.',
   },
   skorpion: {
-    name: 'Скорпион',
-    symbol: '♏',
-    element: 'Вода',
-    description: 'Страстный, загадочный, решительный',
-    accentColor: '#FF6B6B',
-    heroImage: '🦂'
+    name: 'Скорпион', symbol: '♏', element: 'Вода', planet: 'Плутон',
+    dates: '23 октября – 21 ноября', accentColor: '#FF6B6B', heroImage: '🦂',
+    title: 'Стиль Скорпиона: Тёмная элегантность',
+    description: 'Страсть, магнетизм, трансформация. Скорпион — самый загадочный и сильный знак.',
   },
   strelets: {
-    name: 'Стрелец',
-    symbol: '♐',
-    element: 'Огонь',
-    description: 'Оптимистичный, свободолюбивый, философский',
-    accentColor: '#8A2BE2',
-    heroImage: '🏹'
+    name: 'Стрелец', symbol: '♐', element: 'Огонь', planet: 'Юпитер',
+    dates: '22 ноября – 21 декабря', accentColor: '#8A2BE2', heroImage: '🏹',
+    title: 'Стиль Стрельца: Бохо-шик',
+    description: 'Искатель приключений, философ, огненный странник. Стрелец — знак свободы и оптимизма.',
   },
   kozerog: {
-    name: 'Козерог',
-    symbol: '♑',
-    element: 'Земля',
-    description: 'Дисциплинированный, амбициозный, ответственный',
-    accentColor: '#708090',
-    heroImage: '🏔️'
+    name: 'Козерог', symbol: '♑', element: 'Земля', planet: 'Сатурн',
+    dates: '22 декабря – 19 января', accentColor: '#708090', heroImage: '🏔️',
+    title: 'Стиль Козерога: Классика и статус',
+    description: 'Дисциплина, амбиции, безупречный вкус. Козерог — знак горных вершин, символ власти.',
   },
   vodoley: {
-    name: 'Водолей',
-    symbol: '♒',
-    element: 'Воздух',
-    description: 'Инновационный, независимый, гуманистичный',
-    accentColor: '#00FFFF',
-    heroImage: '💧'
+    name: 'Водолей', symbol: '♒', element: 'Воздух', planet: 'Уран',
+    dates: '20 января – 18 февраля', accentColor: '#00FFFF', heroImage: '💧',
+    title: 'Стиль Водолея: Авангард и футуризм',
+    description: 'Инновации, свобода, авангард. Водолей — знак будущего и нестандартного мышления.',
   },
   ryby: {
-    name: 'Рыбы',
-    symbol: '♓',
-    element: 'Вода',
-    description: 'Интуитивный, творческий, сострадательный',
-    accentColor: '#48D1CC',
-    heroImage: '🐟'
-  }
+    name: 'Рыбы', symbol: '♓', element: 'Вода', planet: 'Нептун',
+    dates: '19 февраля – 20 марта', accentColor: '#48D1CC', heroImage: '🐟',
+    title: 'Стиль Рыб: Морская феерия',
+    description: 'Интуиция, глубинная эмпатия, творческий дар. Рыбы — последний знак зодиака.',
+  },
 }
 
 export default function HomePage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [userZodiac, setUserZodiac] = useState<{ zodiac_sign: string | null, slug: string | null }>({
-    zodiac_sign: null,
-    slug: null
-  })
+  const [userZodiacSlug, setUserZodiacSlug] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [clothingItems, setClothingItems] = useState<any[]>([])
+  const [loadingItems, setLoadingItems] = useState(true)
 
   // Получаем знак пользователя
   useEffect(() => {
@@ -122,10 +96,7 @@ export default function HomePage() {
       fetch('/api/user/zodiac')
         .then(res => res.json())
         .then(data => {
-          setUserZodiac({
-            zodiac_sign: data.zodiac_sign,
-            slug: data.slug
-          })
+          setUserZodiacSlug(data.slug)
         })
         .catch(console.error)
         .finally(() => setLoading(false))
@@ -133,6 +104,19 @@ export default function HomePage() {
       setLoading(false)
     }
   }, [session, status])
+
+  // Загружаем товары для знака
+  useEffect(() => {
+    if (userZodiacSlug) {
+      fetch(`/api/zodiac/items?zodiacSlug=${userZodiacSlug}`)
+        .then(res => res.json())
+        .then(data => setClothingItems(data))
+        .catch(console.error)
+        .finally(() => setLoadingItems(false))
+    } else {
+      setLoadingItems(false)
+    }
+  }, [userZodiacSlug])
 
   if (status === 'loading' || loading) {
     return (
@@ -142,7 +126,7 @@ export default function HomePage() {
     )
   }
 
-  // Если пользователь не авторизован - показываем приветственную страницу
+  // Если пользователь не авторизован - показываем приветствие и каталог
   if (status === 'unauthenticated') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
@@ -165,7 +149,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Превью знаков */}
+          {/* Показываем каталог знаков для незалогиненных */}
           <div className="text-center mt-20">
             <h2 className="text-2xl font-bold text-white mb-8">12 знаков зодиака</h2>
             <Link href="/zodiac" className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300">
@@ -177,8 +161,8 @@ export default function HomePage() {
     )
   }
 
-  // Если пользователь авторизован, но знак не найден
-  if (!userZodiac.slug) {
+  // Если знак не найден
+  if (!userZodiacSlug) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
         <div className="text-center">
@@ -191,7 +175,7 @@ export default function HomePage() {
     )
   }
 
-  const sign = zodiacData[userZodiac.slug]
+  const sign = zodiacFullData[userZodiacSlug]
   
   if (!sign) {
     return (
@@ -206,82 +190,70 @@ export default function HomePage() {
     )
   }
 
-  // Показываем страницу знака пользователя
+  // 🔥 ПОЛНАЯ СТРАНИЦА ЗНАКА (как на /zodiac/lev)
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
+    <div className="min-h-screen" style={{ backgroundColor: '#0a0a0a' }}>
       <div className="relative h-[400px] md:h-[500px] overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-transparent z-10" />
         <div className="relative h-full flex flex-col items-center justify-center text-center px-4 z-20">
-          <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', duration: 1 }}
-            className="text-7xl md:text-8xl mb-4 drop-shadow-2xl"
-          >
+          <div className="text-7xl md:text-8xl mb-4 drop-shadow-2xl">
             {sign.heroImage}
-          </motion.div>
-          
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-5xl md:text-7xl font-bold text-white mb-3"
-            style={{ textShadow: `0 0 40px ${sign.accentColor}40` }}
-          >
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-3" style={{ textShadow: `0 0 40px ${sign.accentColor}40` }}>
             {sign.name}
-          </motion.h1>
-          
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="flex items-center gap-2 text-white/70 text-sm md:text-base"
-          >
-            <span>{sign.symbol} • {sign.element}</span>
-          </motion.div>
-          
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="text-white/70 text-base md:text-lg max-w-xl mx-auto mt-5"
-          >
+          </h1>
+          <div className="flex items-center gap-2 text-white/70 text-sm md:text-base">
+            <span>{sign.element} • {sign.planet} • {sign.dates}</span>
+          </div>
+          <p className="text-white/70 text-base md:text-lg max-w-xl mx-auto mt-5">
             {sign.description}
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="mt-8"
-          >
-            <Link
-              href={`/zodiac/${userZodiac.slug}`}
-              className="px-6 py-3 rounded-full font-semibold transition-all hover:scale-105 inline-flex items-center gap-2"
-              style={{ backgroundColor: sign.accentColor, color: '#000' }}
-            >
-              Перейти к стилю {sign.name} <ArrowRight size={18} />
-            </Link>
-          </motion.div>
+          </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="text-center">
-          <Link
-            href="/zodiac"
-            className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition"
-          >
-            <Star size={18} />
-            Смотреть все знаки зодиака
-            <ArrowRight size={16} />
-          </Link>
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        {/* Стиль */}
+        <div className="bg-white/5 rounded-2xl p-6 md:p-8 mb-10 border border-white/10">
+          <h2 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: sign.accentColor }}>
+            {sign.title}
+          </h2>
+          <p className="text-white/70 text-base leading-relaxed">
+            Люкс-бренды, золото, леопардовый принт, бархат, пайетки. Драгоценные ткани и броские аксессуары.
+          </p>
+        </div>
+
+        {/* Товары */}
+        <div>
+          <h2 className="text-2xl font-bold text-white mb-6">Гардероб {sign.name}</h2>
+          
+          {loadingItems ? (
+            <div className="flex justify-center py-20">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-white" />
+            </div>
+          ) : clothingItems.length === 0 ? (
+            <div className="text-center py-16 text-white/40">
+              <p>Товары для этого знака скоро появятся</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {clothingItems.map((item) => (
+                <div key={item.id} className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition">
+                  <div className="aspect-square bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center">
+                    {item.image_url ? (
+                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-4xl opacity-30">👕</span>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="text-white text-sm font-medium truncate">{item.title || 'Без названия'}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-
-      <footer className="text-center py-8 mt-16 border-t border-white/10">
-        <p className="text-white/30 text-xs">© 2026 StellarFit. Пусть звёзды ведут тебя ✨</p>
-      </footer>
     </div>
   )
 }
