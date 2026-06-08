@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { Menu, X, Sparkles } from 'lucide-react'
+import { Menu, X, Sparkles, Stars } from 'lucide-react'
 
 export default function Navigation() {
   const { data: session, status } = useSession()
@@ -14,45 +14,21 @@ export default function Navigation() {
       const starsContainer = document.getElementById('starsCanvas')
       if (!starsContainer) return
       starsContainer.innerHTML = ''
-      const starCount = 200
-      for (let i = 0; i < starCount; i++) {
+      
+      for (let i = 0; i < 200; i++) {
         const star = document.createElement('div')
         star.classList.add('star')
-        const size = Math.random() * 3 + 1
-        star.style.width = size + 'px'
-        star.style.height = size + 'px'
+        star.style.width = Math.random() * 3 + 1 + 'px'
+        star.style.height = star.style.width
         star.style.left = Math.random() * 100 + '%'
         star.style.top = Math.random() * 100 + '%'
         star.style.animationDelay = Math.random() * 5 + 's'
         star.style.animationDuration = Math.random() * 2 + 1.5 + 's'
         starsContainer.appendChild(star)
       }
-      for (let i = 0; i < 10; i++) {
-        const shooting = document.createElement('div')
-        shooting.classList.add('shooting-star')
-        shooting.style.left = Math.random() * 80 + 5 + '%'
-        shooting.style.top = Math.random() * 40 + '%'
-        shooting.style.animationDelay = Math.random() * 8 + 's'
-        shooting.style.animationDuration = Math.random() * 4 + 4 + 's'
-        starsContainer.appendChild(shooting)
-      }
     }
     createStars()
-    const handleResize = () => {
-      const starsContainer = document.getElementById('starsCanvas')
-      if (starsContainer) {
-        starsContainer.innerHTML = ''
-        createStars()
-      }
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
   }, [])
-
-  const navLinks = [
-    { href: '/', label: 'Главная' },
-    { href: '/designers', label: 'Дизайнеры' },
-  ]
 
   return (
     <nav className="navbar">
@@ -61,22 +37,36 @@ export default function Navigation() {
           <Sparkles className="w-5 h-5 text-pink-400" />
           StellarFit
         </Link>
-        
+
         <button className="menu-btn hidden max-md:block" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
-        
+
         <div className={`nav-links ${isOpen ? 'open max-md:flex max-md:flex-col max-md:absolute max-md:top-full max-md:left-0 max-md:right-0 max-md:bg-purple-900/95 max-md:p-4 max-md:gap-3' : 'max-md:hidden'}`}>
-          {navLinks.map((link) => (
-            <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)}>
-              {link.label}
-            </Link>
-          ))}
+          {/* Главная теперь ведет на страницу знака пользователя */}
+          <Link href="/" onClick={() => setIsOpen(false)}>
+            <Sparkles size={16} className="inline mr-1" />
+            Мой знак
+          </Link>
           
+          {/* Все знаки - отдельная страница */}
+          <Link href="/zodiac" onClick={() => setIsOpen(false)}>
+            <Stars size={16} className="inline mr-1" />
+            Все знаки
+          </Link>
+          
+          <Link href="/designers" onClick={() => setIsOpen(false)}>
+            Дизайнеры
+          </Link>
+
           {status === 'authenticated' ? (
             <>
-              <Link href="/profile" onClick={() => setIsOpen(false)}>Профиль</Link>
-              <Link href="/favorites" onClick={() => setIsOpen(false)}>Избранное</Link>
+              <Link href="/favorites" onClick={() => setIsOpen(false)}>
+                ❤️ Избранное
+              </Link>
+              <Link href="/profile" onClick={() => setIsOpen(false)}>
+                👤 Профиль
+              </Link>
               <button onClick={() => signOut()} className="nav-auth-btn">
                 Выйти
               </button>
