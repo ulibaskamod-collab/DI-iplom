@@ -4,7 +4,8 @@ import { useSession } from 'next-auth/react'
 import { useRouter, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Save, Upload, X } from 'lucide-react'
+import { ArrowLeft, Save } from 'lucide-react'
+import { useImageUpload } from '@/src/lib/hooks/useImageUpload'
 
 interface ZodiacSign {
   id: number
@@ -30,15 +31,33 @@ export default function EditClothingPage() {
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
   const [zodiacSigns, setZodiacSigns] = useState<ZodiacSign[]>([])
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [existingImageUrl, setExistingImageUrl] = useState<string>('')
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    image_url: '',
     season: 'summer',
     gender: 'unisex',
     zodiac_sign_id: '',
+  })
+
+  // Используем хук для загрузки изображений
+  const {
+    imagePreview,
+    isUploading,
+    uploadError,
+    handleImageChange,
+    uploadImage,
+    removeImage,
+    setImagePreview,
+  } = useImageUpload({
+    folder: 'clothing',
+    maxSizeMB: 5,
+    onSuccess: (url) => {
+      console.log('Новое фото загружено:', url)
+    },
+    onError: (error) => {
+      alert(error)
+    },
   })
 
   useEffect(() => {
@@ -61,50 +80,37 @@ export default function EditClothingPage() {
         setFormData({
           title: data.title || '',
           description: data.description || '',
-          image_url: data.image_url || '',
           season: data.season || 'summer',
           gender: data.gender || 'unisex',
           zodiac_sign_id: String(data.zodiac_sign_id || ''),
         })
+        
+        // Сохраняем URL существующего изображения
         if (data.image_url) {
+          setExistingImageUrl(data.image_url)
           setImagePreview(data.image_url)
         }
       })
       .catch(console.error)
       .finally(() => setPageLoading(false))
-  }, [id, status, router])
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setImageFile(file)
-      setImagePreview(URL.createObjectURL(file))
-    }
-  }
+  }, [id, status, router, setImagePreview])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
-    let imageUrl = formData.image_url
-
-    // Если загружено новое изображение
-    if (imageFile) {
-      const formDataImg = new FormData()
-      formDataImg.append('image', imageFile)
-      formDataImg.append('folder', 'clothing')
-
-      try {
-        const uploadRes = await fetch('/api/admin/upload', {
-          method: 'POST',
-          body: formDataImg,
-        })
-        const uploadData = await uploadRes.json()
-        if (uploadData.success) {
-          imageUrl = uploadData.url
-        }
-      } catch (error) {
-        console.error('Upload error:', error)
+    // Загружаем новое изображение, если оно есть
+    // Если нет - оставляем старое
+    let imageUrl = existingImageUrl
+    
+    if (imagePreview && imagePreview !== existingImageUrl) {
+      const uploadedUrl = await uploadImage()
+      if (uploadedUrl) {
+        imageUrl = uploadedUrl
+      } else if (uploadError) {
+        alert('Не удалось загрузить новое изображение')
+        setLoading(false)
+        return
       }
     }
 
@@ -142,6 +148,11 @@ export default function EditClothingPage() {
     setLoading(false)
   }
 
+  const handleRemoveImage = () => {
+    removeImage()
+    setExistingImageUrl('')
+  }
+
   if (pageLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-900">
@@ -167,7 +178,7 @@ export default function EditClothingPage() {
             <label className="block text-white font-medium mb-2">Фото предмета</label>
             <div className="flex items-center gap-4">
               {imagePreview ? (
-                <div className="relative">
+                <div className="relative group">
                   <img 
                     src={imagePreview} 
                     alt="Preview" 
@@ -175,23 +186,46 @@ export default function EditClothingPage() {
                   />
                   <button
                     type="button"
-                    onClick={() => { setImageFile(null); setImagePreview(null); setFormData({...formData, image_url: ''}) }}
-                    className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full"
+                    onClick={handleRemoveImage}
+                    disabled={isUploading}
+                    className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full hover:bg-red-600 transition disabled:opacity-50"
                   >
-                    <X size={14} />
+                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center w-40 h-40 border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-green-500 transition">
-                  <Upload className="w-8 h-8 text-white/40" />
+                  <svg className="w-8 h-8 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
                   <span className="text-white/40 text-xs mt-1">Загрузить фото</span>
-                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageChange} 
+                    className="hidden" 
+                    disabled={isUploading}
+                  />
                 </label>
               )}
               <div className="text-white/40 text-sm">
-                {imagePreview ? 'Нажмите X чтобы удалить' : 'Нажмите чтобы загрузить'}
+                {imagePreview ? (
+                  isUploading ? 'Загрузка...' : 'Нажмите ✕ чтобы удалить'
+                ) : (
+                  'Нажмите чтобы загрузить'
+                )}
               </div>
             </div>
+            {uploadError && (
+              <p className="text-red-400 text-sm mt-2">{uploadError}</p>
+            )}
           </div>
 
           <div>
@@ -216,8 +250,6 @@ export default function EditClothingPage() {
               placeholder="Опишите предмет одежды..."
             />
           </div>
-
-         
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -267,11 +299,11 @@ export default function EditClothingPage() {
           <div className="flex gap-4">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || isUploading}
               className="flex-1 py-3 bg-green-500 rounded-xl text-white font-semibold hover:bg-green-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <Save size={18} />
-              {loading ? 'Сохранение...' : 'Сохранить изменения'}
+              {isUploading ? 'Загрузка фото...' : loading ? 'Сохранение...' : 'Сохранить изменения'}
             </button>
             <Link
               href="/admin/clothing"
