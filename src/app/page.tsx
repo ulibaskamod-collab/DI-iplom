@@ -1,5 +1,5 @@
-import HomePage from './(home)/page'
+import ClientOnlyHome from '@/src/components/ClientOnlyHome'
 
 export default function Page() {
-  return <HomePage />
+  return <ClientOnlyHome />
 }
