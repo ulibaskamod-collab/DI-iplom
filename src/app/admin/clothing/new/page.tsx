@@ -44,17 +44,21 @@ export default function AddClothingPage() {
     },
   })
 
-  useEffect(() => {
-    fetch('/api/admin/zodiac')
-      .then(res => res.json())
-      .then(data => {
-        setZodiacSigns(data)
-        if (data.length > 0) {
-          setFormData(prev => ({ ...prev, zodiac_sign_id: String(data[0].id) }))
-        }
-      })
-      .catch(console.error)
-  }, [])
+ useEffect(() => {
+  fetch('/api/admin/zodiac')
+    .then(res => {
+      console.log('Response status:', res.status)
+      return res.json()
+    })
+    .then(data => {
+      console.log('Zodiac signs loaded:', data)
+      setZodiacSigns(data)
+      if (data.length > 0) {
+        setFormData(prev => ({ ...prev, zodiac_sign_id: String(data[0].id) }))
+      }
+    })
+    .catch(err => console.error('Error loading zodiac signs:', err))
+}, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
