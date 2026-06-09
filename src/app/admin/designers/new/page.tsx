@@ -1,99 +1,77 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Save, Upload, X } from 'lucide-react'
+import { useImageUpload } from '@/src/lib/hooks/useImageUpload'
 
 export default function AddDesignerPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     designer_name: '',
     bio: '',
-    designer_image: '',
-    instagram: '',
     website: '',
+    instagram: '',
   })
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setImageFile(file)
-      setImagePreview(URL.createObjectURL(file))
+  const {
+    imagePreview,
+    isUploading,
+    uploadError,
+    handleImageChange,
+    uploadImage,
+    removeImage,
+  } = useImageUpload({
+    folder: 'designers',
+    maxSizeMB: 5,
+    onError: (error) => alert(error),
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    // Загружаем изображение
+    const imageUrl = await uploadImage()
+
+    const social_links = {}
+    if (formData.website) social_links.website = formData.website
+    if (formData.instagram) social_links.instagram = formData.instagram
+
+    const payload = {
+      designer_name: formData.designer_name,
+      bio: formData.bio,
+      designer_image: imageUrl || '',
+      social_links,
     }
-  }
-
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setLoading(true)
-
-  let imageUrl = formData.designer_image
-
-  if (imageFile) {
-    const formDataImg = new FormData()
-    formDataImg.append('image', imageFile)
-    formDataImg.append('folder', 'designers')
 
     try {
-      const uploadRes = await fetch('/api/admin/upload', {
+      const res = await fetch('/api/admin/designers', {
         method: 'POST',
-        body: formDataImg,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       })
-      const uploadData = await uploadRes.json()
-      console.log('Upload result:', uploadData)
-      
-      if (uploadData.success) {
-        imageUrl = uploadData.url
+
+      const data = await res.json()
+
+      if (res.ok) {
+        alert('Дизайнер успешно добавлен!')
+        router.push('/admin/designers')
       } else {
-        console.warn('Upload failed, using default image')
+        alert('Ошибка: ' + (data.error || 'Не удалось добавить'))
       }
     } catch (error) {
-      console.error('Upload error:', error)
+      alert('Ошибка соединения с сервером')
     }
+
+    setLoading(false)
   }
-
-  const social_links = {
-    instagram: formData.instagram || null,
-    website: formData.website || null,
-  }
-
-  const payload = {
-    designer_name: formData.designer_name,
-    bio: formData.bio,
-    designer_image: imageUrl || '/images/designers/default.jpg',
-    social_links: social_links,
-  }
-
-  console.log('Отправляю дизайнера:', payload)
-
-  try {
-    const res = await fetch('/api/admin/designers/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-
-    const data = await res.json()
-    console.log('Ответ сервера:', data)
-
-    if (res.ok) {
-      alert('Дизайнер успешно добавлен!')
-      router.push('/admin/designers')
-    } else {
-      alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'))
-    }
-  } catch (error: any) {
-    console.error('Fetch error:', error)
-    alert('Ошибка соединения с сервером: ' + error.message)
-  }
-
-  setLoading(false)
-}
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
