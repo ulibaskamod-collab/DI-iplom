@@ -14,7 +14,6 @@ export default function Navigation() {
       const starsContainer = document.getElementById('starsCanvas')
       if (!starsContainer) return
       starsContainer.innerHTML = ''
-      
       for (let i = 0; i < 200; i++) {
         const star = document.createElement('div')
         star.classList.add('star')
@@ -38,17 +37,16 @@ export default function Navigation() {
           StellarFit
         </Link>
 
-        <button className="menu-btn hidden max-md:block" onClick={() => setIsOpen(!isOpen)}>
+        <button className="menu-btn max-md:block hidden" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        <div className={`nav-links ${isOpen ? 'open max-md:flex max-md:flex-col max-md:absolute max-md:top-full max-md:left-0 max-md:right-0 max-md:bg-purple-900/95 max-md:p-4 max-md:gap-3' : 'max-md:hidden'}`}>
+        <div className={`nav-links ${isOpen ? 'max-md:flex max-md:flex-col max-md:absolute max-md:top-full max-md:left-0 max-md:right-0 max-md:bg-purple-900/95 max-md:p-4 max-md:gap-3' : 'max-md:hidden'}`}>
           <Link href="/" onClick={() => setIsOpen(false)}>
             <Sparkles size={16} className="inline mr-1" />
             Главная
           </Link>
           
-          {/* Пункт "Все знаки" - показываем всегда */}
           <Link href="/zodiac" onClick={() => setIsOpen(false)}>
             <Stars size={16} className="inline mr-1" />
             Все знаки

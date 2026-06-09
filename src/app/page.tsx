@@ -5,25 +5,21 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import HomePageAllSigns from './(home)/page'
 
-// Временный компонент страницы знака (встроенный)
+// Компонент страницы знака пользователя
 function UserZodiacPage({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true)
-  const [sign, setSign] = useState<any>(null)
-  const [clothingItems, setClothingItems] = useState<any[]>([])
+  const [signName, setSignName] = useState('')
 
   useEffect(() => {
-    // Получаем данные знака
-    fetch(`/api/zodiac/${slug}`)
-      .then(res => res.json())
-      .then(data => setSign(data))
-      .catch(console.error)
-    
-    // Получаем одежду
-    fetch(`/api/zodiac/items?zodiacSlug=${slug}`)
-      .then(res => res.json())
-      .then(data => setClothingItems(data))
-      .catch(console.error)
-      .finally(() => setLoading(false))
+    // Получаем название знака по slug
+    const names: Record<string, string> = {
+      'oven': 'Овен', 'telec': 'Телец', 'bliznetsy': 'Близнецы',
+      'rak': 'Рак', 'lev': 'Лев', 'deva': 'Дева', 'vesy': 'Весы',
+      'skorpion': 'Скорпион', 'strelets': 'Стрелец', 'kozerog': 'Козерог',
+      'vodoley': 'Водолей', 'ryby': 'Рыбы'
+    }
+    setSignName(names[slug] || slug)
+    setLoading(false)
   }, [slug])
 
   if (loading) {
@@ -34,40 +30,17 @@ function UserZodiacPage({ slug }: { slug: string }) {
     )
   }
 
-  if (!sign) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="text-center">
-          <p className="text-white mb-4">Знак не найден</p>
-          <Link href="/zodiac" className="text-pink-400">Перейти ко всем знакам</Link>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-      <div className="relative h-[450px] overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-transparent z-10" />
-        <div className="relative h-full flex flex-col items-center justify-center text-center px-4 z-20">
-          <h1 className="text-6xl md:text-7xl font-bold text-white mb-3">{sign.name}</h1>
-          <p className="text-white/70 text-lg max-w-xl">{sign.description}</p>
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
+        <h1 className="text-5xl font-bold text-white mb-4">{signName}</h1>
+        <p className="text-purple-300 text-lg mb-8">Ваш персональный стиль</p>
+        <div className="bg-white/5 rounded-2xl p-8 border border-white/10">
+          <p className="text-white/60">Здесь будут рекомендации для вашего знака зодиака</p>
+          <Link href="/zodiac" className="inline-block mt-6 px-6 py-2 bg-purple-500 rounded-full text-white hover:bg-purple-600">
+            Посмотреть все знаки →
+          </Link>
         </div>
-      </div>
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        <h2 className="text-2xl font-bold text-white mb-6">Гардероб {sign.name}</h2>
-        {clothingItems.length === 0 ? (
-          <p className="text-white/40">Товары пока не добавлены</p>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {clothingItems.map((item) => (
-              <div key={item.id} className="bg-white/5 rounded-xl p-4">
-                {item.image_url && <img src={item.image_url} alt={item.title} className="w-full h-40 object-cover rounded-lg mb-2" />}
-                <p className="text-white text-sm">{item.title}</p>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )
@@ -100,12 +73,12 @@ export default function Page() {
     )
   }
 
-  // Неавторизованный пользователь -> все знаки
+  // Неавторизованные видят страницу со всеми знаками
   if (status === 'unauthenticated') {
     return <HomePageAllSigns />
   }
 
-  // Авторизованный, но знак не найден
+  // Авторизованные видят свой знак
   if (!userZodiacSlug) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
@@ -119,6 +92,5 @@ export default function Page() {
     )
   }
 
-  // Показываем страницу знака пользователя
   return <UserZodiacPage slug={userZodiacSlug} />
 }
