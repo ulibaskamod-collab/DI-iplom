@@ -103,34 +103,46 @@ export default function ProfilePage() {
     }
   }, [session])
 
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setMessage(null)
+ const handleEditSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setMessage(null)
+  setLoading(true)
 
-    try {
-      const res = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: editForm.name,
-          birthDate: editForm.birthDate,
-          gender: editForm.gender,
-        }),
-      })
+  try {
+    console.log('Sending update:', {
+      name: editForm.name,
+      birthDate: editForm.birthDate,
+      gender: editForm.gender,
+    })
 
-      if (res.ok) {
-        const data = await res.json()
-        setProfile(data.user)
-        setEditing(false)
-        setMessage({ text: '✅ Профиль успешно обновлен!', type: 'success' })
-        setTimeout(() => setMessage(null), 3000)
-      } else {
-        setMessage({ text: '❌ Ошибка при обновлении', type: 'error' })
-      }
-    } catch (error) {
-      setMessage({ text: '❌ Ошибка соединения', type: 'error' })
+    const res = await fetch('/api/user/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: editForm.name,
+        birthDate: editForm.birthDate,
+        gender: editForm.gender,
+      }),
+    })
+
+    const data = await res.json()
+    console.log('Response:', data)
+
+    if (res.ok && data.success) {
+      setProfile(data.user)
+      setEditing(false)
+      setMessage({ text: '✅ Профиль успешно обновлен!', type: 'success' })
+      setTimeout(() => setMessage(null), 3000)
+    } else {
+      setMessage({ text: data.error || '❌ Ошибка при обновлении', type: 'error' })
     }
+  } catch (error) {
+    console.error('Update error:', error)
+    setMessage({ text: '❌ Ошибка соединения с сервером', type: 'error' })
+  } finally {
+    setLoading(false)
   }
+}
 
   const removeFavorite = async (itemId: number) => {
     try {
