@@ -54,10 +54,10 @@ export default function Navigation() {
           {status === 'authenticated' ? (
             <>
               <Link href="/favorites" onClick={() => setIsOpen(false)}>
-                ❤️ Избранное
+                Избранное
               </Link>
               <Link href="/profile" onClick={() => setIsOpen(false)}>
-                👤 Профиль
+                Профиль
               </Link>
               <button onClick={() => signOut()} className="nav-auth-btn">
                 Выйти
