@@ -40,9 +40,14 @@ export default function AddDesignerPage() {
     // Загружаем изображение
     const imageUrl = await uploadImage()
 
-    const social_links = {}
-    if (formData.website) social_links.website = formData.website
-    if (formData.instagram) social_links.instagram = formData.instagram
+    // Правильное создание объекта social_links с типами
+    const social_links: { website?: string; instagram?: string } = {}
+    if (formData.website) {
+      social_links.website = formData.website
+    }
+    if (formData.instagram) {
+      social_links.instagram = formData.instagram
+    }
 
     const payload = {
       designer_name: formData.designer_name,
@@ -50,6 +55,8 @@ export default function AddDesignerPage() {
       designer_image: imageUrl || '',
       social_links,
     }
+
+    console.log('Отправляю дизайнера:', payload)
 
     try {
       const res = await fetch('/api/admin/designers', {
@@ -67,16 +74,21 @@ export default function AddDesignerPage() {
         alert('Ошибка: ' + (data.error || 'Не удалось добавить'))
       }
     } catch (error) {
+      console.error('Ошибка:', error)
       alert('Ошибка соединения с сервером')
     }
 
     setLoading(false)
   }
 
+  if (status === 'unauthenticated') {
+    router.push('/auth/signin')
+    return null
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
       <div className="max-w-2xl mx-auto px-4 py-8">
-        
         <div className="flex items-center gap-4 mb-8">
           <Link href="/admin/designers" className="text-gray-400 hover:text-white">
             <ArrowLeft size={24} />
@@ -85,17 +97,20 @@ export default function AddDesignerPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6 bg-white/5 rounded-2xl p-6 border border-white/10">
-          
-          {/* Фото */}
+          {/* Фото дизайнера */}
           <div>
             <label className="block text-white font-medium mb-2">Фото дизайнера</label>
             <div className="flex items-center gap-4">
               {imagePreview ? (
                 <div className="relative">
-                  <img src={imagePreview} alt="Preview" className="w-32 h-32 object-cover rounded-xl" />
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="w-32 h-32 object-cover rounded-xl border-2 border-white/10" 
+                  />
                   <button
                     type="button"
-                    onClick={() => { setImageFile(null); setImagePreview(null) }}
+                    onClick={removeImage}
                     className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full"
                   >
                     <X size={14} />
@@ -108,9 +123,12 @@ export default function AddDesignerPage() {
                   <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                 </label>
               )}
+              {isUploading && <span className="text-white/50 text-sm">Загрузка...</span>}
+              {uploadError && <span className="text-red-400 text-sm">{uploadError}</span>}
             </div>
           </div>
 
+          {/* Имя */}
           <div>
             <label className="block text-white font-medium mb-2">Имя дизайнера *</label>
             <input
@@ -123,20 +141,21 @@ export default function AddDesignerPage() {
             />
           </div>
 
+          {/* Биография */}
           <div>
             <label className="block text-white font-medium mb-2">Биография *</label>
             <textarea
-              rows={5}
+              rows={6}
               required
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               className="w-full px-4 py-2 bg-white/10 rounded-lg text-white border border-white/10 focus:outline-none focus:border-purple-500"
-              placeholder="История дизайнера, его вклад в моду..."
+              placeholder="Расскажите о дизайнере..."
             />
           </div>
 
+          {/* Социальные сети */}
           <div className="grid grid-cols-2 gap-4">
-            
             <div>
               <label className="block text-white font-medium mb-2">Веб-сайт</label>
               <input
@@ -147,17 +166,35 @@ export default function AddDesignerPage() {
                 placeholder="https://..."
               />
             </div>
+            <div>
+              <label className="block text-white font-medium mb-2">Instagram</label>
+              <input
+                type="url"
+                value={formData.instagram}
+                onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+                className="w-full px-4 py-2 bg-white/10 rounded-lg text-white border border-white/10 focus:outline-none focus:border-purple-500"
+                placeholder="https://instagram.com/..."
+              />
+            </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-purple-500 rounded-xl text-white font-semibold hover:bg-purple-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            <Save size={18} />
-            {loading ? 'Сохранение...' : 'Добавить дизайнера'}
-          </button>
-
+          {/* Кнопки */}
+          <div className="flex gap-4">
+            <button
+              type="submit"
+              disabled={loading || isUploading}
+              className="flex-1 py-3 bg-purple-500 rounded-xl text-white font-semibold hover:bg-purple-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <Save size={18} />
+              {loading || isUploading ? 'Сохранение...' : 'Сохранить дизайнера'}
+            </button>
+            <Link
+              href="/admin/designers"
+              className="px-6 py-3 bg-white/10 rounded-xl text-white hover:bg-white/20 transition text-center"
+            >
+              Отмена
+            </Link>
+          </div>
         </form>
       </div>
     </div>
