@@ -3,8 +3,12 @@ import { getServerSession } from 'next-auth'
 import { Pool } from 'pg'
 import { authOptions } from '@/src/lib/auth'
 
+// Правильное подключение с SSL для Render
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // Для Render PostgreSQL
+  },
 })
 
 export async function GET() {
@@ -48,11 +52,8 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json()
-    console.log('Received update data:', body)
-    
     const { name, birthDate, gender } = body
 
-    // Проверяем, существует ли пользователь
     const checkUser = await pool.query(
       'SELECT id FROM users WHERE email = $1',
       [session.user.email]
@@ -62,7 +63,6 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Обновляем данные пользователя
     const updateQuery = `
       UPDATE users 
       SET name = $1, 
@@ -75,15 +75,7 @@ export async function PUT(req: NextRequest) {
     
     const values = [name || null, gender || null, birthDate || null, session.user.email]
     
-    console.log('Executing query with values:', values)
-    
     const result = await pool.query(updateQuery, values)
-
-    if (result.rows.length === 0) {
-      return NextResponse.json({ error: 'Update failed' }, { status: 500 })
-    }
-
-    console.log('Updated user:', result.rows[0])
 
     return NextResponse.json({
       success: true,
