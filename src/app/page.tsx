@@ -1,259 +1,405 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Sparkles, ArrowRight } from 'lucide-react'
+import { useState } from 'react'
 
-// Данные о знаках (копия из zodiac/[slug]/page.tsx)
-const zodiacFullData: Record<string, any> = {
-  oven: {
-    name: 'Овен', symbol: '♈', element: 'Огонь', planet: 'Марс',
-    dates: '21 марта – 19 апреля', accentColor: '#FF4500', heroImage: '🔥',
-    title: 'Стиль Овна: Смелость и Спорт-ШИК',
-    description: 'Пионер, воин, первооткрыватель. Овен — первый знак зодиака, заряженный динамикой, мужеством и страстью.',
-  },
-  telec: {
-    name: 'Телец', symbol: '♉', element: 'Земля', planet: 'Венера',
-    dates: '20 апреля – 20 мая', accentColor: '#2ECC71', heroImage: '🌿',
-    title: 'Стиль Тельца: Природная элегантность',
-    description: 'Чувственность, стойкость, любовь к роскоши. Телец — знак земной силы и красоты.',
-  },
-  bliznetsy: {
-    name: 'Близнецы', symbol: '♊', element: 'Воздух', planet: 'Меркурий',
-    dates: '21 мая – 20 июня', accentColor: '#FFD700', heroImage: '🌀',
-    title: 'Стиль Близнецов: Эклектика и игра',
-    description: 'Двойственность, коммуникабельность, жажда перемен. Близнецы — самый любознательный знак.',
-  },
-  rak: {
-    name: 'Рак', symbol: '♋', element: 'Вода', planet: 'Луна',
-    dates: '21 июня – 22 июля', accentColor: '#6C5CE7', heroImage: '🌙',
-    title: 'Стиль Рака: Лунная женственность',
-    description: 'Эмпатия, глубина чувств, любовь к дому. Рак — самый заботливый и интуитивный знак.',
-  },
-  lev: {
-    name: 'Лев', symbol: '♌', element: 'Огонь', planet: 'Солнце',
-    dates: '23 июля – 22 августа', accentColor: '#FFD700', heroImage: '👑',
-    title: 'Стиль Льва: Старый Голливуд',
-    description: 'Величественный, страстный, королевский знак. Солнце правит Львом, даря магнетизм и любовь к роскоши.',
-  },
-  deva: {
-    name: 'Дева', symbol: '♍', element: 'Земля', planet: 'Меркурий',
-    dates: '23 августа – 22 сентября', accentColor: '#95A5A6', heroImage: '🍃',
-    title: 'Стиль Девы: Элегантный минимализм',
-    description: 'Элегантность, аналитический ум, безупречный вкус. Дева — знак чистоты и порядка.',
-  },
-  vesy: {
-    name: 'Весы', symbol: '♎', element: 'Воздух', planet: 'Венера',
-    dates: '23 сентября – 22 октября', accentColor: '#FFB6C1', heroImage: '🌸',
-    title: 'Стиль Весов: Утончённая элегантность',
-    description: 'Гармония, дипломатичность, утончённость. Весы — знак равновесия и эстетики.',
-  },
-  skorpion: {
-    name: 'Скорпион', symbol: '♏', element: 'Вода', planet: 'Плутон',
-    dates: '23 октября – 21 ноября', accentColor: '#FF6B6B', heroImage: '🦂',
-    title: 'Стиль Скорпиона: Тёмная элегантность',
-    description: 'Страсть, магнетизм, трансформация. Скорпион — самый загадочный и сильный знак.',
-  },
-  strelets: {
-    name: 'Стрелец', symbol: '♐', element: 'Огонь', planet: 'Юпитер',
-    dates: '22 ноября – 21 декабря', accentColor: '#8A2BE2', heroImage: '🏹',
-    title: 'Стиль Стрельца: Бохо-шик',
-    description: 'Искатель приключений, философ, огненный странник. Стрелец — знак свободы и оптимизма.',
-  },
-  kozerog: {
-    name: 'Козерог', symbol: '♑', element: 'Земля', planet: 'Сатурн',
-    dates: '22 декабря – 19 января', accentColor: '#708090', heroImage: '🏔️',
-    title: 'Стиль Козерога: Классика и статус',
-    description: 'Дисциплина, амбиции, безупречный вкус. Козерог — знак горных вершин, символ власти.',
-  },
-  vodoley: {
-    name: 'Водолей', symbol: '♒', element: 'Воздух', planet: 'Уран',
-    dates: '20 января – 18 февраля', accentColor: '#00FFFF', heroImage: '💧',
-    title: 'Стиль Водолея: Авангард и футуризм',
-    description: 'Инновации, свобода, авангард. Водолей — знак будущего и нестандартного мышления.',
-  },
-  ryby: {
-    name: 'Рыбы', symbol: '♓', element: 'Вода', planet: 'Нептун',
-    dates: '19 февраля – 20 марта', accentColor: '#48D1CC', heroImage: '🐟',
-    title: 'Стиль Рыб: Морская феерия',
-    description: 'Интуиция, глубинная эмпатия, творческий дар. Рыбы — последний знак зодиака.',
-  },
+const zodiacSlugs: Record<string, string> = {
+  'Овен': 'oven',
+  'Телец': 'telec',
+  'Близнецы': 'bliznetsy',
+  'Рак': 'rak',
+  'Лев': 'lev',
+  'Дева': 'deva',
+  'Весы': 'vesy',
+  'Скорпион': 'skorpion',
+  'Стрелец': 'strelets',
+  'Козерог': 'kozerog',
+  'Водолей': 'vodoley',
+  'Рыбы': 'ryby',
 }
 
 export default function HomePage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [userZodiacSlug, setUserZodiacSlug] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [clothingItems, setClothingItems] = useState<any[]>([])
-  const [loadingItems, setLoadingItems] = useState(true)
+  const zodiacButtons = [
+    'Овен', 'Телец', 'Близнецы', 'Рак', 'Лев', 'Дева',
+    'Весы', 'Скорпион', 'Стрелец', 'Козерог', 'Водолей', 'Рыбы'
+  ]
 
-  // Получаем знак пользователя
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
-      fetch('/api/user/zodiac')
-        .then(res => res.json())
-        .then(data => {
-          setUserZodiacSlug(data.slug)
-        })
-        .catch(console.error)
-        .finally(() => setLoading(false))
-    } else if (status === 'unauthenticated') {
-      setLoading(false)
+  const zodiacBlocks = [
+    {
+      name: 'Овен',
+      dates: '21 марта - 19 апреля',
+      icon: '♈',
+      style: 'Классический, яркий, стремительный. Цвета: яркий, красный, оранжевый, пурпурный.',
+      hobbies: 'Экстремальные виды спорта (гонки, соревнования), туризм, работа, требующая физической активности.',
+      facts: 'У Овнов высокий уровень энергии, они очень смелые. Он любит получать то, что хочет.',
+      fate: 'Овен - первопроходец. Он всегда борется за свое место, но иногда не понимает, что добившись своего, теряет интерес.'
+    },
+    {
+      name: 'Телец',
+      dates: '20 апреля - 20 мая',
+      icon: '♉',
+      style: 'Сдержанный, элегантный. Цвета: зеленый, голубой, серый, нежно-розовый.',
+      hobbies: 'Кулинария, садоводство, искусство (живопись, музыка), коллекционирование, отдых на природе.',
+      facts: 'Тельцы - очень приземленные и практичные люди. Любят комфорт и стабильность. Они очень терпеливы.',
+      fate: 'Судьба Тельца - это стремление к материальному благополучию и наслаждению жизнью.'
+    },
+    {
+      name: 'Близнецы',
+      dates: '21 мая - 20 июня',
+      icon: '♊',
+      style: 'Легкий, разнообразный, модный. Цвета: желтый, серебристый, голубой, бирюзовый.',
+      hobbies: 'Чтение, изучение языков, путешествия, общение, игры, программирование, журналистика.',
+      facts: 'Близнецы известны своей двойственной натурой. Они очень любопытны и любят узнавать новое.',
+      fate: 'Судьба Близнецов - это постоянное движение и поиск. Им важно не потеряться между двумя путями.'
+    },
+    {
+      name: 'Рак',
+      dates: '21 июня - 22 июля',
+      icon: '♋',
+      style: 'Домашний, уютный, чувствительный. Цвета: серебряный, белый, светло-зеленый, голубой.',
+      hobbies: 'Кулинария, создание уюта дома, уход за растениями, чтение, рукоделие, семейные мероприятия.',
+      facts: 'Раки очень эмоциональны и привязаны к дому и семье. Они заботливые и отзывчивые.',
+      fate: 'Судьба Рака - это забота о близких и создание крепкого семейного очага.'
+    },
+    {
+      name: 'Лев',
+      dates: '23 июля - 22 августа',
+      icon: '♌',
+      style: 'Роскошный, яркий, театральный. Цвета: золотой, оранжевый, красный, пурпурный.',
+      hobbies: 'Сцена, искусство, организация мероприятий, спорт, волонтерство, игра на публику.',
+      facts: 'Львы - прирожденные лидеры, любят быть в центре внимания. Благородны и щедры.',
+      fate: 'Судьба Льва - это проявить свои таланты и поделиться энергией с миром.'
+    },
+    {
+      name: 'Дева',
+      dates: '23 августа - 22 сентября',
+      icon: '♍',
+      style: 'Аккуратный, практичный, умеренный. Цвета: синий, зеленый, бежевый, серый.',
+      hobbies: 'Чтение, учеба, рукоделие, кулинария, аналитика, помощь другим, забота о здоровье.',
+      facts: 'Девы очень внимательны к деталям, любят порядок и анализ. Часто склонны к самокритике.',
+      fate: 'Судьба Девы - помогать другим своим интеллектом и практичностью.'
+    },
+    {
+      name: 'Весы',
+      dates: '23 сентября - 22 октября',
+      icon: '♎',
+      style: 'Элегантный, гармоничный, изысканный. Цвета: нежно-розовый, голубой, пастельные тона.',
+      hobbies: 'Искусство, музыка, танцы, общение, путешествия, урегулирование конфликтов, посещение выставок.',
+      facts: 'Весы стремятся к гармонии и равновесию. Любят красоту и справедливость, очень дипломатичны.',
+      fate: 'Судьба Весов - находить баланс и примирять людей.'
+    },
+    {
+      name: 'Скорпион',
+      dates: '23 октября - 21 ноября',
+      icon: '♏',
+      style: 'Загадочный, сильный, сексуальный. Цвета: темно-красный, черный, бордовый, темно-синий.',
+      hobbies: 'Психология, исследования, экстремальные виды спорта, мистика, любая деятельность, связанная с углублением.',
+      facts: 'Скорпионы очень страстные, влиятельные и харизматичные. Обладают сильной интуицией.',
+      fate: 'Судьба Скорпиона - трансформация и преображение. Они проходят через кризисы, чтобы стать сильнее.'
+    },
+    {
+      name: 'Стрелец',
+      dates: '22 ноября - 21 декабря',
+      icon: '♐',
+      style: 'Яркий, свободный, приключенческий. Цвета: синий, фиолетовый, сиреневый, зеленый.',
+      hobbies: 'Путешествия, спорт, изучение философии, образование, духовные практики, игры.',
+      facts: 'Стрельцы - оптимисты, любят свободу и приключения. Ценят честность и справедливость.',
+      fate: 'Судьба Стрельцов - искать истину и делиться мудростью.'
+    },
+    {
+      name: 'Козерог',
+      dates: '22 декабря - 19 января',
+      icon: '♑',
+      style: 'Классический, строгий, эффективный. Цвета: темно-коричневый, черный, серый, темно-синий.',
+      hobbies: 'Карьеризм, учеба, планирование, спорт, история, коллекционирование.',
+      facts: 'Козероги очень амбициозны, целеустремленны и дисциплинированны. Ценят традиции и ответственность.',
+      fate: 'Судьба Козерогов - достичь вершин и построить прочный фундамент.'
+    },
+    {
+      name: 'Водолей',
+      dates: '20 января - 18 февраля',
+      icon: '♒',
+      style: 'Необычный, футуристичный, независимый. Цвета: голубой, бирюзовый, серебристый, фиолетовый.',
+      hobbies: 'Наука, технологии, астрономия, социальные движения, искусство, программирование, дружба.',
+      facts: 'Водолеи - оригинальны, независимы и гуманисты. Ценят свободу и дружбу, часто имеют нестандартное мышление.',
+      fate: 'Судьба Водолеев - привнести что-то новое в мир и помочь человечеству.'
+    },
+    {
+      name: 'Рыбы',
+      dates: '19 февраля - 20 марта',
+      icon: '♓',
+      style: 'Мечтательный, романтичный, интуитивный. Цвета: морской зеленый, синий, лавандовый, фиолетовый.',
+      hobbies: 'Искусство, музыка, поэзия, медитация, духовные практики, помощь другим, работа с водой.',
+      facts: 'Рыбы - очень чувствительны, сострадательны и интуитивны. Обладают богатым воображением.',
+      fate: 'Судьба Рыб - это служение и исцеление. Важно научиться отличать реальность от иллюзий.'
     }
-  }, [session, status])
+  ]
 
-  // Загружаем товары для знака
-  useEffect(() => {
-    if (userZodiacSlug) {
-      fetch(`/api/zodiac/items?zodiacSlug=${userZodiacSlug}`)
-        .then(res => res.json())
-        .then(data => setClothingItems(data))
-        .catch(console.error)
-        .finally(() => setLoadingItems(false))
-    } else {
-      setLoadingItems(false)
+  const getZodiacClass = (name: string) => {
+    const classMap: Record<string, string> = {
+      'Овен': 'aries', 'Телец': 'taurus', 'Близнецы': 'gemini', 'Рак': 'cancer',
+      'Лев': 'leo', 'Дева': 'virgo', 'Весы': 'libra', 'Скорпион': 'scorpio',
+      'Стрелец': 'sagittarius', 'Козерог': 'capricorn', 'Водолей': 'aquarius', 'Рыбы': 'pisces'
     }
-  }, [userZodiacSlug])
-
-  if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
-      </div>
-    )
+    return classMap[name] || ''
   }
 
-  // Если пользователь не авторизован - показываем приветствие и каталог
-  if (status === 'unauthenticated') {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <Sparkles className="w-20 h-20 text-pink-400 mx-auto mb-6" />
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-4">
-              StellarFit
-            </h1>
-            <p className="text-purple-300 text-xl max-w-2xl mx-auto">
-              Открой свой идеальный стиль с помощью звёзд
-            </p>
-            <div className="flex gap-4 justify-center mt-8">
-              <Link href="/auth/signin" className="px-6 py-3 bg-pink-500 rounded-full text-white font-semibold hover:bg-pink-600 transition">
-                Войти
-              </Link>
-              <Link href="/auth/register" className="px-6 py-3 bg-white/10 rounded-full text-white font-semibold hover:bg-white/20 transition">
-                Регистрация
-              </Link>
-            </div>
+  return (
+    <div className="astroliv-page">
+      <section className="hero">
+        <div className="container">
+          <h1 className="main-title">Астрология души и нарядов</h1>
+          <div className="zodiac-nav">
+            {zodiacButtons.map((name) => (
+              <button
+                key={name}
+                onClick={() => {
+                  const element = document.getElementById(`zodiac-${name}`)
+                  if (element) element.scrollIntoView({ behavior: 'smooth' })
+                }}
+              >
+                {name}
+              </button>
+            ))}
           </div>
+        </div>
+      </section>
 
-          {/* Показываем каталог знаков для незалогиненных */}
-          <div className="text-center mt-20">
-            <h2 className="text-2xl font-bold text-white mb-8">12 знаков зодиака</h2>
-            <Link href="/zodiac" className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300">
-              Смотреть все знаки <ArrowRight size={18} />
+      {zodiacBlocks.map((zodiac) => (
+        <section
+          key={zodiac.name}
+          id={`zodiac-${zodiac.name}`}
+          className={`zodiac-block ${getZodiacClass(zodiac.name)}`}
+        >
+          <div className="zodiac-icon">
+            <span className="zodiac-symbol">{zodiac.icon}</span>
+          </div>
+          <div className="zodiac-info">
+            <h2 className="zodiac-title">{zodiac.name}</h2>
+            <p className="zodiac-date">{zodiac.dates}</p>
+            <div className="zodiac-content">
+              <div className="zodiac-item">
+                <h3>Стиль и цветотип</h3>
+                <p>{zodiac.style}</p>
+              </div>
+              <div className="zodiac-item">
+                <h3>Хобби</h3>
+                <p>{zodiac.hobbies}</p>
+              </div>
+              <div className="zodiac-item">
+                <h3>Интересные факты</h3>
+                <p>{zodiac.facts}</p>
+              </div>
+              <div className="zodiac-item">
+                <h3>Судьба</h3>
+                <p>{zodiac.fate}</p>
+              </div>
+            </div>
+            <Link href={`/zodiac/${zodiacSlugs[zodiac.name]}`} className="details-link">
+              Подробнее →
             </Link>
           </div>
-        </div>
-      </div>
-    )
-  }
+        </section>
+      ))}
 
-  // Если знак не найден
-  if (!userZodiacSlug) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="text-center">
-          <p className="text-white mb-4">Не удалось определить ваш знак зодиака</p>
-          <Link href="/profile" className="text-pink-400 hover:text-pink-300">
-            Заполните дату рождения в профиле
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  const sign = zodiacFullData[userZodiacSlug]
-  
-  if (!sign) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="text-center">
-          <p className="text-white">Знак не найден</p>
-          <Link href="/zodiac" className="text-pink-400 hover:text-pink-300">
-            Перейти к списку знаков
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  // 🔥 ПОЛНАЯ СТРАНИЦА ЗНАКА (как на /zodiac/lev)
-  return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0a0a0a' }}>
-      <div className="relative h-[400px] md:h-[500px] overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-transparent z-10" />
-        <div className="relative h-full flex flex-col items-center justify-center text-center px-4 z-20">
-          <div className="text-7xl md:text-8xl mb-4 drop-shadow-2xl">
-            {sign.heroImage}
+      <footer className="astroliv-footer">
+        <div className="container">
+          <div className="footer-content">
+            <div className="footer-logo">StellarFit</div>
+            <div className="footer-links">
+              <h4>Меню</h4>
+              <ul>
+                <li><Link href="/">Главная</Link></li>
+                <li><Link href="/designers">Дизайнеры</Link></li>
+              </ul>
+            </div>
+            <div className="footer-address">
+              <p>Адрес: Улица Пушкина, дом Колотушкина, 111</p>
+              <p><a href="mailto:rotaralena661@gmail.com">rotaralena661@gmail.com</a></p>
+              <p><a href="tel:+79629493596">+7 (962) 4949-35-05</a></p>
+            </div>
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-3" style={{ textShadow: `0 0 40px ${sign.accentColor}40` }}>
-            {sign.name}
-          </h1>
-          <div className="flex items-center gap-2 text-white/70 text-sm md:text-base">
-            <span>{sign.element} • {sign.planet} • {sign.dates}</span>
-          </div>
-          <p className="text-white/70 text-base md:text-lg max-w-xl mx-auto mt-5">
-            {sign.description}
-          </p>
         </div>
-      </div>
+      </footer>
 
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* Стиль */}
-        <div className="bg-white/5 rounded-2xl p-6 md:p-8 mb-10 border border-white/10">
-          <h2 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: sign.accentColor }}>
-            {sign.title}
-          </h2>
-          <p className="text-white/70 text-base leading-relaxed">
-            Люкс-бренды, золото, леопардовый принт, бархат, пайетки. Драгоценные ткани и броские аксессуары.
-          </p>
-        </div>
-
-        {/* Товары */}
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-6">Гардероб {sign.name}</h2>
-          
-          {loadingItems ? (
-            <div className="flex justify-center py-20">
-              <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/20 border-t-white" />
-            </div>
-          ) : clothingItems.length === 0 ? (
-            <div className="text-center py-16 text-white/40">
-              <p>Товары для этого знака скоро появятся</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {clothingItems.map((item) => (
-                <div key={item.id} className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition">
-                  <div className="aspect-square bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center">
-                    {item.image_url ? (
-                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-4xl opacity-30">👕</span>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <p className="text-white text-sm font-medium truncate">{item.title || 'Без названия'}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      <style jsx>{`
+        .astroliv-page {
+          font-family: 'Arial', sans-serif;
+          margin: 0;
+          padding: 0;
+          background: linear-gradient(135deg, #0a0a1a 0%, #0d0d25 50%, #0a0a1a 100%);
+          color: #ffffff;
+          min-height: 100vh;
+        }
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+        .main-title {
+          text-align: center;
+          margin-top: 50px;
+          font-size: 3em;
+          font-family: 'Georgia', serif;
+          color: #c090e0;
+        }
+        .zodiac-nav {
+          text-align: center;
+          margin-top: 30px;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 10px;
+        }
+        .zodiac-nav button {
+          background-color: #4a2a6a;
+          border: none;
+          padding: 12px 25px;
+          border-radius: 20px;
+          color: #d0b0f0;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+        .zodiac-nav button:hover {
+          background-color: #6a4a8a;
+          color: white;
+        }
+        .zodiac-block {
+          background-color: rgba(40, 20, 60, 0.7);
+          border-radius: 15px;
+          margin: 30px auto;
+          padding: 30px;
+          width: 80%;
+          max-width: 900px;
+          display: flex;
+          align-items: flex-start;
+          gap: 30px;
+          transition: transform 0.3s;
+        }
+        .zodiac-block:hover {
+          transform: translateY(-5px);
+        }
+        .aries { background-color: rgba(70, 30, 40, 0.7); }
+        .taurus { background-color: rgba(30, 70, 40, 0.7); }
+        .gemini { background-color: rgba(30, 70, 40, 0.7); }
+        .cancer { background-color: rgba(40, 40, 60, 0.7); }
+        .leo { background-color: rgba(70, 50, 30, 0.7); }
+        .virgo { background-color: rgba(40, 60, 50, 0.7); }
+        .libra { background-color: rgba(70, 50, 80, 0.7); }
+        .scorpio { background-color: rgba(70, 20, 50, 0.7); }
+        .sagittarius { background-color: rgba(70, 40, 30, 0.7); }
+        .capricorn { background-color: rgba(30, 40, 60, 0.7); }
+        .aquarius { background-color: rgba(30, 50, 70, 0.7); }
+        .pisces { background-color: rgba(40, 70, 60, 0.7); }
+        .zodiac-icon {
+          font-size: 4em;
+          text-align: center;
+          min-width: 80px;
+        }
+        .zodiac-symbol {
+          filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+        }
+        .zodiac-info {
+          flex: 1;
+        }
+        .zodiac-title {
+          font-size: 2.5em;
+          margin-bottom: 5px;
+          color: #e0b0ff;
+        }
+        .zodiac-date {
+          font-size: 1.2em;
+          color: #ccc;
+          margin-bottom: 20px;
+        }
+        .zodiac-content {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 20px;
+        }
+        .zodiac-item {
+          background-color: rgba(0, 0, 0, 0.3);
+          border-radius: 10px;
+          padding: 20px;
+        }
+        .zodiac-item h3 {
+          font-size: 1.3em;
+          margin-top: 0;
+          color: #d0b0f0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+          padding-bottom: 10px;
+          margin-bottom: 15px;
+        }
+        .zodiac-item p {
+          font-size: 0.95em;
+          line-height: 1.6;
+          color: #eee;
+        }
+        .details-link {
+          display: inline-block;
+          margin-top: 20px;
+          color: #e0b0ff;
+          text-decoration: none;
+          transition: color 0.3s;
+        }
+        .details-link:hover {
+          color: white;
+          text-decoration: underline;
+        }
+        .astroliv-footer {
+          background-color: rgba(20, 10, 30, 0.9);
+          padding: 40px 0;
+          margin-top: 60px;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .footer-content {
+          display: flex;
+          justify-content: space-around;
+          flex-wrap: wrap;
+        }
+        .footer-logo {
+          font-size: 1.5em;
+          font-family: 'Brush Script MT', cursive;
+          color: #e0b0ff;
+        }
+        .footer-links ul, .footer-address ul {
+          list-style: none;
+          padding: 0;
+        }
+        .footer-links a, .footer-address a {
+          color: #ccc;
+          text-decoration: none;
+        }
+        .footer-links a:hover, .footer-address a:hover {
+          color: #e0b0ff;
+        }
+        .footer-links h4, .footer-address h4 {
+          color: #e0b0ff;
+          margin-bottom: 10px;
+        }
+        @media (max-width: 768px) {
+          .zodiac-block {
+            flex-direction: column;
+            width: 95%;
+          }
+          .zodiac-icon {
+            text-align: center;
+          }
+          .zodiac-content {
+            grid-template-columns: 1fr;
+          }
+          .footer-content {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 20px;
+          }
+          .zodiac-nav button {
+            padding: 8px 16px;
+            font-size: 12px;
+          }
+        }
+      `}</style>
     </div>
   )
 }
