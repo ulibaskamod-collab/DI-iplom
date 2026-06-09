@@ -1,4 +1,3 @@
-// src/lib/hooks/useImageUpload.ts
 import { useState, useCallback, ChangeEvent } from 'react'
 
 interface UseImageUploadOptions {
@@ -10,20 +9,15 @@ interface UseImageUploadOptions {
 }
 
 interface UseImageUploadReturn {
-  // Состояния
   imageFile: File | null
   imagePreview: string | null
   isUploading: boolean
   uploadError: string | null
-  
-  // Методы
   handleImageChange: (e: ChangeEvent<HTMLInputElement>) => void
   uploadImage: () => Promise<string | null>
   removeImage: () => void
   setImagePreview: (url: string | null) => void
   setImageFile: (file: File | null) => void
-  
-  // Вспомогательные
   validateFile: (file: File) => boolean
   reset: () => void
 }
@@ -42,9 +36,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
 
-  // Валидация файла
   const validateFile = useCallback((file: File): boolean => {
-    // Проверка размера
     const maxSizeBytes = maxSizeMB * 1024 * 1024
     if (file.size > maxSizeBytes) {
       const errorMsg = `Файл слишком большой! Максимальный размер: ${maxSizeMB}MB`
@@ -53,7 +45,6 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
       return false
     }
 
-    // Проверка типа
     if (!allowedTypes.includes(file.type)) {
       const errorMsg = `Неподдерживаемый формат. Разрешены: ${allowedTypes.join(', ')}`
       setUploadError(errorMsg)
@@ -65,7 +56,6 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     return true
   }, [maxSizeMB, allowedTypes, onError])
 
-  // Обработчик выбора файла
   const handleImageChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     
@@ -74,15 +64,12 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     }
 
     if (!validateFile(file)) {
-      // Очищаем input
       e.target.value = ''
       return
     }
 
-    // Создаем preview
     const previewUrl = URL.createObjectURL(file)
     
-    // Очищаем старый preview при необходимости
     if (imagePreview && imagePreview.startsWith('blob:')) {
       URL.revokeObjectURL(imagePreview)
     }
@@ -92,11 +79,10 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     setUploadError(null)
   }, [validateFile, imagePreview])
 
-  // Загрузка изображения на сервер
   const uploadImage = useCallback(async (): Promise<string | null> => {
+    // Если нет файла - возвращаем null (не ошибка)
     if (!imageFile) {
-      // Если нет нового файла, но есть старый URL - возвращаем его
-      return imagePreview?.startsWith('http') ? imagePreview : null
+      return null
     }
 
     setIsUploading(true)
@@ -132,9 +118,8 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     } finally {
       setIsUploading(false)
     }
-  }, [imageFile, imagePreview, folder, onSuccess, onError])
+  }, [imageFile, folder, onSuccess, onError])
 
-  // Удаление изображения
   const removeImage = useCallback(() => {
     if (imagePreview && imagePreview.startsWith('blob:')) {
       URL.revokeObjectURL(imagePreview)
@@ -144,7 +129,6 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     setUploadError(null)
   }, [imagePreview])
 
-  // Сброс всех состояний
   const reset = useCallback(() => {
     if (imagePreview && imagePreview.startsWith('blob:')) {
       URL.revokeObjectURL(imagePreview)
@@ -156,20 +140,15 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
   }, [imagePreview])
 
   return {
-    // Состояния
     imageFile,
     imagePreview,
     isUploading,
     uploadError,
-    
-    // Методы
     handleImageChange,
     uploadImage,
     removeImage,
     setImagePreview,
     setImageFile,
-    
-    // Вспомогательные
     validateFile,
     reset,
   }

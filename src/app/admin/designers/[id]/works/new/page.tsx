@@ -3,7 +3,7 @@
 import { useRouter, useParams } from 'next/navigation'
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Save, Upload, X } from 'lucide-react'
+import { ArrowLeft, Save, Upload, X, AlertCircle } from 'lucide-react'
 import { useImageUpload } from '@/src/lib/hooks/useImageUpload'
 
 export default function AddWorkPage() {
@@ -26,19 +26,38 @@ export default function AddWorkPage() {
   } = useImageUpload({
     folder: 'works',
     maxSizeMB: 5,
-    onError: (error) => alert(error),
+    onError: (error) => {
+      console.error('Upload error:', error)
+    },
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Валидация
+    if (!formData.work_title) {
+      alert('Пожалуйста, заполните название работы')
+      return
+    }
+
     setLoading(true)
 
-    const imageUrl = await uploadImage()
+    // Сначала загружаем изображение
+    let imageUrl = ''
+    if (imagePreview) {
+      const uploadedUrl = await uploadImage()
+      if (!uploadedUrl && uploadError) {
+        alert('Не удалось загрузить изображение: ' + uploadError)
+        setLoading(false)
+        return
+      }
+      imageUrl = uploadedUrl || ''
+    }
 
     const payload = {
       work_title: formData.work_title,
       description: formData.description,
-      work_image: imageUrl || '',
+      work_image: imageUrl,
     }
 
     try {
@@ -48,14 +67,16 @@ export default function AddWorkPage() {
         body: JSON.stringify(payload),
       })
 
+      const data = await res.json()
+
       if (res.ok) {
         alert('Работа успешно добавлена!')
         router.push(`/admin/designers/${designerId}/works`)
       } else {
-        const data = await res.json()
         alert('Ошибка: ' + (data.error || 'Не удалось добавить'))
       }
     } catch (error) {
+      console.error('Ошибка:', error)
       alert('Ошибка соединения с сервером')
     }
 
@@ -83,21 +104,38 @@ export default function AddWorkPage() {
                   <button
                     type="button"
                     onClick={removeImage}
-                    className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full"
+                    className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full hover:bg-red-600"
+                    disabled={isUploading}
                   >
-                    <X size={14} />
+                    <X size={14} className="text-white" />
                   </button>
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center w-48 h-48 border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-blue-500 transition">
                   <Upload className="w-8 h-8 text-white/40" />
                   <span className="text-white/40 text-sm mt-1">Загрузить фото</span>
-                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                  <span className="text-white/20 text-xs mt-1">JPG, PNG, WebP</span>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageChange} 
+                    className="hidden" 
+                    disabled={isUploading}
+                  />
                 </label>
               )}
-              {isUploading && <span className="text-white/50 text-sm">Загрузка...</span>}
-              {uploadError && <span className="text-red-400 text-sm">{uploadError}</span>}
             </div>
+            {uploadError && (
+              <div className="mt-2 p-2 bg-red-500/20 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-sm">
+                <AlertCircle size={16} />
+                {uploadError}
+              </div>
+            )}
           </div>
 
           {/* Название */}
@@ -110,6 +148,7 @@ export default function AddWorkPage() {
               onChange={(e) => setFormData({ ...formData, work_title: e.target.value })}
               className="w-full px-4 py-2 bg-white/10 rounded-lg text-white border border-white/10 focus:outline-none focus:border-blue-500"
               placeholder="Например: Маленькое чёрное платье"
+              disabled={loading}
             />
           </div>
 
@@ -122,6 +161,7 @@ export default function AddWorkPage() {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="w-full px-4 py-2 bg-white/10 rounded-lg text-white border border-white/10 focus:outline-none focus:border-blue-500"
               placeholder="Опишите работу дизайнера..."
+              disabled={loading}
             />
           </div>
 
@@ -132,8 +172,22 @@ export default function AddWorkPage() {
               disabled={loading || isUploading}
               className="flex-1 py-3 bg-blue-500 rounded-xl text-white font-semibold hover:bg-blue-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              <Save size={18} />
-              {loading || isUploading ? 'Сохранение...' : 'Добавить работу'}
+              {isUploading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  Загрузка фото...
+                </>
+              ) : loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  Сохранение...
+                </>
+              ) : (
+                <>
+                  <Save size={18} />
+                  Добавить работу
+                </>
+              )}
             </button>
             <Link
               href={`/admin/designers/${designerId}/works`}
