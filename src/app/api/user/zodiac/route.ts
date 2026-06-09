@@ -16,7 +16,10 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
+    console.log('Session email:', session?.user?.email)
+    
     if (!session?.user?.email) {
+      console.log('No session email')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -25,8 +28,19 @@ export async function GET() {
       [session.user.email]
     )
 
+    console.log('Query result:', result.rows)
+
     const user = result.rows[0]
     
+    if (!user || !user.zodiac_sign) {
+      console.log('No zodiac sign found for user')
+      return NextResponse.json({ 
+        zodiac_sign: null, 
+        slug: null,
+        message: 'Знак зодиака не найден. Заполните дату рождения в профиле.'
+      })
+    }
+
     const slugs: Record<string, string> = {
       'Овен': 'oven',
       'Телец': 'telec',
@@ -42,9 +56,12 @@ export async function GET() {
       'Рыбы': 'ryby',
     }
 
+    const slug = slugs[user.zodiac_sign]
+    console.log('Zodiac sign found:', user.zodiac_sign, 'Slug:', slug)
+
     return NextResponse.json({
-      zodiac_sign: user?.zodiac_sign || null,
-      slug: user?.zodiac_sign ? slugs[user.zodiac_sign] : null
+      zodiac_sign: user.zodiac_sign,
+      slug: slug,
     })
   } catch (error) {
     console.error('Error fetching user zodiac:', error)
