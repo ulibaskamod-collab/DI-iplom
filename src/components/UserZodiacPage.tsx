@@ -1,10 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Heart, Sparkles, Star, ShoppingBag } from 'lucide-react'
+import { ShoppingBag } from 'lucide-react'
 
 const zodiacFullData: Record<string, any> = {
   oven: {
