@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
 
+// Правильное подключение с SSL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-});
+  ssl: {
+    rejectUnauthorized: false, // Обязательно для Render
+  },
+})
 
 // GET - получить всё
 export async function GET() {
@@ -16,6 +20,7 @@ export async function GET() {
   }
 }
 
+// POST - создать новый предмет
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -26,8 +31,8 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await pool.query(
-      `INSERT INTO clothing_items (title, description, image_url, season, gender, zodiac_sign_id) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
+      `INSERT INTO clothing_items (title, description, image_url, season, gender, zodiac_sign_id)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
       [title, description, image_url, season, gender, zodiac_sign_id]
     )
@@ -39,6 +44,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// PUT - обновить предмет
 export async function PUT(req: NextRequest) {
   try {
     const body = await req.json()
@@ -49,8 +55,8 @@ export async function PUT(req: NextRequest) {
     }
 
     const result = await pool.query(
-      `UPDATE clothing_items 
-       SET title = $1, description = $2, image_url = $3, season = $4, 
+      `UPDATE clothing_items
+       SET title = $1, description = $2, image_url = $3, season = $4,
            gender = $5, zodiac_sign_id = $6, updated_at = CURRENT_TIMESTAMP
        WHERE id = $7
        RETURNING *`,
@@ -68,9 +74,10 @@ export async function PUT(req: NextRequest) {
   }
 }
 
+// DELETE - удалить предмет
 export async function DELETE(req: NextRequest) {
   const id = req.nextUrl.searchParams.get('id')
-  
+
   if (!id) {
     return NextResponse.json({ error: 'ID required' }, { status: 400 })
   }
