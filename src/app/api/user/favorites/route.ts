@@ -5,8 +5,12 @@ import { authOptions } from '@/src/lib/auth'
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-});
+  ssl: {
+    rejectUnauthorized: false,
+  },
+})
 
+// GET - получить все избранное пользователя
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -27,21 +31,24 @@ export async function GET() {
 
     const userId = userResult.rows[0].id
 
-    // Получаем избранное
+    // Получаем избранное с данными о товарах
     const favoritesResult = await pool.query(
-      `SELECT f.*, c.* FROM favorites f 
-       JOIN clothing_items c ON f.clothing_item_id = c.id 
-       WHERE f.user_id = $1`,
+      `SELECT f.id, f.clothing_item_id, c.title, c.description, c.image_url, c.season, c.gender
+       FROM favorites f
+       JOIN clothing_items c ON f.clothing_item_id = c.id
+       WHERE f.user_id = $1
+       ORDER BY f.created_at DESC`,
       [userId]
     )
 
     return NextResponse.json(favoritesResult.rows)
   } catch (error) {
-    console.error('GET error:', error)
+    console.error('GET favorites error:', error)
     return NextResponse.json([])
   }
 }
 
+// POST - добавить в избранное
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -79,21 +86,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Clothing item not found' }, { status: 404 })
     }
 
-    // Добавляем в избранное
+    // Добавляем в избранное (игнорируем если уже есть)
     await pool.query(
-      `INSERT INTO favorites (user_id, clothing_item_id) 
-       VALUES ($1, $2) 
+      `INSERT INTO favorites (user_id, clothing_item_id)
+       VALUES ($1, $2)
        ON CONFLICT (user_id, clothing_item_id) DO NOTHING`,
       [userId, clothingItemId]
     )
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('POST error:', error)
+    console.error('POST favorite error:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
 
+// DELETE - удалить из избранного
 export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -102,11 +110,8 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Получаем ID товара из URL
     const url = new URL(req.url)
     const clothingItemId = url.searchParams.get('clothingItemId')
-
-    console.log('DELETE - clothingItemId:', clothingItemId)
 
     if (!clothingItemId) {
       return NextResponse.json({ error: 'clothingItemId required' }, { status: 400 })
@@ -132,7 +137,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('DELETE error:', error)
+    console.error('DELETE favorite error:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
