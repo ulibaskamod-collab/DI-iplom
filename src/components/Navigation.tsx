@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { Menu, X, Sparkles } from 'lucide-react'
+import { Menu, X, Sparkles, Stars, User, Heart, LogOut } from 'lucide-react'
 
 export default function Navigation() {
   const { data: session, status } = useSession()
@@ -44,7 +44,14 @@ export default function Navigation() {
 
         <div className={`nav-links ${isOpen ? 'open max-md:flex max-md:flex-col max-md:absolute max-md:top-full max-md:left-0 max-md:right-0 max-md:bg-purple-900/95 max-md:p-4 max-md:gap-3' : 'max-md:hidden'}`}>
           <Link href="/" onClick={() => setIsOpen(false)}>
+            <Sparkles size={16} className="inline mr-1" />
             Главная
+          </Link>
+          
+          {/* Пункт "Все знаки" - показываем всегда */}
+          <Link href="/zodiac" onClick={() => setIsOpen(false)}>
+            <Stars size={16} className="inline mr-1" />
+            Все знаки
           </Link>
           
           <Link href="/designers" onClick={() => setIsOpen(false)}>
@@ -54,12 +61,15 @@ export default function Navigation() {
           {status === 'authenticated' ? (
             <>
               <Link href="/favorites" onClick={() => setIsOpen(false)}>
+                <Heart size={16} className="inline mr-1" />
                 Избранное
               </Link>
               <Link href="/profile" onClick={() => setIsOpen(false)}>
+                <User size={16} className="inline mr-1" />
                 Профиль
               </Link>
-              <button onClick={() => signOut()} className="nav-auth-btn">
+              <button onClick={() => signOut()} className="nav-auth-btn flex items-center gap-1">
+                <LogOut size={16} />
                 Выйти
               </button>
             </>
