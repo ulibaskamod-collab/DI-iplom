@@ -4,7 +4,8 @@ import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import HomePageAllSigns from './(home)/page'
-import UserZodiacPage from '@/components/UserZodiacPage'
+import UserZodiacPage from '@/src/components/UserZodiacPage'
+import { Link } from 'lucide-react'
 
 export default function Page() {
   const { data: session, status } = useSession()
