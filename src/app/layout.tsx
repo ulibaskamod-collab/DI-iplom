@@ -4,13 +4,11 @@ import Navigation from '../components/Navigation'
 import { Providers } from './providers'
 import './globals.css'
 
-
 const inter = Inter({ subsets: ['latin', 'cyrillic'] })
 
 export const metadata: Metadata = {
-  title: 'StellarFit | Звёздный стиль ',
-  description: 'Персонализированные рекомендации по стилю на основе знака зодиака. Открой свою идеальную моду.',
-  keywords: 'астрология, мода, стиль, знаки зодиака, подбор одежды, StellarFit',
+  title: 'StellarFit | Звёздный стиль',
+  description: 'Персонализированные рекомендации по стилю на основе знака зодиака',
 }
 
 export default function RootLayout({
