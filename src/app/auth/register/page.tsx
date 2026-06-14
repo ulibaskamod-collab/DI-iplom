@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Mail, Lock, User, Calendar, Sparkles, Venus, Mars } from 'lucide-react'
+import { Star, Sparkles, Mail, Lock, User, Calendar, Venus, Mars, Eye, EyeOff } from 'lucide-react'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -14,21 +13,16 @@ export default function RegisterPage() {
     password: '',
     confirmPassword: '',
     birthDate: '',
-    gender: 'female',
+    gender: '',
   })
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-
-    console.log('Отправка формы регистрации...')
 
     if (formData.password !== formData.confirmPassword) {
       setError('Пароли не совпадают')
@@ -36,127 +30,113 @@ export default function RegisterPage() {
       return
     }
 
-    if (formData.password.length < 8) {
-      setError('Пароль должен содержать минимум 8 символов')
-      setLoading(false)
-      return
-    }
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        birthDate: formData.birthDate,
+        gender: formData.gender,
+      }),
+    })
 
-    try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          birthDate: formData.birthDate,
-          gender: formData.gender,
-        }),
-      })
+    const data = await res.json()
 
-      const data = await response.json()
-      console.log('Ответ сервера:', { status: response.status, data })
-
-      if (response.ok) {
-        router.push('/auth/signin?registered=true')
-      } else {
-        setError(data.error || 'Ошибка регистрации')
-      }
-    } catch (err) {
-      console.error('Ошибка при запросе:', err)
-      setError('Ошибка подключения к серверу. Проверьте, запущен ли сервер.')
-    } finally {
+    if (res.ok) {
+      router.push('/auth/signin?registered=true')
+    } else {
+      setError(data.error || 'Ошибка регистрации')
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-purple-900/30 backdrop-blur-sm rounded-3xl p-8 border border-purple-700/50"
-      >
-        <div className="text-center mb-6">
-          <Sparkles className="w-12 h-12 text-pink-400 mx-auto mb-3" />
-          <h1 className="text-3xl font-playfair bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-            Создать аккаунт
-          </h1>
-          <p className="text-purple-300 text-sm mt-2">Присоединяйтесь к звёздному сообществу</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFF5F0] to-[#FFE8E0] py-12 px-4">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] rounded-2xl mb-4">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800">StellarFit</h1>
+          <p className="text-gray-500 mt-2">Создайте новый аккаунт</p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <div className="bg-white rounded-3xl shadow-xl p-8">
           {error && (
-            <div className="bg-red-500/20 border border-red-500 rounded-xl p-3 text-red-300 text-sm text-center mb-4">
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
               {error}
             </div>
           )}
 
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm mb-2 text-purple-300">Имя</label>
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                Имя
+              </label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  name="name"
                   type="text"
                   value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="auth-input pl-12"
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#FF6B6B] focus:ring-2 focus:ring-[#FF6B6B]/20 transition"
                   placeholder="Ваше имя"
+                  required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm mb-2 text-purple-300">Email</label>
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                Email
+              </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  name="email"
                   type="email"
                   value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="auth-input pl-12"
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#FF6B6B] focus:ring-2 focus:ring-[#FF6B6B]/20 transition"
                   placeholder="your@email.com"
+                  required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm mb-2 text-purple-300">Дата рождения</label>
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                Дата рождения
+              </label>
               <div className="relative">
-                <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  name="birthDate"
                   type="date"
                   value={formData.birthDate}
-                  onChange={handleChange}
+                  onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#FF6B6B] focus:ring-2 focus:ring-[#FF6B6B]/20 transition"
                   required
-                  className="auth-input pl-12"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm mb-2 text-purple-300">Пол</label>
-              <div className="flex gap-6">
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                Пол
+              </label>
+              <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
                     name="gender"
                     value="female"
                     checked={formData.gender === 'female'}
-                    onChange={handleChange}
-                    className="accent-pink-500"
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                    className="w-4 h-4 accent-[#FF6B6B]"
                   />
-                  <Venus size={16} className="text-pink-400" />
-                  Женский
+                  <Venus className="w-4 h-4 text-[#FF6B6B]" />
+                  <span className="text-gray-700">Женский</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -164,60 +144,90 @@ export default function RegisterPage() {
                     name="gender"
                     value="male"
                     checked={formData.gender === 'male'}
-                    onChange={handleChange}
-                    className="accent-blue-500"
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                    className="w-4 h-4 accent-[#4A90D9]"
                   />
-                  <Mars size={16} className="text-blue-400" />
-                  Мужской
+                  <Mars className="w-4 h-4 text-[#4A90D9]" />
+                  <span className="text-gray-700">Мужской</span>
                 </label>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm mb-2 text-purple-300">Пароль</label>
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                Пароль
+              </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={formData.password}
-                  onChange={handleChange}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#FF6B6B] focus:ring-2 focus:ring-[#FF6B6B]/20 transition"
+                  placeholder="Минимум 6 символов"
                   required
-                  className="auth-input pl-12"
-                  placeholder="минимум 8 символов"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <Eye className="w-5 h-5 text-gray-400" />
+                  )}
+                </button>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm mb-2 text-purple-300">Подтвердите пароль</label>
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                Подтвердите пароль
+              </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  name="confirmPassword"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
-                  onChange={handleChange}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#FF6B6B] focus:ring-2 focus:ring-[#FF6B6B]/20 transition"
+                  placeholder="Повторите пароль"
                   required
-                  className="auth-input pl-12"
-                  placeholder="повторите пароль"
                 />
               </div>
             </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] text-white font-semibold rounded-xl hover:from-[#FF5252] hover:to-[#FF7575] transition shadow-md disabled:opacity-50"
+            >
+              {loading ? 'Регистрация...' : 'Зарегистрироваться'}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-gray-500 text-sm">
+              Уже есть аккаунт?{' '}
+              <Link href="/auth/signin" className="text-[#FF6B6B] font-medium hover:underline">
+                Войти
+              </Link>
+            </p>
           </div>
+        </div>
 
-          <button type="submit" disabled={loading} className="auth-btn w-full mt-6">
-            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
-          </button>
-        </form>
-
-        <p className="text-center mt-6 text-purple-300 text-sm">
-          Уже есть аккаунт?{' '}
-          <Link href="/auth/signin" className="text-pink-400 hover:text-pink-300 font-semibold">
-            Войти
-          </Link>
-        </p>
-      </motion.div>
+        <div className="text-center mt-8">
+          <div className="flex justify-center gap-2">
+            <Star className="w-4 h-4 text-[#FFB347] fill-[#FFB347]" />
+            <Star className="w-4 h-4 text-[#FFB347] fill-[#FFB347]" />
+            <Star className="w-4 h-4 text-[#FFB347] fill-[#FFB347]" />
+          </div>
+          <p className="text-gray-400 text-xs mt-3">
+            Регистрируясь, вы соглашаетесь с условиями использования
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

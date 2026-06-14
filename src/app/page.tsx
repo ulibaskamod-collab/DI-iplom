@@ -1,346 +1,304 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Heart, Sparkles, Star, ShoppingBag } from 'lucide-react'
-import HomePageAllSigns from './(home)/page'
+import { useState, useEffect } from 'react'
 
-// Полные данные для всех знаков (как на странице /zodiac/[slug])
-const zodiacFullData: Record<string, any> = {
-  oven: {
-    name: 'Овен', symbol: '♈', element: 'Огонь', planet: 'Марс',
-    dates: '21 марта – 19 апреля', accentColor: '#FF4500', heroImage: '🔥',
-    title: 'Стиль Овна: Смелость и Спорт-ШИК',
-    description: 'Пионер, воин, первооткрыватель. Овен — первый знак зодиака, заряженный динамикой, мужеством и страстью.',
-    styleDesc: 'Авангард, динамика, функциональность. Кожа, металлические детали, яркие акценты.',
-    styleKeywords: ['Смелость', 'Динамика', 'Функциональность', 'Огонь'],
-    colors: ['#FF0000', '#FF4500', '#8B0000', '#1A1A1A', '#C0C0C0'],
-    colorNames: ['Красный огонь', 'Мандарин', 'Кармин', 'Графит', 'Серебро'],
-    bgGradient: 'from-red-900/40 via-orange-900/30 to-black'
+const zodiacData = [
+  {
+    name: 'Овен',
+    dates: '21 марта - 19 апреля',
+    symbol: '♈',
+    style: 'Классический, яркий, стремительный',
+    colors: 'Красный, оранжевый, пурпурный',
+    hobby: 'Экстремальные виды спорта, туризм',
+    fact: 'Овны обладают высоким уровнем энергии и смелостью',
+    fate: 'Первопроходец, всегда борется за свое место',
+    slug: 'aries',
+    gradient: 'from-red-100 to-orange-100',
+    color: '#FF4500'
   },
-  telec: {
-    name: 'Телец', symbol: '♉', element: 'Земля', planet: 'Венера',
-    dates: '20 апреля – 20 мая', accentColor: '#2ECC71', heroImage: '🌿',
-    title: 'Стиль Тельца: Природная элегантность',
-    description: 'Чувственность, стойкость, любовь к роскоши. Телец — знак земной силы и красоты.',
-    styleDesc: 'Натуральные ткани, мягкие силуэты, теплые земляные оттенки. Кашемир, шёлк, хлопок.',
-    styleKeywords: ['Роскошь', 'Комфорт', 'Элегантность', 'Натуральность'],
-    colors: ['#8B7355', '#D2B48C', '#556B2F', '#FFB6C1', '#F5DEB3'],
-    colorNames: ['Коричневый', 'Бежевый', 'Оливковый', 'Пудровый', 'Кремовый'],
-    bgGradient: 'from-emerald-900/40 via-green-900/30 to-black'
+  {
+    name: 'Телец',
+    dates: '20 апреля - 20 мая',
+    symbol: '♉',
+    style: 'Сдержанный, элегантный, натуральный',
+    colors: 'Зеленый, голубой, нежно-розовый',
+    hobby: 'Кулинария, садоводство, искусство',
+    fact: 'Практичные, любят комфорт и стабильность',
+    fate: 'Стремление к материальному благополучию',
+    slug: 'taurus',
+    gradient: 'from-green-100 to-emerald-100',
+    color: '#2ECC71'
   },
-  bliznetsy: {
-    name: 'Близнецы', symbol: '♊', element: 'Воздух', planet: 'Меркурий',
-    dates: '21 мая – 20 июня', accentColor: '#FFD700', heroImage: '🌀',
-    title: 'Стиль Близнецов: Эклектика и игра',
-    description: 'Двойственность, коммуникабельность, жажда перемен. Близнецы — самый любознательный знак.',
-    styleDesc: 'Смешение фактур и направлений: спорт-шик с бохо, офисный жакет с джинсами.',
-    styleKeywords: ['Эклектика', 'Многослойность', 'Игривость', 'Свобода'],
-    colors: ['#FFD700', '#87CEEB', '#32CD32', '#FFA500', '#9370DB'],
-    colorNames: ['Золотой', 'Голубой', 'Лайм', 'Оранжевый', 'Пурпурный'],
-    bgGradient: 'from-yellow-900/40 via-amber-900/30 to-black'
+  {
+    name: 'Близнецы',
+    dates: '21 мая - 20 июня',
+    symbol: '♊',
+    style: 'Легкий, разнообразный, модный',
+    colors: 'Желтый, серебристый, бирюзовый',
+    hobby: 'Чтение, путешествия, общение',
+    fact: 'Двойственная натура, любопытство',
+    fate: 'Постоянное движение и поиск',
+    slug: 'gemini',
+    gradient: 'from-yellow-100 to-amber-100',
+    color: '#FFD700'
   },
-  rak: {
-    name: 'Рак', symbol: '♋', element: 'Вода', planet: 'Луна',
-    dates: '21 июня – 22 июля', accentColor: '#6C5CE7', heroImage: '🌙',
-    title: 'Стиль Рака: Лунная женственность',
-    description: 'Эмпатия, глубина чувств, любовь к дому. Рак — самый заботливый и интуитивный знак.',
-    styleDesc: 'Мягкие драпировки, струящиеся ткани, пастельные оттенки и винтажные нотки.',
-    styleKeywords: ['Нежность', 'Уют', 'Романтика', 'Защита'],
-    colors: ['#FFFFFF', '#C0C0C0', '#F0F8FF', '#E6E6FA', '#48D1CC'],
-    colorNames: ['Белый', 'Серебряный', 'Небесный', 'Лавандовый', 'Бирюзовый'],
-    bgGradient: 'from-blue-900/40 via-cyan-900/30 to-black'
+  {
+    name: 'Рак',
+    dates: '21 июня - 22 июля',
+    symbol: '♋',
+    style: 'Домашний, уютный, чувствительный',
+    colors: 'Серебряный, белый, голубой',
+    hobby: 'Кулинария, рукоделие, забота о доме',
+    fact: 'Эмоциональны, привязаны к дому и семье',
+    fate: 'Забота о близких и создание уюта',
+    slug: 'cancer',
+    gradient: 'from-blue-100 to-cyan-100',
+    color: '#6C5CE7'
   },
-  lev: {
-    name: 'Лев', symbol: '♌', element: 'Огонь', planet: 'Солнце',
-    dates: '23 июля – 22 августа', accentColor: '#FFD700', heroImage: '👑',
-    title: 'Стиль Льва: Старый Голливуд',
-    description: 'Величественный, страстный, королевский знак. Солнце правит Львом, даря магнетизм и любовь к роскоши.',
-    styleDesc: 'Люкс-бренды, золото, леопардовый принт, бархат, пайетки.',
-    styleKeywords: ['Роскошь', 'Власть', 'Гламур', 'Царственность'],
-    colors: ['#FFD700', '#8B008B', '#FF4500', '#1A1A1A', '#DAA520', '#800020'],
-    colorNames: ['Золотой', 'Пурпурный', 'Оранжевый', 'Чёрный', 'Шампань', 'Бургунди'],
-    bgGradient: 'from-amber-900/40 via-yellow-900/30 to-black'
+  {
+    name: 'Лев',
+    dates: '23 июля - 22 августа',
+    symbol: '♌',
+    style: 'Роскошный, яркий, театральный',
+    colors: 'Золотой, оранжевый, пурпурный',
+    hobby: 'Сцена, искусство, организация мероприятий',
+    fact: 'Прирожденные лидеры, любят быть в центре внимания',
+    fate: 'Проявить таланты и поделиться энергией',
+    slug: 'leo',
+    gradient: 'from-orange-100 to-amber-100',
+    color: '#FF8C00'
   },
-  deva: {
-    name: 'Дева', symbol: '♍', element: 'Земля', planet: 'Меркурий',
-    dates: '23 августа – 22 сентября', accentColor: '#95A5A6', heroImage: '🍃',
-    title: 'Стиль Девы: Элегантный минимализм',
-    description: 'Элегантность, аналитический ум, безупречный вкус. Дева — знак чистоты и порядка.',
-    styleDesc: 'Лаконичные силуэты, натуральные ткани, нейтральные оттенки с акцентами на детали.',
-    styleKeywords: ['Минимализм', 'Чистота', 'Практичность', 'Совершенство'],
-    colors: ['#FFFFFF', '#808080', '#D3D3D3', '#F5F5DC', '#6B8E23'],
-    colorNames: ['Белый', 'Серый', 'Светло-серый', 'Бежевый', 'Оливковый'],
-    bgGradient: 'from-gray-900/40 via-stone-900/30 to-black'
+  {
+    name: 'Дева',
+    dates: '23 августа - 22 сентября',
+    symbol: '♍',
+    style: 'Аккуратный, практичный, умеренный',
+    colors: 'Синий, зеленый, серый',
+    hobby: 'Чтение, аналитика, забота о здоровье',
+    fact: 'Внимательны к деталям, любят порядок',
+    fate: 'Помогать другим интеллектом и практичностью',
+    slug: 'virgo',
+    gradient: 'from-teal-100 to-cyan-100',
+    color: '#20B2AA'
   },
-  vesy: {
-    name: 'Весы', symbol: '♎', element: 'Воздух', planet: 'Венера',
-    dates: '23 сентября – 22 октября', accentColor: '#FFB6C1', heroImage: '🌸',
-    title: 'Стиль Весов: Утончённая элегантность',
-    description: 'Гармония, дипломатичность, утончённость. Весы — знак равновесия и эстетики.',
-    styleDesc: 'Мягкие силуэты, пастельные тона, изысканные ткани.',
-    styleKeywords: ['Гармония', 'Эстетика', 'Женственность', 'Шик'],
-    colors: ['#FFB6C1', '#87CEEB', '#DDA0DD', '#F5DEB3', '#FFF0F5'],
-    colorNames: ['Розовый', 'Небесный', 'Лавандовый', 'Шампань', 'Жемчужный'],
-    bgGradient: 'from-pink-900/40 via-rose-900/30 to-black'
+  {
+    name: 'Весы',
+    dates: '23 сентября - 22 октября',
+    symbol: '♎',
+    style: 'Элегантный, гармоничный, изысканный',
+    colors: 'Нежно-розовый, голубой, пастельные тона',
+    hobby: 'Искусство, музыка, общение',
+    fact: 'Стремятся к гармонии и равновесию',
+    fate: 'Находить баланс и примирять людей',
+    slug: 'libra',
+    gradient: 'from-pink-100 to-rose-100',
+    color: '#FF69B4'
   },
-  skorpion: {
-    name: 'Скорпион', symbol: '♏', element: 'Вода', planet: 'Плутон',
-    dates: '23 октября – 21 ноября', accentColor: '#FF6B6B', heroImage: '🦂',
-    title: 'Стиль Скорпиона: Тёмная элегантность',
-    description: 'Страсть, магнетизм, трансформация. Скорпион — самый загадочный и сильный знак.',
-    styleDesc: 'Кожа, латекс, глубокий чёрный, винный и кроваво-красный. Стиль "рок-шик".',
-    styleKeywords: ['Таинственность', 'Страсть', 'Магнетизм', 'Сила'],
-    colors: ['#FF6B6B', '#8B0000', '#4B0082', '#800080', '#2E8B57'],
-    colorNames: ['Коралловый', 'Кровавый', 'Индиго', 'Фиолетовый', 'Изумрудный'],
-    bgGradient: 'from-purple-900/40 via-purple-950/40 to-black'
+  {
+    name: 'Скорпион',
+    dates: '23 октября - 21 ноября',
+    symbol: '♏',
+    style: 'Загадочный, сильный, страстный',
+    colors: 'Темно-красный, черный, бордовый',
+    hobby: 'Психология, исследования, мистика',
+    fact: 'Страстные, харизматичные, сильная интуиция',
+    fate: 'Трансформация и преображение',
+    slug: 'scorpio',
+    gradient: 'from-red-100 to-rose-100',
+    color: '#8B0000'
   },
-  strelets: {
-    name: 'Стрелец', symbol: '♐', element: 'Огонь', planet: 'Юпитер',
-    dates: '22 ноября – 21 декабря', accentColor: '#8A2BE2', heroImage: '🏹',
-    title: 'Стиль Стрельца: Бохо-шик',
-    description: 'Искатель приключений, философ, огненный странник. Стрелец — знак свободы и оптимизма.',
-    styleDesc: 'Свобода — главное правило. Этнические мотивы, свободные силуэты, кожа, замша.',
-    styleKeywords: ['Свобода', 'Приключения', 'Этника', 'Оптимизм'],
-    colors: ['#800080', '#0000CD', '#FFA500', '#40E0D0', '#DDA0DD'],
-    colorNames: ['Пурпурный', 'Синий', 'Оранжевый', 'Бирюзовый', 'Лиловый'],
-    bgGradient: 'from-indigo-900/40 via-purple-900/30 to-black'
+  {
+    name: 'Стрелец',
+    dates: '22 ноября - 21 декабря',
+    symbol: '♐',
+    style: 'Яркий, свободный, приключенческий',
+    colors: 'Синий, фиолетовый, сиреневый',
+    hobby: 'Путешествия, спорт, философия',
+    fact: 'Оптимисты, любят свободу и приключения',
+    fate: 'Искать истину и делиться мудростью',
+    slug: 'sagittarius',
+    gradient: 'from-purple-100 to-indigo-100',
+    color: '#9B59B6'
   },
-  kozerog: {
-    name: 'Козерог', symbol: '♑', element: 'Земля', planet: 'Сатурн',
-    dates: '22 декабря – 19 января', accentColor: '#708090', heroImage: '🏔️',
-    title: 'Стиль Козерога: Классика и статус',
-    description: 'Дисциплина, амбиции, безупречный вкус. Козерог — знак горных вершин, символ власти.',
-    styleDesc: 'Кашемир, твид, идеально скроенные костюмы, минималистичные аксессуары.',
-    styleKeywords: ['Власть', 'Классика', 'Статус', 'Элегантность'],
-    colors: ['#1A1A1A', '#2F4F4F', '#696969', '#8B4513', '#F5F5DC'],
-    colorNames: ['Чёрный', 'Тёмный', 'Серый', 'Коричневый', 'Бежевый'],
-    bgGradient: 'from-slate-900/40 via-gray-900/30 to-black'
+  {
+    name: 'Козерог',
+    dates: '22 декабря - 19 января',
+    symbol: '♑',
+    style: 'Классический, строгий, эффективный',
+    colors: 'Темно-коричневый, черный, серый',
+    hobby: 'Карьеризм, учеба, планирование',
+    fact: 'Амбициозны, целеустремленны, дисциплинированны',
+    fate: 'Достичь вершин и построить фундамент',
+    slug: 'capricorn',
+    gradient: 'from-gray-100 to-slate-100',
+    color: '#2C3E50'
   },
-  vodoley: {
-    name: 'Водолей', symbol: '♒', element: 'Воздух', planet: 'Уран',
-    dates: '20 января – 18 февраля', accentColor: '#00FFFF', heroImage: '💧',
-    title: 'Стиль Водолея: Авангард и футуризм',
-    description: 'Инновации, свобода, авангард. Водолей — знак будущего и нестандартного мышления.',
-    styleDesc: 'Необычные акценты, асимметрия, техно-аксессуары. Гость из будущего.',
-    styleKeywords: ['Авангард', 'Футуризм', 'Технологичность', 'Свобода'],
-    colors: ['#00FFFF', '#C0C0C0', '#0000FF', '#FF00FF', '#40E0D0'],
-    colorNames: ['Бирюзовый', 'Серебряный', 'Синий', 'Неоновый', 'Мятный'],
-    bgGradient: 'from-cyan-900/40 via-blue-900/30 to-black'
+  {
+    name: 'Водолей',
+    dates: '20 января - 18 февраля',
+    symbol: '♒',
+    style: 'Необычный, футуристичный, независимый',
+    colors: 'Голубой, бирюзовый, фиолетовый',
+    hobby: 'Наука, технологии, социальные движения',
+    fact: 'Оригинальны, независимы, гуманисты',
+    fate: 'Привнести новое и помочь человечеству',
+    slug: 'aquarius',
+    gradient: 'from-cyan-100 to-blue-100',
+    color: '#00CED1'
   },
-  ryby: {
-    name: 'Рыбы', symbol: '♓', element: 'Вода', planet: 'Нептун',
-    dates: '19 февраля – 20 марта', accentColor: '#48D1CC', heroImage: '🐟',
-    title: 'Стиль Рыб: Морская феерия',
-    description: 'Интуиция, глубинная эмпатия, творческий дар. Рыбы — последний знак зодиака.',
-    styleDesc: 'Невесомые ткани, переливчатые оттенки, струящийся шифон, перламутр и блеск.',
-    styleKeywords: ['Романтика', 'Таинственность', 'Творчество', 'Мечтательность'],
-    colors: ['#48D1CC', '#E0FFFF', '#D8BFD8', '#F0E68C', '#FFB6C1'],
-    colorNames: ['Бирюзовый', 'Белый', 'Лавандовый', 'Шампань', 'Розовый'],
-    bgGradient: 'from-teal-900/40 via-cyan-900/30 to-black'
+  {
+    name: 'Рыбы',
+    dates: '19 февраля - 20 марта',
+    symbol: '♓',
+    style: 'Мечтательный, романтичный, интуитивный',
+    colors: 'Морской зеленый, лавандовый, фиолетовый',
+    hobby: 'Искусство, музыка, медитация',
+    fact: 'Чувствительны, сострадательны, интуитивны',
+    fate: 'Служение и исцеление',
+    slug: 'pisces',
+    gradient: 'from-teal-100 to-emerald-100',
+    color: '#48D1CC'
   }
-}
+]
 
-// Компонент страницы знака пользователя
-function UserZodiacPage({ slug }: { slug: string }) {
-  const sign = zodiacFullData[slug]
-  const [clothingItems, setClothingItems] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+export default function HomePage() {
+  const [activeZodiac, setActiveZodiac] = useState<string | null>(null)
 
   useEffect(() => {
-    if (sign) {
-      fetch(`/api/zodiac/items?zodiacSlug=${slug}`)
-        .then(res => res.json())
-        .then(data => setClothingItems(data))
-        .catch(console.error)
-        .finally(() => setLoading(false))
-    }
-  }, [slug, sign])
-
-  if (!sign) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Знак не найден</h1>
-          <Link href="/zodiac" className="text-pink-400 hover:text-pink-300">← Перейти ко всем знакам</Link>
-        </div>
-      </div>
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveZodiac(entry.target.id)
+          }
+        })
+      },
+      { threshold: 0.3 }
     )
+
+    zodiacData.forEach((zodiac) => {
+      const element = document.getElementById(zodiac.slug)
+      if (element) observer.observe(element)
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
+  const scrollToZodiac = (slug: string) => {
+    const element = document.getElementById(slug)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-b ${sign.bgGradient}`}>
-      {/* Герой-секция */}
-      <div className="relative h-[450px] md:h-[500px] overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-transparent z-10" />
-        <div className="relative h-full flex flex-col items-center justify-center text-center px-4 z-20">
-          <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', duration: 1 }}
-            className="text-7xl md:text-8xl mb-4 drop-shadow-2xl"
-          >
-            {sign.heroImage}
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-5xl md:text-7xl font-bold text-white mb-3"
-            style={{ textShadow: `0 0 40px ${sign.accentColor}40` }}
-          >
-            {sign.name}
-          </motion.h1>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="flex items-center gap-2 text-white/70 text-sm md:text-base"
-          >
-            <span>{sign.element} • {sign.planet} • {sign.dates}</span>
-          </motion.div>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="text-white/70 text-base md:text-lg max-w-xl mx-auto mt-5"
-          >
-            {sign.description}
-          </motion.p>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* Стиль */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white/5 rounded-2xl p-6 md:p-8 mb-10 border border-white/10"
-        >
-          <h2 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: sign.accentColor }}>
-            {sign.title}
-          </h2>
-          <p className="text-white/70 text-base leading-relaxed">{sign.styleDesc}</p>
-          <div className="flex flex-wrap gap-2 mt-5">
-            {sign.styleKeywords.map((keyword: string, idx: number) => (
-              <span
-                key={idx}
-                className="px-3 py-1.5 rounded-full text-xs font-medium"
-                style={{ backgroundColor: `${sign.accentColor}15`, color: sign.accentColor, border: `1px solid ${sign.accentColor}30` }}
+    <>
+      {/* Hero секция */}
+      <section className="hero">
+        <div className="hero-content">
+          <h1>StellarFit</h1>
+          <p>Астрология души и нарядов</p>
+          
+          <div className="zodiac-nav">
+            {zodiacData.map((zodiac) => (
+              <button
+                key={zodiac.slug}
+                onClick={() => scrollToZodiac(zodiac.slug)}
+                className="zodiac-nav-btn"
+                style={{
+                  borderColor: activeZodiac === zodiac.slug ? zodiac.color : '#FFD4C8',
+                  color: activeZodiac === zodiac.slug ? zodiac.color : '#5A5A5A'
+                }}
               >
-                {keyword}
-              </span>
+                {zodiac.name}
+              </button>
             ))}
           </div>
-        </motion.div>
+        </div>
+      </section>
 
-        {/* Гардероб */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
+      {/* Блоки знаков зодиака */}
+      {zodiacData.map((zodiac) => (
+        <section
+          key={zodiac.slug}
+          id={zodiac.slug}
+          className="zodiac-block"
+          style={{ background: `linear-gradient(135deg, ${zodiac.color}08, ${zodiac.color}04)` }}
         >
-          <h2 className="text-2xl font-bold text-white mb-6">Гардероб {sign.name}</h2>
-          
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-2 border-white/20 border-t-white/80" />
+          <div className="zodiac-header">
+            <div className="zodiac-symbol" style={{ color: zodiac.color }}>
+              {zodiac.symbol}
             </div>
-          ) : clothingItems.length === 0 ? (
-            <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
-              <ShoppingBag className="w-12 h-12 text-white/20 mx-auto mb-3" />
-              <p className="text-white/40">Товары для этого знака скоро появятся</p>
+            <div className="zodiac-title">
+              <h2 style={{ color: zodiac.color }}>{zodiac.name}</h2>
+              <p>{zodiac.dates}</p>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-              {clothingItems.map((item) => (
-                <div key={item.id} className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition">
-                  <div className="aspect-square bg-gradient-to-br from-white/10 to-transparent relative">
-                    {item.image_url ? (
-                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <ShoppingBag className="w-10 h-10 text-white/20" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <p className="text-white text-sm font-medium truncate">{item.title || 'Без названия'}</p>
-                    <p className="text-white/40 text-xs mt-1">
-                      {item.gender === 'female' ? '👩 Женский' : item.gender === 'male' ? '👨 Мужской' : '👥 Унисекс'}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </motion.div>
+          </div>
 
-        {/* Ссылка на все знаки */}
-        <div className="text-center mt-12">
-          <Link href="/zodiac" className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition">
-            <Star size={18} />
-            Посмотреть все знаки зодиака
+          <div className="zodiac-grid-content">
+            <div className="zodiac-item">
+              <h3>
+                <span style={{ color: zodiac.color }}>✨</span> Стиль и цветотип
+              </h3>
+              <p>{zodiac.style}</p>
+              <div className="colors-list" style={{ marginTop: '12px' }}>
+                {zodiac.colors.split(', ').map((color, idx) => (
+                  <div
+                    key={idx}
+                    className="color-dot"
+                    style={{ backgroundColor: color.toLowerCase() }}
+                    title={color}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="zodiac-item">
+              <h3>
+                <span style={{ color: zodiac.color }}>🎯</span> Хобби
+              </h3>
+              <p>{zodiac.hobby}</p>
+            </div>
+
+            <div className="zodiac-item">
+              <h3>
+                <span style={{ color: zodiac.color }}>⭐</span> Интересные факты
+              </h3>
+              <p>{zodiac.fact}</p>
+            </div>
+
+            <div className="zodiac-item">
+              <h3>
+                <span style={{ color: zodiac.color }}>🔮</span> Судьба
+              </h3>
+              <p>{zodiac.fate}</p>
+            </div>
+          </div>
+
+          <Link href={`/zodiac/${zodiac.slug}`} className="details-link" style={{ color: zodiac.color }}>
+            Подробнее о знаке {zodiac.name} →
           </Link>
-        </div>
-      </div>
+        </section>
+      ))}
 
-      <footer className="text-center py-8 mt-16 border-t border-white/10">
-        <p className="text-white/30 text-xs">© 2026 StellarFit. Пусть звёзды ведут тебя ✨</p>
+      {/* Футер */}
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-logo">StellarFit</div>
+          <div className="footer-links">
+            <h4>Меню</h4>
+            <a href="/">Главная</a>
+            <a href="/zodiac">Все знаки</a>
+            <a href="/designers">Дизайнеры</a>
+          </div>
+          <div className="footer-contacts">
+            <h4>Контакты</h4>
+            <p>Email: info@stellarfit.com</p>
+            <p>Для вопросов и сотрудничества</p>
+          </div>
+        </div>
       </footer>
-    </div>
+    </>
   )
-}
-
-export default function Page() {
-  const { data: session, status } = useSession()
-  const [userZodiacSlug, setUserZodiacSlug] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
-      fetch('/api/user/zodiac')
-        .then(res => res.json())
-        .then(data => {
-          if (data.slug) setUserZodiacSlug(data.slug)
-        })
-        .catch(console.error)
-        .finally(() => setLoading(false))
-    } else if (status === 'unauthenticated') {
-      setLoading(false)
-    }
-  }, [session, status])
-
-  if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
-      </div>
-    )
-  }
-
-  // Неавторизованные видят страницу со всеми знаками
-  if (status === 'unauthenticated') {
-    return <HomePageAllSigns />
-  }
-
-  // Авторизованные, но знак не найден
-  if (!userZodiacSlug) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="text-center">
-          <p className="text-white mb-4">Не удалось определить ваш знак зодиака</p>
-          <Link href="/profile" className="text-pink-400 hover:text-pink-300">
-            Заполните дату рождения в профиле
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  // Показываем красивую страницу знака пользователя
-  return <UserZodiacPage slug={userZodiacSlug} />
 }
