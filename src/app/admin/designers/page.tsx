@@ -1,158 +1,176 @@
 'use client'
 
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Palette, Globe, ArrowRight, Loader2 } from 'lucide-react'
+import { ArrowLeft, Palette, Trash2, Plus, Edit, Eye, Image as ImageIcon, RefreshCw } from 'lucide-react'
 
 interface Designer {
   id: number
   designer_name: string
   bio: string
   designer_image: string
-  social_links: {
-    instagram?: string
-    website?: string
-  }
+  social_links: any
+  created_at: string
+  works_count?: number
 }
 
-export default function DesignersPage() {
+export default function AdminDesignersPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [designers, setDesigners] = useState<Designer[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin')
+      return
+    }
+
+    if (session?.user?.email) {
+      fetch(`/api/user/role?email=${session.user.email}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.role !== 'admin') router.push('/')
+        })
+        .catch(() => router.push('/'))
+    }
+
     fetchDesigners()
-  }, [])
+  }, [session, status, router])
 
   const fetchDesigners = async () => {
-    setLoading(true)
-    setError(null)
-    
     try {
-      const res = await fetch('/api/designers')
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`)
-      }
+      const res = await fetch('/api/admin/designers')
       const data = await res.json()
-      console.log('Получены дизайнеры:', data)
-      setDesigners(Array.isArray(data) ? data : [])
+      setDesigners(data)
     } catch (error) {
-      console.error('Error fetching designers:', error)
-      setError('Не удалось загрузить дизайнеров')
+      console.error('Error:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
-          <p className="text-white/50">Загрузка дизайнеров...</p>
-        </div>
-      </div>
-    )
+  const deleteDesigner = async (id: number) => {
+    if (confirm('Удалить дизайнера и все его работы? Это действие необратимо!')) {
+      await fetch(`/api/admin/designers?id=${id}`, { method: 'DELETE' })
+      setDesigners(designers.filter(d => d.id !== id))
+    }
   }
 
-  if (error) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="text-center">
-          <div className="text-red-400 text-xl mb-4">⚠️ {error}</div>
-          <button 
-            onClick={fetchDesigners}
-            className="px-4 py-2 bg-purple-500 rounded-lg text-white hover:bg-purple-600 transition"
-          >
-            Попробовать снова
-          </button>
-        </div>
+      <div className="flex justify-center items-center h-screen bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-      <div className="max-w-7xl mx-auto px-4 py-16">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         
-        <div className="text-center mb-16">
-          <Palette className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-          <h1 className="text-5xl font-bold text-white mb-4">Дизайнеры</h1>
-          <p className="text-purple-300 text-lg max-w-2xl mx-auto">
-            Великие кутюрье, чьи творения вдохновляют стиль знаков зодиака
-          </p>
+        {/* Заголовок с кнопкой добавления */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Link href="/admin" className="text-gray-400 hover:text-white">
+              <ArrowLeft size={24} />
+            </Link>
+            <h1 className="text-3xl font-bold text-white">Дизайнеры</h1>
+            <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">
+              {designers.length}
+            </span>
+          </div>
+          
+          {/* КНОПКА ДОБАВЛЕНИЯ ДИЗАЙНЕРА */}
+          <Link
+            href="/admin/designers/new"
+            className="flex items-center gap-2 px-4 py-2 bg-purple-500 rounded-xl text-white hover:bg-purple-600 transition"
+          >
+            <Plus size={18} />
+            Добавить дизайнера
+          </Link>
         </div>
 
+        {/* Кнопка обновления */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={fetchDesigners}
+            className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
+            title="Обновить"
+          >
+            <RefreshCw size={16} className="text-white/60" />
+          </button>
+        </div>
+
+        {/* Список дизайнеров */}
         {designers.length === 0 ? (
           <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
             <Palette className="w-20 h-20 text-purple-500 mx-auto mb-4 opacity-50" />
-            <p className="text-2xl text-purple-300">Дизайнеры скоро появятся</p>
-            <p className="text-purple-400 mt-2">Добавьте дизайнеров через админ-панель</p>
-            <Link href="/admin/designers" className="inline-block mt-6 px-6 py-2 bg-purple-500 rounded-full text-white hover:bg-purple-600 transition">
-              Добавить дизайнера
+            <p className="text-xl text-purple-300">Дизайнеров пока нет</p>
+            <Link
+              href="/admin/designers/new"
+              className="inline-block mt-4 px-4 py-2 bg-purple-500 rounded-xl text-white hover:bg-purple-600 transition"
+            >
+              Добавить первого дизайнера
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {designers.map((designer) => (
-              <div
-                key={designer.id}
-                className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition-all duration-300 hover:scale-105"
-              >
-                <div className="aspect-square bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center relative overflow-hidden">
+              <div key={designer.id} className="bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/30 transition group">
+                <div className="aspect-square bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center relative">
                   {designer.designer_image ? (
-                    <img 
-                      src={designer.designer_image} 
-                      alt={designer.designer_name} 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        console.error('Image failed to load:', designer.designer_image)
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
+                    <img src={designer.designer_image} alt={designer.designer_name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="text-center">
-                      <Palette className="w-24 h-24 text-purple-400 opacity-50 mx-auto" />
-                      <p className="text-purple-300 mt-2 text-sm">{designer.designer_name}</p>
-                    </div>
+                    <Palette className="w-20 h-20 text-purple-400 opacity-50" />
                   )}
-                </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold text-white mb-3">{designer.designer_name}</h3>
-                  <p className="text-purple-300/80 text-sm leading-relaxed line-clamp-3 mb-4">
-                    {designer.bio}
-                  </p>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-3">
-                      {designer.social_links?.instagram && (
-                        <a 
-                          href={designer.social_links.instagram} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="p-2 rounded-full bg-pink-500/20 text-pink-400 hover:bg-pink-500/40 transition"
-                        >
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
-                          </svg>
-                        </a>
-                      )}
-                      {designer.social_links?.website && (
-                        <a 
-                          href={designer.social_links.website} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="p-2 rounded-full bg-purple-500/20 text-purple-400 hover:bg-purple-500/40 transition"
-                        >
-                          <Globe size={18} />
-                        </a>
-                      )}
-                    </div>
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-3">
+                    <Link
+                      href={`/admin/designers/${designer.id}/edit`}
+                      className="p-2 bg-purple-500 rounded-full hover:bg-purple-600 transition"
+                      title="Редактировать"
+                    >
+                      <Edit size={18} className="text-white" />
+                    </Link>
+                    <Link
+                      href={`/admin/designers/${designer.id}/works`}
+                      className="p-2 bg-blue-500 rounded-full hover:bg-blue-600 transition"
+                      title="Управление работами"
+                    >
+                      <ImageIcon size={18} className="text-white" />
+                    </Link>
                     <Link
                       href={`/designers/${designer.id}`}
-                      className="flex items-center gap-1 text-purple-400 hover:text-purple-300 transition text-sm"
+                      target="_blank"
+                      className="p-2 bg-green-500 rounded-full hover:bg-green-600 transition"
+                      title="Посмотреть на сайте"
                     >
-                      Подробнее <ArrowRight size={16} />
+                      <Eye size={18} className="text-white" />
+                    </Link>
+                    <button
+                      onClick={() => deleteDesigner(designer.id)}
+                      className="p-2 bg-red-500 rounded-full hover:bg-red-600 transition"
+                      title="Удалить"
+                    >
+                      <Trash2 size={18} className="text-white" />
+                    </button>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-white mb-2">{designer.designer_name}</h3>
+                  <p className="text-gray-400 text-sm line-clamp-2 mb-4">{designer.bio}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-purple-300 text-xs">
+                      Работ: {designer.works_count || 0}
+                    </span>
+                    <Link
+                      href={`/admin/designers/${designer.id}/works`}
+                      className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+                    >
+                      <ImageIcon size={14} />
+                      Работы
                     </Link>
                   </div>
                 </div>
