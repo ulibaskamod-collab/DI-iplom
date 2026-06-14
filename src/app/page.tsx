@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { Menu, X, Sparkles, Stars, User, LogOut, Shield, Sun, Moon } from 'lucide-react'
 import { useTheme } from '@/src/context/ThemeContext'
 
@@ -123,3 +123,4 @@ export default function Navigation() {
     </nav>
   )
 }
+

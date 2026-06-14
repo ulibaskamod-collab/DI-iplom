@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useSession } from 'next-auth/react'
@@ -569,4 +570,5 @@ const updateZodiac = async () => {
       </div>
     </div>
   )
+
 }
