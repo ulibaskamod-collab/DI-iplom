@@ -7,11 +7,12 @@ import { authOptions } from '@/src/lib/auth'
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: false }
 })
 
-// Функция определения знака по дате
 function getZodiacSign(birthDate: string): string {
+  if (!birthDate) return ''  // ← возвращаем пустую строку вместо null
+  
   const date = new Date(birthDate)
   const month = date.getMonth() + 1
   const day = date.getDate()
@@ -30,7 +31,7 @@ function getZodiacSign(birthDate: string): string {
   return 'Рыбы'
 }
 
-export async function POST(req: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
@@ -38,27 +39,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { birthDate, zodiacSign: forceSign } = await req.json()
+    // Получаем дату рождения пользователя
+    const userResult = await pool.query(
+      'SELECT birth_date FROM users WHERE email = $1',
+      [session.user.email]
+    )
     
-    let zodiacSign = forceSign
+    let birthDate = userResult.rows[0]?.birth_date
     
-    if (birthDate && !forceSign) {
-      zodiacSign = getZodiacSign(birthDate)
+    // Если нет даты рождения, устанавливаем дату по умолчанию
+    if (!birthDate) {
+      birthDate = '2000-08-09'  // 9 августа - Лев
     }
     
-    if (!zodiacSign) {
-      return NextResponse.json({ error: 'No birth date or zodiac sign provided' }, { status: 400 })
-    }
-
-    // Обновляем пользователя
+    const zodiacSign = getZodiacSign(birthDate)
+    
     const result = await pool.query(
       `UPDATE users 
-       SET zodiac_sign = $1, 
-           birth_date = COALESCE(birth_date, $2),
-           updated_at = NOW()
+       SET zodiac_sign = $1, birth_date = $2 
        WHERE email = $3
        RETURNING email, zodiac_sign, birth_date`,
-      [zodiacSign, birthDate || null, session.user.email]
+      [zodiacSign, birthDate, session.user.email]
     )
 
     return NextResponse.json({ 

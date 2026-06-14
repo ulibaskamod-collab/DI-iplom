@@ -9,7 +9,7 @@ const pool = new Pool({
 })
 
 function getZodiacSign(birthDate: string): string {
-  if (!birthDate) return null
+  if (!birthDate) return ''  // ← возвращаем пустую строку вместо null
   
   const date = new Date(birthDate)
   const month = date.getMonth() + 1
@@ -48,7 +48,7 @@ export async function GET() {
             [newSign, user.id]
           )
           updated++
-          results.push({ email: user.email, old: user.zodiac_sign, new: newSign })
+          results.push({ email: user.email, newSign })
         }
       }
     }
