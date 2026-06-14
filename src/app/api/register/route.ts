@@ -7,7 +7,6 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 })
 
-// Функция определения знака зодиака по дате рождения
 function getZodiacSign(birthDate: string): string {
   if (!birthDate) return 'Не определен'
   
@@ -34,7 +33,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { name, email, password, birthDate, gender } = body
 
-    console.log('📝 Регистрация:', { email, birthDate, gender })
+    console.log('📝 Регистрация:', { email, birthDate, gender, name })
 
     // Проверяем, существует ли пользователь
     const existingUser = await pool.query(
@@ -48,16 +47,17 @@ export async function POST(req: NextRequest) {
 
     // Хешируем пароль
     const hashedPassword = await bcrypt.hash(password, 10)
+    console.log('🔐 Пароль захэширован')
     
     // Определяем знак зодиака
     const zodiacSign = getZodiacSign(birthDate)
-    console.log('⭐ Определен знак зодиака:', zodiacSign, 'для даты:', birthDate)
+    console.log('⭐ Знак зодиака:', zodiacSign)
 
     // Создаем пользователя
     const result = await pool.query(
       `INSERT INTO users (id, name, email, password, birth_date, gender, zodiac_sign, user_role, created_at)
        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, 'user', NOW())
-       RETURNING id, name, email, zodiac_sign, birth_date`,
+       RETURNING id, name, email, zodiac_sign`,
       [name || null, email, hashedPassword, birthDate || null, gender || null, zodiacSign]
     )
 
