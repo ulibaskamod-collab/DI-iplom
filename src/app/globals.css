@@ -2,133 +2,105 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Базовые стили для всего приложения */
-:root {
-  --background: 0, 0%, 100%;
-  --foreground: 222.2, 84%, 4.9%;
+/* Темная тема (по умолчанию) */
+[data-theme="dark"] {
+  --bg-primary: linear-gradient(135deg, #0a0a1a 0%, #0d0d25 50%, #0a0a1a 100%);
+  --bg-secondary: rgba(40, 20, 60, 0.7);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --navbar-bg: rgba(0, 0, 0, 0.6);
+  --accent: #ec4899;
+  --accent-hover: #be185d;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: 222.2, 84%, 4.9%;
-    --foreground: 210, 40%, 98%;
-  }
+/* Светлая тема */
+[data-theme="light"] {
+  --bg-primary: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 50%, #f5f3ff 100%);
+  --bg-secondary: rgba(255, 255, 255, 0.9);
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --input-bg: rgba(0, 0, 0, 0.05);
+  --navbar-bg: rgba(255, 255, 255, 0.9);
+  --accent: #ec4899;
+  --accent-hover: #be185d;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  background: linear-gradient(135deg, #0a0a1a 0%, #0d0d25 50%, #0a0a1a 100%);
-  color: #ffffff;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Стили для админ-панели (светлый фон - тёмный текст) */
-.admin-page,
-.admin-page * {
-  color-scheme: light;
-}
-
-/* Общие стили для форм и карточек */
-input, textarea, select {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-}
-
-input::placeholder, textarea::placeholder {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: #ec4899;
-}
-
-/* Стили для таблиц админки */
-.admin-table {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 1rem;
-  overflow: hidden;
-}
-
-.admin-table th {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  font-weight: 600;
-  padding: 1rem;
-  text-align: left;
-}
-
-.admin-table td {
-  padding: 1rem;
-  color: rgba(255, 255, 255, 0.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.admin-table tr:hover td {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-/* Стили для кнопок */
-.btn-primary {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.75rem;
+/* Кнопка переключения темы */
+.theme-toggle {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 2rem;
+  padding: 0.5rem;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.btn-primary:hover {
-  transform: scale(1.02);
-  opacity: 0.9;
+.theme-toggle:hover {
+  transform: scale(1.05);
 }
 
-.btn-secondary {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.75rem;
-  transition: all 0.3s ease;
+/* Адаптивные контейнеры */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
-.btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+/* Адаптивная сетка */
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
 }
 
-.btn-danger {
-  background-color: rgba(239, 68, 68, 0.2);
-  color: #f87171;
-  padding: 0.5rem 1rem;
-  border-radius: 0.75rem;
-  transition: all 0.3s ease;
+@media (max-width: 768px) {
+  .grid-responsive {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  
+  .container {
+    padding: 0 1rem;
+  }
 }
 
-.btn-danger:hover {
-  background-color: rgba(239, 68, 68, 0.4);
-}
-
-/* Стили для модальных окон */
-.modal-overlay {
-  background-color: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
-}
-
-.modal-content {
-  background-color: #1f2937;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  padding: 1.5rem;
+@media (max-width: 480px) {
+  .grid-responsive {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Навигация */
 .navbar {
-  background-color: rgba(0, 0, 0, 0.6);
+  background: var(--navbar-bg);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-color);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 50;
+  transition: background 0.3s ease;
 }
 
 .nav-container {
@@ -143,7 +115,7 @@ input:focus, textarea:focus, select:focus {
 .nav-logo {
   font-size: 1.5rem;
   font-weight: bold;
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -156,16 +128,16 @@ input:focus, textarea:focus, select:focus {
 }
 
 .nav-links a {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   transition: color 0.3s ease;
 }
 
 .nav-links a:hover {
-  color: #ec4899;
+  color: var(--accent);
 }
 
 .nav-auth-btn {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
   padding: 0.5rem 1rem;
   border-radius: 2rem;
   color: white !important;
@@ -177,7 +149,7 @@ input:focus, textarea:focus, select:focus {
     top: 100%;
     left: 0;
     right: 0;
-    background-color: rgba(76, 29, 149, 0.95);
+    background: var(--navbar-bg);
     backdrop-filter: blur(12px);
     flex-direction: column;
     padding: 1rem;
@@ -194,128 +166,23 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
-/* Стили для карточек знаков зодиака */
+/* Карточки знаков зодиака */
 .zodiac-block {
-  background-color: rgba(40, 20, 60, 0.7);
-  border-radius: 15px;
-  margin: 30px auto;
-  padding: 30px;
-  width: 80%;
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  margin: 2rem auto;
+  padding: 1.5rem;
   max-width: 900px;
   display: flex;
-  align-items: flex-start;
-  gap: 30px;
-  transition: transform 0.3s;
+  gap: 1.5rem;
+  transition: transform 0.3s ease;
+  border: 1px solid var(--border-color);
 }
 
 .zodiac-block:hover {
   transform: translateY(-5px);
 }
 
-.zodiac-icon {
-  font-size: 4em;
-  text-align: center;
-  min-width: 80px;
-}
-
-.zodiac-title {
-  font-size: 2.5em;
-  margin-bottom: 5px;
-  color: #e0b0ff;
-}
-
-.zodiac-date {
-  font-size: 1.2em;
-  color: #ccc;
-  margin-bottom: 20px;
-}
-
-.zodiac-content {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-
-.zodiac-item {
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-  padding: 20px;
-}
-
-.zodiac-item h3 {
-  font-size: 1.3em;
-  margin-top: 0;
-  color: #d0b0f0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-}
-
-.zodiac-item p {
-  font-size: 0.95em;
-  line-height: 1.6;
-  color: #eee;
-}
-
-/* Стили для страницы всех знаков */
-.astroliv-page {
-  background: linear-gradient(135deg, #0a0a1a 0%, #0d0d25 50%, #0a0a1a 100%);
-  min-height: 100vh;
-}
-
-.main-title {
-  text-align: center;
-  margin-top: 50px;
-  font-size: 3em;
-  font-family: 'Georgia', serif;
-  color: #c090e0;
-}
-
-.zodiac-nav {
-  text-align: center;
-  margin-top: 30px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-}
-
-.zodiac-nav button {
-  background-color: #4a2a6a;
-  border: none;
-  padding: 12px 25px;
-  border-radius: 20px;
-  color: #d0b0f0;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.zodiac-nav button:hover {
-  background-color: #6a4a8a;
-  color: white;
-}
-
-/* Стили для футера */
-.astroliv-footer {
-  background-color: rgba(20, 10, 30, 0.9);
-  padding: 40px 0;
-  margin-top: 60px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer-content {
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-}
-
-.footer-logo {
-  font-size: 1.5em;
-  font-family: 'Brush Script MT', cursive;
-  color: #e0b0ff;
-}
-
-/* Адаптивность */
 @media (max-width: 768px) {
   .zodiac-block {
     flex-direction: column;
@@ -325,22 +192,171 @@ input:focus, textarea:focus, select:focus {
   .zodiac-icon {
     text-align: center;
   }
-  
+}
+
+.zodiac-icon {
+  font-size: 4rem;
+  text-align: center;
+  min-width: 80px;
+}
+
+.zodiac-title {
+  font-size: 2rem;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+.zodiac-date {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.zodiac-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
   .zodiac-content {
     grid-template-columns: 1fr;
   }
-  
-  .footer-content {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 20px;
+}
+
+.zodiac-item {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+
+[data-theme="light"] .zodiac-item {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.zodiac-item h3 {
+  font-size: 1.2rem;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+/* Формы */
+input, textarea, select {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Кнопки */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  transform: scale(1.02);
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  background: var(--input-bg);
+  color: var(--text-primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: var(--border-color);
+}
+
+/* Таблицы */
+.admin-table {
+  width: 100%;
+  background: var(--card-bg);
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.admin-table th {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.admin-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admin-table tr:hover td {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .admin-table {
+    display: block;
+    overflow-x: auto;
   }
-  
-  .zodiac-nav button {
-    padding: 8px 16px;
-    font-size: 12px;
+}
+
+/* Модальные окна */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-content {
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  max-width: 90%;
+  width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@media (max-width: 640px) {
+  .modal-content {
+    width: 95%;
+    padding: 1rem;
   }
+}
+
+/* Футер */
+.footer {
+  background: var(--navbar-bg);
+  border-top: 1px solid var(--border-color);
+  padding: 2rem 0;
+  margin-top: 4rem;
 }
 
 /* Анимация звёзд */
@@ -356,10 +372,14 @@ input:focus, textarea:focus, select:focus {
 
 .star {
   position: absolute;
-  background-color: white;
+  background: white;
   border-radius: 50%;
   opacity: 0.5;
   animation: twinkle 2s infinite ease-in-out;
+}
+
+[data-theme="light"] .star {
+  background: #1f2937;
 }
 
 @keyframes twinkle {
