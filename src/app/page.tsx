@@ -1,12 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
-
-const zodiacButtons = [
-  'Овен', 'Телец', 'Близнецы', 'Рак', 'Лев', 'Дева',
-  'Весы', 'Скорпион', 'Стрелец', 'Козерог', 'Водолей', 'Рыбы'
-]
+import { useState } from 'react'
 
 const zodiacSlugs: Record<string, string> = {
   'Овен': 'oven',
@@ -33,31 +28,20 @@ const zodiacBlocks = [
     facts: 'У Овнов высокий уровень энергии, они очень смелые. Он любит получать то, что хочет.',
     fate: 'Овен - первопроходец. Он всегда борется за свое место, но иногда не понимает, что добившись своего, теряет интерес.'
   },
-  // ... остальные знаки
+  {
+    name: 'Телец',
+    dates: '20 апреля - 20 мая',
+    icon: '♉',
+    style: 'Сдержанный, элегантный. Цвета: зеленый, голубой, серый, нежно-розовый.',
+    hobbies: 'Кулинария, садоводство, искусство (живопись, музыка), коллекционирование, отдых на природе.',
+    facts: 'Тельцы - очень приземленные и практичные люди. Любят комфорт и стабильность. Они очень терпеливы.',
+    fate: 'Судьба Тельца - это стремление к материальному благополучию и наслаждению жизнью.'
+  },
+  // ... добавьте остальные 10 знаков по аналогии
 ]
 
 export default function HomePage() {
   const [activeZodiac, setActiveZodiac] = useState<string | null>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveZodiac(entry.target.id)
-          }
-        })
-      },
-      { threshold: 0.3 }
-    )
-
-    zodiacBlocks.forEach((zodiac) => {
-      const element = document.getElementById(`zodiac-${zodiac.name}`)
-      if (element) observer.observe(element)
-    })
-
-    return () => observer.disconnect()
-  }, [])
 
   const scrollToZodiac = (name: string) => {
     const element = document.getElementById(`zodiac-${name}`)
@@ -72,12 +56,8 @@ export default function HomePage() {
         <div className="container">
           <h1 className="main-title">Астрология души и нарядов</h1>
           <div className="zodiac-nav">
-            {zodiacButtons.map((name) => (
-              <button
-                key={name}
-                onClick={() => scrollToZodiac(name)}
-                className="zodiac-nav-btn"
-              >
+            {Object.keys(zodiacSlugs).map((name) => (
+              <button key={name} onClick={() => scrollToZodiac(name)}>
                 {name}
               </button>
             ))}
@@ -89,52 +69,54 @@ export default function HomePage() {
         <section
           key={zodiac.name}
           id={`zodiac-${zodiac.name}`}
-          className="zodiac-block"
+          className={`zodiac-block ${zodiac.name.toLowerCase()}`}
         >
-          <div className="zodiac-header">
-            <div className="zodiac-symbol">{zodiac.icon}</div>
-            <div className="zodiac-title">
-              <h2>{zodiac.name}</h2>
-              <p>{zodiac.dates}</p>
-            </div>
+          <div className="zodiac-icon">
+            <span className="zodiac-symbol">{zodiac.icon}</span>
           </div>
-          <div className="zodiac-grid-content">
-            <div className="zodiac-item">
-              <h3>✨ Стиль и цветотип</h3>
-              <p>{zodiac.style}</p>
+          <div className="zodiac-info">
+            <h2 className="zodiac-title">{zodiac.name}</h2>
+            <p className="zodiac-date">{zodiac.dates}</p>
+            <div className="zodiac-content">
+              <div className="zodiac-item">
+                <h3>Стиль и цветотип</h3>
+                <p>{zodiac.style}</p>
+              </div>
+              <div className="zodiac-item">
+                <h3>Хобби</h3>
+                <p>{zodiac.hobbies}</p>
+              </div>
+              <div className="zodiac-item">
+                <h3>Интересные факты</h3>
+                <p>{zodiac.facts}</p>
+              </div>
+              <div className="zodiac-item">
+                <h3>Судьба</h3>
+                <p>{zodiac.fate}</p>
+              </div>
             </div>
-            <div className="zodiac-item">
-              <h3>🎯 Хобби</h3>
-              <p>{zodiac.hobbies}</p>
-            </div>
-            <div className="zodiac-item">
-              <h3>⭐ Интересные факты</h3>
-              <p>{zodiac.facts}</p>
-            </div>
-            <div className="zodiac-item">
-              <h3>🔮 Судьба</h3>
-              <p>{zodiac.fate}</p>
-            </div>
+            <Link href={`/zodiac/${zodiacSlugs[zodiac.name]}`} className="details-link">
+              Подробнее →
+            </Link>
           </div>
-          <Link href={`/zodiac/${zodiacSlugs[zodiac.name]}`} className="details-link">
-            Подробнее →
-          </Link>
         </section>
       ))}
 
-      <footer className="footer">
-        <div className="footer-content">
-          <div className="footer-logo">StellarFit</div>
-          <div className="footer-links">
-            <h4>Меню</h4>
-            <Link href="/">Главная</Link>
-            <Link href="/zodiac">Все знаки</Link>
-            <Link href="/designers">Дизайнеры</Link>
-          </div>
-          <div className="footer-contacts">
-            <h4>Контакты</h4>
-            <p>Email: info@stellarfit.com</p>
-            <p>Для вопросов и сотрудничества</p>
+      <footer className="astroliv-footer">
+        <div className="container">
+          <div className="footer-content">
+            <div className="footer-logo">StellarFit</div>
+            <div className="footer-links">
+              <h4>Меню</h4>
+              <ul>
+                <li><Link href="/">Главная</Link></li>
+                <li><Link href="/designers">Дизайнеры</Link></li>
+              </ul>
+            </div>
+            <div className="footer-address">
+              <p>Email: rotaralena661@gmail.com</p>
+              <p>Тел: +7 (962) 4949-35-05</p>
+            </div>
           </div>
         </div>
       </footer>

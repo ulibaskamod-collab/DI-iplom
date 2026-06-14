@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Star, Sparkles, Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { Sparkles, Mail, Lock, Eye, EyeOff, Star } from 'lucide-react'
 
 export default function SignInPage() {
   const router = useRouter()
@@ -35,99 +35,88 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FFF5F0] to-[#FFE8E0] dark:from-[#0a0a1a] dark:to-[#0d0d25] py-12 px-4">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] dark:from-[#FF1493] dark:to-[#FF69B4] rounded-2xl mb-4">
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl mb-4">
             <Sparkles className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">StellarFit</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">Войдите в свой аккаунт</p>
+          <h1 className="auth-title">StellarFit</h1>
+          <p className="auth-subtitle">Войдите в свой аккаунт</p>
         </div>
 
-        <div className="bg-white dark:bg-[#141428] rounded-3xl shadow-xl p-8">
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1a35] rounded-xl focus:outline-none focus:border-[#FF6B6B] dark:focus:border-[#FF1493] transition text-gray-800 dark:text-white"
-                  placeholder="your@email.com"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-2">
-                Пароль
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1a1a35] rounded-xl focus:outline-none focus:border-[#FF6B6B] dark:focus:border-[#FF1493] transition text-gray-800 dark:text-white"
-                  placeholder="••••••••"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5 text-gray-400" />
-                  ) : (
-                    <Eye className="w-5 h-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-[#FF6B6B] to-[#FF8E8E] dark:from-[#FF1493] dark:to-[#FF69B4] text-white font-semibold rounded-xl hover:from-[#FF5252] hover:to-[#FF7575] dark:hover:from-[#FF1493]/80 dark:hover:to-[#FF69B4]/80 transition shadow-md disabled:opacity-50"
-            >
-              {loading ? 'Вход...' : 'Войти'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
-              Нет аккаунта?{' '}
-              <Link href="/auth/register" className="text-[#FF6B6B] dark:text-[#FF69B4] font-medium hover:underline">
-                Зарегистрироваться
-              </Link>
-            </p>
+        {error && (
+          <div className="mb-6 p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 text-sm text-center">
+            {error}
           </div>
-        </div>
+        )}
 
-        <div className="text-center mt-8">
-          <div className="flex justify-center gap-2">
-            <Star className="w-4 h-4 text-[#FFB347] fill-[#FFB347]" />
-            <Star className="w-4 h-4 text-[#FFB347] fill-[#FFB347]" />
-            <Star className="w-4 h-4 text-[#FFB347] fill-[#FFB347]" />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-purple-300 text-sm mb-2">Email</label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="auth-input pl-10"
+                placeholder="your@email.com"
+                required
+              />
+            </div>
           </div>
-          <p className="text-gray-400 dark:text-gray-500 text-xs mt-3">
-            Пусть звёзды ведут тебя ✨
+
+          <div>
+            <label className="block text-purple-300 text-sm mb-2">Пароль</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="auth-input pl-10 pr-10"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5 text-purple-400" />
+                ) : (
+                  <Eye className="w-5 h-5 text-purple-400" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="auth-btn mt-6"
+          >
+            {loading ? 'Вход...' : 'Войти'}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-purple-300 text-sm">
+            Нет аккаунта?{' '}
+            <Link href="/auth/register" className="auth-link">
+              Зарегистрироваться
+            </Link>
           </p>
+        </div>
+
+        <div className="mt-8 flex justify-center gap-1">
+          <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+          <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+          <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
         </div>
       </div>
     </div>
   )
-} 
+}

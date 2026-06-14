@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { ThemeProvider } from '@/src/context/ThemeContext'
 import Navigation from '@/src/components/Navigation'
 import './globals.css'
 
@@ -16,12 +15,10 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body>
-        <ThemeProvider>
-          <Navigation />
-          <main className="pt-16">
-            {children}
-          </main>
-        </ThemeProvider>
+        <Navigation />
+        <main className="pt-16">
+          {children}
+        </main>
       </body>
     </html>
   )
