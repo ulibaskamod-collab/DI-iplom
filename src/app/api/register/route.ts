@@ -7,7 +7,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 })
 
-// Функция определения знака зодиака
+// Функция определения знака зодиака по дате рождения
 function getZodiacSign(birthDate: string): string {
   if (!birthDate) return 'Не определен'
   
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { name, email, password, birthDate, gender } = body
 
-    console.log('Регистрация:', { email, birthDate, gender })
+    console.log('📝 Регистрация:', { email, birthDate, gender })
 
     // Проверяем, существует ли пользователь
     const existingUser = await pool.query(
@@ -51,17 +51,17 @@ export async function POST(req: NextRequest) {
     
     // Определяем знак зодиака
     const zodiacSign = getZodiacSign(birthDate)
-    console.log('Определен знак зодиака:', zodiacSign)
+    console.log('⭐ Определен знак зодиака:', zodiacSign, 'для даты:', birthDate)
 
     // Создаем пользователя
     const result = await pool.query(
       `INSERT INTO users (id, name, email, password, birth_date, gender, zodiac_sign, user_role, created_at)
        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, 'user', NOW())
-       RETURNING id, name, email, zodiac_sign`,
+       RETURNING id, name, email, zodiac_sign, birth_date`,
       [name || null, email, hashedPassword, birthDate || null, gender || null, zodiacSign]
     )
 
-    console.log('Пользователь создан:', result.rows[0])
+    console.log('✅ Пользователь создан:', result.rows[0])
 
     return NextResponse.json({ 
       success: true, 
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       zodiac_sign: zodiacSign
     }, { status: 201 })
   } catch (error) {
-    console.error('Ошибка регистрации:', error)
+    console.error('❌ Ошибка регистрации:', error)
     return NextResponse.json({ error: 'Ошибка сервера' }, { status: 500 })
   }
 }

@@ -143,7 +143,17 @@ export default function ProfilePage() {
     setLoading(false)
   }
 }
-
+const updateZodiac = async () => {
+  const res = await fetch('/api/user/update-zodiac', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ birthDate: editForm.birthDate })
+  })
+  const data = await res.json()
+  if (data.success) {
+    console.log('Знак обновлен:', data.zodiac_sign)
+  }
+}
   const removeFavorite = async (itemId: number) => {
     try {
       const res = await fetch(`/api/user/favorites?clothingItemId=${itemId}`, {
