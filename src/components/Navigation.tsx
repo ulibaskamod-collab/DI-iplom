@@ -3,13 +3,16 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { Menu, X, Sparkles, Stars, User, LogOut, Shield } from 'lucide-react'
+import { Menu, X, Sparkles, Stars, User, LogOut, Shield, Sun, Moon } from 'lucide-react'
+import { useTheme } from '@/src/context/ThemeContext'
 
 export default function Navigation() {
   const { data: session, status } = useSession()
   const [isOpen, setIsOpen] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
+  const { theme, toggleTheme } = useTheme()
 
+  // Проверяем, является ли пользователь администратором
   useEffect(() => {
     if (session?.user?.email) {
       fetch(`/api/user/role?email=${session.user.email}`)
@@ -68,8 +71,28 @@ export default function Navigation() {
             Дизайнеры
           </Link>
 
+          {/* Кнопка переключения темы */}
+          <button 
+            onClick={toggleTheme} 
+            className="p-2 rounded-full hover:bg-white/10 transition flex items-center gap-2"
+            aria-label="Переключить тему"
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun size={18} className="text-yellow-400" />
+                <span className="text-sm hidden md:inline">Светлая тема</span>
+              </>
+            ) : (
+              <>
+                <Moon size={18} className="text-purple-400" />
+                <span className="text-sm hidden md:inline">Тёмная тема</span>
+              </>
+            )}
+          </button>
+
           {status === 'authenticated' ? (
             <>
+              {/* Ссылка на админ-панель (только для администраторов) */}
               {isAdmin && (
                 <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-1 text-pink-400 hover:text-pink-300">
                   <Shield size={16} className="inline mr-1" />
