@@ -9,11 +9,10 @@ const pool = new Pool({
 
 function getZodiacSign(birthDate: string): string {
   if (!birthDate) return 'Не определен'
-  
   const date = new Date(birthDate)
   const month = date.getMonth() + 1
   const day = date.getDate()
-  
+
   if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return 'Овен'
   if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return 'Телец'
   if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return 'Близнецы'
@@ -30,30 +29,16 @@ function getZodiacSign(birthDate: string): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const { name, email, password, birthDate, gender } = body
+    const { name, email, password, birthDate, gender } = await req.json()
 
-    console.log('📝 Регистрация:', { email, birthDate, gender, name })
-
-    // Проверяем, существует ли пользователь
-    const existingUser = await pool.query(
-      'SELECT id FROM users WHERE email = $1',
-      [email]
-    )
-
+    const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email])
     if (existingUser.rows.length > 0) {
       return NextResponse.json({ error: 'Пользователь с таким email уже существует' }, { status: 400 })
     }
 
-    // Хешируем пароль
     const hashedPassword = await bcrypt.hash(password, 10)
-    console.log('🔐 Пароль захэширован')
-    
-    // Определяем знак зодиака
     const zodiacSign = getZodiacSign(birthDate)
-    console.log('⭐ Знак зодиака:', zodiacSign)
 
-    // Создаем пользователя
     const result = await pool.query(
       `INSERT INTO users (id, name, email, password, birth_date, gender, zodiac_sign, user_role, created_at)
        VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, 'user', NOW())
@@ -61,15 +46,8 @@ export async function POST(req: NextRequest) {
       [name || null, email, hashedPassword, birthDate || null, gender || null, zodiacSign]
     )
 
-    console.log('✅ Пользователь создан:', result.rows[0])
-
-    return NextResponse.json({ 
-      success: true, 
-      userId: result.rows[0].id,
-      zodiac_sign: zodiacSign
-    }, { status: 201 })
+    return NextResponse.json({ success: true, userId: result.rows[0].id }, { status: 201 })
   } catch (error) {
-    console.error('❌ Ошибка регистрации:', error)
     return NextResponse.json({ error: 'Ошибка сервера' }, { status: 500 })
   }
 }

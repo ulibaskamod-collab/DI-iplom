@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { Menu, X, Sparkles, Stars, User, LogOut, Shield } from 'lucide-react'
+import { Menu, X, Sparkles, Stars, User, Heart, LogOut, Shield } from 'lucide-react'
 
 export default function Navigation() {
   const { data: session, status } = useSession()
@@ -14,7 +14,9 @@ export default function Navigation() {
     if (session?.user?.email) {
       fetch(`/api/user/role?email=${session.user.email}`)
         .then(res => res.json())
-        .then(data => setIsAdmin(data.role === 'admin'))
+        .then(data => {
+          setIsAdmin(data.role === 'admin')
+        })
         .catch(() => setIsAdmin(false))
     }
   }, [session])
@@ -51,21 +53,46 @@ export default function Navigation() {
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        <div className={`nav-links ${isOpen ? 'open' : ''}`}>
-          <Link href="/" onClick={() => setIsOpen(false)}>Главная</Link>
-          <Link href="/zodiac" onClick={() => setIsOpen(false)}>Все знаки</Link>
-          <Link href="/designers" onClick={() => setIsOpen(false)}>Дизайнеры</Link>
+        <div className={`nav-links ${isOpen ? 'max-md:flex max-md:flex-col max-md:absolute max-md:top-full max-md:left-0 max-md:right-0 max-md:bg-purple-900/95 max-md:p-4 max-md:gap-3' : 'max-md:hidden'}`}>
+          <Link href="/" onClick={() => setIsOpen(false)}>
+            <Sparkles size={16} className="inline mr-1" />
+            Главная
+          </Link>
+          
+          <Link href="/zodiac" onClick={() => setIsOpen(false)}>
+            <Stars size={16} className="inline mr-1" />
+            Все знаки
+          </Link>
+          
+          <Link href="/designers" onClick={() => setIsOpen(false)}>
+            Дизайнеры
+          </Link>
 
           {status === 'authenticated' ? (
             <>
-              {isAdmin && <Link href="/admin" onClick={() => setIsOpen(false)}>Админ панель</Link>}
-              <Link href="/profile" onClick={() => setIsOpen(false)}>Профиль</Link>
-              <button onClick={() => signOut()} className="nav-auth-btn">Выйти</button>
+              {isAdmin && (
+                <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-1 text-pink-400 hover:text-pink-300">
+                  <Shield size={16} className="inline mr-1" />
+                  Админ панель
+                </Link>
+              )}
+              <Link href="/profile" onClick={() => setIsOpen(false)}>
+                <User size={16} className="inline mr-1" />
+                Профиль
+              </Link>
+              <button onClick={() => signOut()} className="nav-auth-btn flex items-center gap-1">
+                <LogOut size={16} />
+                Выйти
+              </button>
             </>
           ) : (
             <>
-              <Link href="/auth/signin" className="nav-auth-btn">Войти</Link>
-              <Link href="/auth/register" className="text-purple-300 hover:text-pink-400">Регистрация</Link>
+              <Link href="/auth/signin" className="nav-auth-btn" onClick={() => setIsOpen(false)}>
+                Войти
+              </Link>
+              <Link href="/auth/register" className="text-purple-300 hover:text-pink-400" onClick={() => setIsOpen(false)}>
+                Регистрация
+              </Link>
             </>
           )}
         </div>
