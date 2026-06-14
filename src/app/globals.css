@@ -4,20 +4,54 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== СВЕТЛАЯ ТЕМА (по умолчанию) ===== */
 :root {
-  /* Светлая весенняя тема */
   --bg-primary: #FFF9F7;
   --bg-secondary: #FFFFFF;
   --bg-card: #FFFFFF;
   --bg-card-hover: #FFF5F2;
+  --bg-gradient-start: #FFF9F7;
+  --bg-gradient-end: #FFEFE8;
   
   --text-primary: #2D2D2D;
   --text-secondary: #5A5A5A;
   --text-muted: #8A8A8A;
+  --text-light: #B0B0B0;
+  
+  --accent-primary: #FF6B6B;
+  --accent-secondary: #FF8E8E;
   
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  
+  --border-color: #FFE0D4;
+  --navbar-bg: rgba(255, 249, 247, 0.95);
+}
+
+/* ===== ТЁМНАЯ ТЕМА ===== */
+.dark {
+  --bg-primary: #0a0a1a;
+  --bg-secondary: #0d0d25;
+  --bg-card: #141428;
+  --bg-card-hover: #1a1a35;
+  --bg-gradient-start: #0a0a1a;
+  --bg-gradient-end: #0d0d25;
+  
+  --text-primary: #f0f0f0;
+  --text-secondary: #c0c0c0;
+  --text-muted: #8888aa;
+  --text-light: #666688;
+  
+  --accent-primary: #FF1493;
+  --accent-secondary: #FF69B4;
+  
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  
+  --border-color: rgba(255,20,147,0.2);
+  --navbar-bg: rgba(10, 7, 16, 0.9);
 }
 
 * {
@@ -31,25 +65,47 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3, .font-playfair {
   font-family: 'Playfair Display', serif;
 }
 
-/* Цвета знаков зодиака */
-.zodiac-aries { --zodiac-color: #FF4500; --zodiac-bg: linear-gradient(135deg, #FFF0ED, #FFE4DE); }
-.zodiac-taurus { --zodiac-color: #2ECC71; --zodiac-bg: linear-gradient(135deg, #EDFFF4, #DEFFE8); }
-.zodiac-gemini { --zodiac-color: #FFD700; --zodiac-bg: linear-gradient(135deg, #FFFCE8, #FFF4CC); }
-.zodiac-cancer { --zodiac-color: #6C5CE7; --zodiac-bg: linear-gradient(135deg, #F0EEFF, #E6E2FF); }
-.zodiac-leo { --zodiac-color: #FF8C00; --zodiac-bg: linear-gradient(135deg, #FFF3E8, #FFE8CC); }
-.zodiac-virgo { --zodiac-color: #20B2AA; --zodiac-bg: linear-gradient(135deg, #E8FFF8, #CCFFEE); }
-.zodiac-libra { --zodiac-color: #FF69B4; --zodiac-bg: linear-gradient(135deg, #FFF0F8, #FFE4F0); }
-.zodiac-scorpio { --zodiac-color: #8B0000; --zodiac-bg: linear-gradient(135deg, #FFE8E8, #FFD4D4); }
-.zodiac-sagittarius { --zodiac-color: #9B59B6; --zodiac-bg: linear-gradient(135deg, #F5E8FF, #E8D4FF); }
-.zodiac-capricorn { --zodiac-color: #2C3E50; --zodiac-bg: linear-gradient(135deg, #E8EDF0, #D4DEE8); }
-.zodiac-aquarius { --zodiac-color: #00CED1; --zodiac-bg: linear-gradient(135deg, #E8FFFF, #CCFFFF); }
-.zodiac-pisces { --zodiac-color: #48D1CC; --zodiac-bg: linear-gradient(135deg, #E8FFFF, #CCFFF8); }
+/* Звёздный фон */
+.stars-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  background-color: #ffffff;
+  border-radius: 50%;
+  animation: twinkle 3s infinite alternate ease-in-out;
+  opacity: 0;
+}
+
+:root .star {
+  background-color: #FFB7C5;
+  box-shadow: 0 0 8px rgba(255, 143, 163, 0.5);
+}
+
+.dark .star {
+  background-color: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 200, 0.8);
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.2; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1.2); }
+}
 
 /* Навигация */
 .navbar {
@@ -58,9 +114,9 @@ h1, h2, h3, .font-playfair {
   left: 0;
   right: 0;
   z-index: 100;
-  background: rgba(255, 249, 247, 0.95);
+  background: var(--navbar-bg);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  border-bottom: 1px solid var(--border-color);
   padding: 1rem 2rem;
 }
 
@@ -76,7 +132,7 @@ h1, h2, h3, .font-playfair {
   font-family: 'Playfair Display', serif;
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -90,18 +146,18 @@ h1, h2, h3, .font-playfair {
 }
 
 .nav-links a {
-  color: #5A5A5A;
+  color: var(--text-secondary);
   text-decoration: none;
   transition: color 0.3s;
   font-weight: 500;
 }
 
 .nav-links a:hover {
-  color: #FF6B6B;
+  color: var(--accent-primary);
 }
 
 .nav-auth-btn {
-  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   padding: 0.5rem 1.2rem;
   border-radius: 40px;
   color: white !important;
@@ -113,7 +169,7 @@ h1, h2, h3, .font-playfair {
   border: none;
   font-size: 1.8rem;
   cursor: pointer;
-  color: #2D2D2D;
+  color: var(--text-primary);
 }
 
 /* Hero секция */
@@ -123,14 +179,14 @@ h1, h2, h3, .font-playfair {
   align-items: center;
   justify-content: center;
   text-align: center;
-  background: linear-gradient(135deg, #FFF5F0, #FFE8E0);
+  background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
   position: relative;
   padding-top: 80px;
 }
 
 .hero h1 {
   font-size: 5rem;
-  background: linear-gradient(135deg, #FF6B6B, #FFB347, #FF6B6B);
+  background: linear-gradient(135deg, var(--accent-primary), #FFB347, var(--accent-primary));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -139,7 +195,7 @@ h1, h2, h3, .font-playfair {
 
 .hero p {
   font-size: 1.3rem;
-  color: #5A5A5A;
+  color: var(--text-secondary);
   margin-bottom: 2rem;
 }
 
@@ -153,36 +209,36 @@ h1, h2, h3, .font-playfair {
 }
 
 .zodiac-nav-btn {
-  background: white;
-  border: 2px solid #FFD4C8;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
   border-radius: 40px;
   padding: 12px 24px;
   font-weight: 600;
-  color: #5A5A5A;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.3s;
 }
 
 .zodiac-nav-btn:hover {
   transform: translateY(-2px);
-  border-color: #FF6B6B;
+  border-color: var(--accent-primary);
   box-shadow: 0 4px 12px rgba(255,107,107,0.2);
 }
 
 /* Блок знака */
 .zodiac-block {
-  background: white;
+  background: var(--bg-card);
   border-radius: 32px;
   margin: 40px auto;
   padding: 40px;
   max-width: 1100px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-md);
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .zodiac-block:hover {
   transform: translateY(-5px);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.12);
+  box-shadow: var(--shadow-lg);
 }
 
 .zodiac-header {
@@ -191,12 +247,11 @@ h1, h2, h3, .font-playfair {
   gap: 30px;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #FFE0D4;
+  border-bottom: 2px solid var(--border-color);
 }
 
 .zodiac-symbol {
   font-size: 80px;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
 }
 
 .zodiac-title h2 {
@@ -207,7 +262,7 @@ h1, h2, h3, .font-playfair {
 
 .zodiac-title p {
   font-size: 18px;
-  color: #8A8A8A;
+  color: var(--text-muted);
   margin: 5px 0 0;
 }
 
@@ -218,14 +273,14 @@ h1, h2, h3, .font-playfair {
 }
 
 .zodiac-item {
-  background: #FFF9F7;
+  background: var(--bg-primary);
   border-radius: 24px;
   padding: 20px;
   transition: all 0.3s;
 }
 
 .zodiac-item:hover {
-  background: #FFF0EA;
+  background: var(--bg-card-hover);
   transform: translateY(-3px);
 }
 
@@ -239,14 +294,14 @@ h1, h2, h3, .font-playfair {
 }
 
 .zodiac-item p {
-  color: #5A5A5A;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
 .details-link {
   display: inline-block;
   margin-top: 24px;
-  color: #FF6B6B;
+  color: var(--accent-primary);
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s;
@@ -254,15 +309,14 @@ h1, h2, h3, .font-playfair {
 
 .details-link:hover {
   transform: translateX(5px);
-  color: #FF8E8E;
 }
 
 /* Футер */
 .footer {
   text-align: center;
   padding: 40px;
-  background: white;
-  border-top: 1px solid #FFE0D4;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-color);
   margin-top: 60px;
 }
 
@@ -279,7 +333,7 @@ h1, h2, h3, .font-playfair {
   font-family: 'Playfair Display', serif;
   font-size: 24px;
   font-weight: 700;
-  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -289,192 +343,39 @@ h1, h2, h3, .font-playfair {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 12px;
-  color: #2D2D2D;
+  color: var(--text-primary);
 }
 
 .footer-links a {
   display: block;
-  color: #8A8A8A;
+  color: var(--text-muted);
   text-decoration: none;
   margin-bottom: 8px;
   transition: color 0.3s;
 }
 
 .footer-links a:hover {
-  color: #FF6B6B;
+  color: var(--accent-primary);
 }
 
 .footer-contacts p {
-  color: #8A8A8A;
+  color: var(--text-muted);
   margin-bottom: 8px;
 }
 
-/* Страница всех знаков */
-.all-signs-header {
-  background: linear-gradient(135deg, #FFF5F0, #FFE8E0);
-  padding: 120px 20px 60px;
-  text-align: center;
-}
-
-.all-signs-header h1 {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
-.all-signs-header p {
-  color: #5A5A5A;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.zodiac-grid-page {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 30px;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-
-.zodiac-card-link {
-  text-decoration: none;
-}
-
-.zodiac-card {
-  background: white;
-  border-radius: 28px;
-  padding: 30px;
-  text-align: center;
-  transition: all 0.3s;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  border: 1px solid #FFE0D4;
-}
-
-.zodiac-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 16px 40px rgba(0,0,0,0.12);
-  border-color: #FF6B6B;
-}
-
-.zodiac-card-symbol {
-  font-size: 64px;
-  margin-bottom: 16px;
-}
-
-.zodiac-card-name {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: #2D2D2D;
-}
-
-.zodiac-card-dates {
-  color: #8A8A8A;
-  font-size: 14px;
-  margin-bottom: 16px;
-}
-
-.zodiac-card-desc {
-  color: #5A5A5A;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-/* Страница отдельного знака */
-.sign-page {
-  padding-top: 80px;
-}
-
-.sign-hero {
-  padding: 60px 20px;
-  text-align: center;
-  border-radius: 0 0 48px 48px;
-}
-
-.sign-hero-symbol {
-  font-size: 100px;
-  margin-bottom: 16px;
-}
-
-.sign-hero h1 {
-  font-size: 56px;
-  margin-bottom: 8px;
-  color: white;
-}
-
-.sign-hero-dates {
-  font-size: 18px;
-  opacity: 0.9;
-}
-
-.sign-container {
-  max-width: 1000px;
-  margin: -40px auto 0;
-  padding: 0 20px 60px;
-  position: relative;
-  z-index: 2;
-}
-
-.sign-details-card {
-  background: white;
-  border-radius: 40px;
-  padding: 40px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-}
-
-.sign-section {
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #FFE0D4;
-}
-
-.sign-section:last-child {
-  border-bottom: none;
-}
-
-.sign-section h2 {
-  font-size: 24px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.sign-section p {
-  color: #5A5A5A;
-  line-height: 1.6;
-}
-
-.colors-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.color-dot {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.keywords {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.keyword {
-  background: #FFF0EA;
-  padding: 6px 16px;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #FF6B6B;
-}
+/* Цвета для знаков (остаются в светлой и тёмной теме) */
+[data-zodiac="aries"] { --zodiac-color: #FF4500; }
+[data-zodiac="taurus"] { --zodiac-color: #2ECC71; }
+[data-zodiac="gemini"] { --zodiac-color: #FFD700; }
+[data-zodiac="cancer"] { --zodiac-color: #6C5CE7; }
+[data-zodiac="leo"] { --zodiac-color: #FF8C00; }
+[data-zodiac="virgo"] { --zodiac-color: #20B2AA; }
+[data-zodiac="libra"] { --zodiac-color: #FF69B4; }
+[data-zodiac="scorpio"] { --zodiac-color: #8B0000; }
+[data-zodiac="sagittarius"] { --zodiac-color: #9B59B6; }
+[data-zodiac="capricorn"] { --zodiac-color: #2C3E50; }
+[data-zodiac="aquarius"] { --zodiac-color: #00CED1; }
+[data-zodiac="pisces"] { --zodiac-color: #48D1CC; }
 
 /* Адаптивность */
 @media (max-width: 768px) {
@@ -488,11 +389,11 @@ h1, h2, h3, .font-playfair {
     top: 100%;
     left: 0;
     right: 0;
-    background: white;
+    background: var(--bg-card);
     flex-direction: column;
     padding: 1rem;
     gap: 1rem;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-md);
   }
   
   .nav-links.open {
@@ -533,23 +434,6 @@ h1, h2, h3, .font-playfair {
   .zodiac-grid-content {
     grid-template-columns: 1fr;
     gap: 16px;
-  }
-  
-  .zodiac-grid-page {
-    grid-template-columns: 1fr;
-    padding: 20px;
-  }
-  
-  .sign-hero h1 {
-    font-size: 36px;
-  }
-  
-  .sign-hero-symbol {
-    font-size: 70px;
-  }
-  
-  .sign-details-card {
-    padding: 24px;
   }
   
   .footer-content {

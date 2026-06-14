@@ -3,26 +3,28 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { Menu, X, Sparkles, User, LogOut, Star } from 'lucide-react'
+import { Menu, X, Sparkles, User, LogOut, Star, Sun, Moon } from 'lucide-react'
+import { useTheme } from '@/src/context/ThemeContext'
 
 export default function Navigation() {
   const { data: session, status } = useSession()
   const [isOpen, setIsOpen] = useState(false)
+  const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
     const createStars = () => {
       const starsContainer = document.getElementById('starsCanvas')
       if (!starsContainer) return
       starsContainer.innerHTML = ''
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 150; i++) {
         const star = document.createElement('div')
         star.classList.add('star')
-        star.style.width = Math.random() * 2 + 1 + 'px'
+        star.style.width = Math.random() * 3 + 1 + 'px'
         star.style.height = star.style.width
         star.style.left = Math.random() * 100 + '%'
         star.style.top = Math.random() * 100 + '%'
         star.style.animationDelay = Math.random() * 5 + 's'
-        star.style.animationDuration = Math.random() * 2 + 1.5 + 's'
+        star.style.animationDuration = Math.random() * 3 + 2 + 's'
         starsContainer.appendChild(star)
       }
     }
@@ -35,7 +37,7 @@ export default function Navigation() {
       <nav className="navbar">
         <div className="nav-container">
           <Link href="/" className="nav-logo flex items-center gap-2" onClick={() => setIsOpen(false)}>
-            <Sparkles className="w-5 h-5" style={{ color: '#FF6B6B' }} />
+            <Sparkles className="w-5 h-5" />
             StellarFit
           </Link>
 
@@ -58,6 +60,24 @@ export default function Navigation() {
               Дизайнеры
             </Link>
 
+            {/* Кнопка переключения темы */}
+            <button 
+              onClick={toggleTheme} 
+              className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-white/10 transition"
+            >
+              {theme === 'light' ? (
+                <>
+                  <Moon size={18} />
+                  <span>Тёмная тема</span>
+                </>
+              ) : (
+                <>
+                  <Sun size={18} />
+                  <span>Светлая тема</span>
+                </>
+              )}
+            </button>
+
             {status === 'authenticated' ? (
               <>
                 <Link href="/profile" onClick={() => setIsOpen(false)}>
@@ -74,7 +94,7 @@ export default function Navigation() {
                 <Link href="/auth/signin" className="nav-auth-btn" onClick={() => setIsOpen(false)}>
                   Войти
                 </Link>
-                <Link href="/auth/register" className="text-gray-500 hover:text-[#FF6B6B]" onClick={() => setIsOpen(false)}>
+                <Link href="/auth/register" onClick={() => setIsOpen(false)}>
                   Регистрация
                 </Link>
               </>

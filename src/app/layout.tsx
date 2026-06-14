@@ -1,15 +1,11 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import Navigation from '../components/Navigation'
-import { Providers } from './providers'
 import { ThemeProvider } from '@/src/context/ThemeContext'
-import './globals.css'  // ← ЭТОТ ИМПОРТ ОБЯЗАТЕЛЕН!
-
-const inter = Inter({ subsets: ['latin', 'cyrillic'] })
+import Navigation from '@/src/components/Navigation'
+import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'StellarFit | Звёздный стиль',
-  description: 'Персонализированные рекомендации по стилю на основе знака зодиака',
+  title: 'StellarFit - Астрология стиля',
+  description: 'Подбери свой идеальный образ по знаку зодиака',
 }
 
 export default function RootLayout({
@@ -19,13 +15,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <body className={inter.className}>
+      <body>
         <ThemeProvider>
-          <div className="stars-container" id="starsCanvas" />
-          <Providers>
-            <Navigation />
-            <main className="pt-20">{children}</main>
-          </Providers>
+          <Navigation />
+          <main className="pt-16">
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>
