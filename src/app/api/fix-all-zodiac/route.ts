@@ -8,8 +8,8 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 })
 
-function getZodiacSign(birthDate: string): string {
-  if (!birthDate) return ''  // ← возвращаем пустую строку вместо null
+function getZodiacSign(birthDate: string): string | null {
+  if (!birthDate) return null
   
   const date = new Date(birthDate)
   const month = date.getMonth() + 1
@@ -31,7 +31,6 @@ function getZodiacSign(birthDate: string): string {
 
 export async function GET() {
   try {
-    // Получаем всех пользователей
     const users = await pool.query(
       'SELECT id, email, birth_date, zodiac_sign FROM users'
     )

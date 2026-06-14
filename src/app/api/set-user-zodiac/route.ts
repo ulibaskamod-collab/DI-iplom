@@ -10,8 +10,8 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 })
 
-function getZodiacSign(birthDate: string): string {
-  if (!birthDate) return ''  // ← возвращаем пустую строку вместо null
+function getZodiacSign(birthDate: string): string | null {
+  if (!birthDate) return null
   
   const date = new Date(birthDate)
   const month = date.getMonth() + 1
@@ -39,27 +39,16 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Получаем дату рождения пользователя
-    const userResult = await pool.query(
-      'SELECT birth_date FROM users WHERE email = $1',
-      [session.user.email]
-    )
-    
-    let birthDate = userResult.rows[0]?.birth_date
-    
-    // Если нет даты рождения, устанавливаем дату по умолчанию
-    if (!birthDate) {
-      birthDate = '2000-08-09'  // 9 августа - Лев
-    }
-    
-    const zodiacSign = getZodiacSign(birthDate)
+    // Устанавливаем дату и знак по умолчанию
+    const defaultBirthDate = '2000-08-09'
+    const zodiacSign = getZodiacSign(defaultBirthDate)
     
     const result = await pool.query(
       `UPDATE users 
        SET zodiac_sign = $1, birth_date = $2 
        WHERE email = $3
        RETURNING email, zodiac_sign, birth_date`,
-      [zodiacSign, birthDate, session.user.email]
+      [zodiacSign, defaultBirthDate, session.user.email]
     )
 
     return NextResponse.json({ 
