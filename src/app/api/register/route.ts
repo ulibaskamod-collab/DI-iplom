@@ -1,85 +1,75 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
+import bcrypt from 'bcryptjs'
 
-// Создаём пул подключений прямо в файле, используя переменную окружения
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 })
 
-export async function POST(req: NextRequest) {
-  console.log('=== API /api/register ===')
+// Функция определения знака зодиака
+function getZodiacSign(birthDate: string): string {
+  if (!birthDate) return 'Не определен'
   
+  const date = new Date(birthDate)
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  
+  if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return 'Овен'
+  if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return 'Телец'
+  if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return 'Близнецы'
+  if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return 'Рак'
+  if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return 'Лев'
+  if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return 'Дева'
+  if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return 'Весы'
+  if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return 'Скорпион'
+  if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return 'Стрелец'
+  if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return 'Козерог'
+  if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return 'Водолей'
+  return 'Рыбы'
+}
+
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { name, email, password, birthDate, gender } = body
 
-    console.log('Данные:', { name, email, birthDate, gender })
+    console.log('Регистрация:', { email, birthDate, gender })
 
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email и пароль обязательны' },
-        { status: 400 }
-      )
-    }
-
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: 'Пароль должен быть минимум 8 символов' },
-        { status: 400 }
-      )
-    }
-
+    // Проверяем, существует ли пользователь
     const existingUser = await pool.query(
       'SELECT id FROM users WHERE email = $1',
       [email]
     )
 
     if (existingUser.rows.length > 0) {
-      return NextResponse.json(
-        { error: 'Пользователь с таким email уже существует' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Пользователь с таким email уже существует' }, { status: 400 })
     }
 
-    function getZodiacSign(birthDateStr: string) {
-      if (!birthDateStr) return null
-      const date = new Date(birthDateStr)
-      const month = date.getMonth() + 1
-      const day = date.getDate()
-      
-      if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return 'Овен'
-      if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return 'Телец'
-      if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return 'Близнецы'
-      if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return 'Рак'
-      if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return 'Лев'
-      if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return 'Дева'
-      if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return 'Весы'
-      if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return 'Скорпион'
-      if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return 'Стрелец'
-      if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return 'Козерог'
-      if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return 'Водолей'
-      return 'Рыбы'
-    }
+    // Хешируем пароль
+    const hashedPassword = await bcrypt.hash(password, 10)
+    
+    // Определяем знак зодиака
+    const zodiacSign = getZodiacSign(birthDate)
+    console.log('Определен знак зодиака:', zodiacSign)
 
+    // Создаем пользователя
     const result = await pool.query(
-      `INSERT INTO users (id, name, email, password, birth_date, gender, zodiac_sign, user_role) 
-       VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, 'user') 
-       RETURNING id, name, email`,
-      [name || null, email, password, birthDate || null, gender || null, getZodiacSign(birthDate)]
+      `INSERT INTO users (id, name, email, password, birth_date, gender, zodiac_sign, user_role, created_at)
+       VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, 'user', NOW())
+       RETURNING id, name, email, zodiac_sign`,
+      [name || null, email, hashedPassword, birthDate || null, gender || null, zodiacSign]
     )
 
-    const user = result.rows[0]
-    console.log('Пользователь создан:', user.id)
+    console.log('Пользователь создан:', result.rows[0])
 
-    return NextResponse.json(
-      { success: true, userId: user.id },
-      { status: 201 }
-    )
-  } catch (error: any) {
-    console.error('Ошибка:', error)
-    return NextResponse.json(
-      { error: error.message || 'Ошибка сервера' },
-      { status: 500 }
-    )
+    return NextResponse.json({ 
+      success: true, 
+      userId: result.rows[0].id,
+      zodiac_sign: zodiacSign
+    }, { status: 201 })
+  } catch (error) {
+    console.error('Ошибка регистрации:', error)
+    return NextResponse.json({ error: 'Ошибка сервера' }, { status: 500 })
   }
 }

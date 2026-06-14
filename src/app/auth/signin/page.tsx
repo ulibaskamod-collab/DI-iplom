@@ -27,9 +27,11 @@ export default function SignInPage() {
       setError('Неверный email или пароль')
       setLoading(false)
     } else {
-      // Просто редирект на главную
-      router.push('/')
+      // Обновляем сессию и редиректим
       router.refresh()
+      setTimeout(() => {
+        router.push('/')
+      }, 100)
     }
   }
 

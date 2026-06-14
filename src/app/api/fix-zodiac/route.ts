@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { Pool } from 'pg'
 import { authOptions } from '@/src/lib/auth'
@@ -14,7 +14,6 @@ function getZodiacSign(birthDate: string): string {
   const date = new Date(birthDate)
   const month = date.getMonth() + 1
   const day = date.getDate()
-  
   if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return 'Овен'
   if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return 'Телец'
   if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return 'Близнецы'
@@ -29,7 +28,7 @@ function getZodiacSign(birthDate: string): string {
   return 'Рыбы'
 }
 
-export async function POST(req: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
@@ -37,23 +36,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await req.json()
-    const { birthDate } = body
-
-    if (!birthDate) {
-      return NextResponse.json({ error: 'Birth date required' }, { status: 400 })
-    }
-
-    const zodiacSign = getZodiacSign(birthDate)
-    
-    await pool.query(
-      'UPDATE users SET zodiac_sign = $1, birth_date = $2 WHERE email = $3',
-      [zodiacSign, birthDate, session.user.email]
+    // Получаем дату рождения пользователя
+    const result = await pool.query(
+      'SELECT birth_date FROM users WHERE email = $1',
+      [session.user.email]
     )
 
-    return NextResponse.json({ success: true, zodiac_sign: zodiacSign })
+    const user = result.rows[0]
+    
+    if (!user || !user.birth_date) {
+      return NextResponse.json({ error: 'Birth date not found' }, { status: 404 })
+    }
+
+    const zodiacSign = getZodiacSign(user.birth_date)
+    
+    // Обновляем знак
+    await pool.query(
+      'UPDATE users SET zodiac_sign = $1 WHERE email = $2',
+      [zodiacSign, session.user.email]
+    )
+
+    return NextResponse.json({ 
+      success: true, 
+      zodiac_sign: zodiacSign,
+      birth_date: user.birth_date
+    })
   } catch (error) {
-    console.error('Error updating zodiac:', error)
+    console.error('Error:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
