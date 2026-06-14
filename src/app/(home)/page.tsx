@@ -147,65 +147,62 @@ export default function HomePage() {
   }
 
   return (
-    <div className="astroliv-page">
-      <section className="hero">
-        <div className="container">
-          <h1 className="main-title">Астрология души и нарядов</h1>
-          <div className="zodiac-nav">
-            {zodiacButtons.map((name) => (
-              <button
-                key={name}
-                onClick={() => {
-                  const element = document.getElementById(`zodiac-${name}`)
-                  if (element) element.scrollIntoView({ behavior: 'smooth' })
-                }}
-              >
-                {name}
-              </button>
-            ))}
-          </div>
+    <div className="astroliv-page pt-20">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="main-title">Астрология души и нарядов</h1>
+        
+        <div className="zodiac-nav">
+          {zodiacButtons.map((name) => (
+            <button
+              key={name}
+              onClick={() => {
+                const element = document.getElementById(`zodiac-${name}`)
+                if (element) element.scrollIntoView({ behavior: 'smooth' })
+              }}
+            >
+              {name}
+            </button>
+          ))}
         </div>
-      </section>
 
-      {zodiacBlocks.map((zodiac) => (
-        <section
-          key={zodiac.name}
-          id={`zodiac-${zodiac.name}`}
-          className={`zodiac-block ${getZodiacClass(zodiac.name)}`}
-        >
-          <div className="zodiac-icon">
-            <span className="zodiac-symbol">{zodiac.icon}</span>
-          </div>
-          <div className="zodiac-info">
-            <h2 className="zodiac-title">{zodiac.name}</h2>
-            <p className="zodiac-date">{zodiac.dates}</p>
-            <div className="zodiac-content">
-              <div className="zodiac-item">
-                <h3>Стиль и цветотип</h3>
-                <p>{zodiac.style}</p>
-              </div>
-              <div className="zodiac-item">
-                <h3>Хобби</h3>
-                <p>{zodiac.hobbies}</p>
-              </div>
-              <div className="zodiac-item">
-                <h3>Интересные факты</h3>
-                <p>{zodiac.facts}</p>
-              </div>
-              <div className="zodiac-item">
-                <h3>Судьба</h3>
-                <p>{zodiac.fate}</p>
-              </div>
+        {zodiacBlocks.map((zodiac) => (
+          <div
+            key={zodiac.name}
+            id={`zodiac-${zodiac.name}`}
+            className={`zodiac-block ${getZodiacClass(zodiac.name)}`}
+          >
+            <div className="zodiac-icon">
+              <span className="zodiac-symbol">{zodiac.icon}</span>
             </div>
-            <Link href={`/zodiac/${zodiacSlugs[zodiac.name]}`} className="details-link">
-              Подробнее →
-            </Link>
+            <div className="zodiac-info">
+              <h2 className="zodiac-title">{zodiac.name}</h2>
+              <p className="zodiac-date">{zodiac.dates}</p>
+              <div className="zodiac-content">
+                <div className="zodiac-item">
+                  <h3>Стиль и цветотип</h3>
+                  <p>{zodiac.style}</p>
+                </div>
+                <div className="zodiac-item">
+                  <h3>Хобби</h3>
+                  <p>{zodiac.hobbies}</p>
+                </div>
+                <div className="zodiac-item">
+                  <h3>Интересные факты</h3>
+                  <p>{zodiac.facts}</p>
+                </div>
+                <div className="zodiac-item">
+                  <h3>Судьба</h3>
+                  <p>{zodiac.fate}</p>
+                </div>
+              </div>
+              <Link href={`/zodiac/${zodiacSlugs[zodiac.name]}`} className="details-link">
+                Подробнее →
+              </Link>
+            </div>
           </div>
-        </section>
-      ))}
+        ))}
 
-      <footer className="astroliv-footer">
-        <div className="container">
+        <footer className="astroliv-footer">
           <div className="footer-content">
             <div className="footer-logo">StellarFit</div>
             <div className="footer-links">
@@ -221,187 +218,11 @@ export default function HomePage() {
               <p><a href="tel:+79629493596">+7 (962) 4949-35-05</a></p>
             </div>
           </div>
-        </div>
-      </footer>
-
-      <style jsx>{`
-        .astroliv-page {
-          font-family: 'Arial', sans-serif;
-          margin: 0;
-          padding: 0;
-          background: linear-gradient(135deg, #0a0a1a 0%, #0d0d25 50%, #0a0a1a 100%);
-          color: #ffffff;
-          min-height: 100vh;
-        }
-        .container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        .main-title {
-          text-align: center;
-          margin-top: 50px;
-          font-size: 3em;
-          font-family: 'Georgia', serif;
-          color: #c090e0;
-        }
-        .zodiac-nav {
-          text-align: center;
-          margin-top: 30px;
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 10px;
-        }
-        .zodiac-nav button {
-          background-color: #4a2a6a;
-          border: none;
-          padding: 12px 25px;
-          border-radius: 20px;
-          color: #d0b0f0;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-        .zodiac-nav button:hover {
-          background-color: #6a4a8a;
-          color: white;
-        }
-        .zodiac-block {
-          background-color: rgba(40, 20, 60, 0.7);
-          border-radius: 15px;
-          margin: 30px auto;
-          padding: 30px;
-          width: 80%;
-          max-width: 900px;
-          display: flex;
-          align-items: flex-start;
-          gap: 30px;
-          transition: transform 0.3s;
-        }
-        .zodiac-block:hover {
-          transform: translateY(-5px);
-        }
-        .aries { background-color: rgba(70, 30, 40, 0.7); }
-        .taurus { background-color: rgba(30, 70, 40, 0.7); }
-        .gemini { background-color: rgba(30, 70, 40, 0.7); }
-        .cancer { background-color: rgba(40, 40, 60, 0.7); }
-        .leo { background-color: rgba(70, 50, 30, 0.7); }
-        .virgo { background-color: rgba(40, 60, 50, 0.7); }
-        .libra { background-color: rgba(70, 50, 80, 0.7); }
-        .scorpio { background-color: rgba(70, 20, 50, 0.7); }
-        .sagittarius { background-color: rgba(70, 40, 30, 0.7); }
-        .capricorn { background-color: rgba(30, 40, 60, 0.7); }
-        .aquarius { background-color: rgba(30, 50, 70, 0.7); }
-        .pisces { background-color: rgba(40, 70, 60, 0.7); }
-        .zodiac-icon {
-          font-size: 4em;
-          text-align: center;
-          min-width: 80px;
-        }
-        .zodiac-symbol {
-          filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
-        }
-        .zodiac-info {
-          flex: 1;
-        }
-        .zodiac-title {
-          font-size: 2.5em;
-          margin-bottom: 5px;
-          color: #e0b0ff;
-        }
-        .zodiac-date {
-          font-size: 1.2em;
-          color: #ccc;
-          margin-bottom: 20px;
-        }
-        .zodiac-content {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 20px;
-        }
-        .zodiac-item {
-          background-color: rgba(0, 0, 0, 0.3);
-          border-radius: 10px;
-          padding: 20px;
-        }
-        .zodiac-item h3 {
-          font-size: 1.3em;
-          margin-top: 0;
-          color: #d0b0f0;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-          padding-bottom: 10px;
-          margin-bottom: 15px;
-        }
-        .zodiac-item p {
-          font-size: 0.95em;
-          line-height: 1.6;
-          color: #eee;
-        }
-        .details-link {
-          display: inline-block;
-          margin-top: 20px;
-          color: #e0b0ff;
-          text-decoration: none;
-          transition: color 0.3s;
-        }
-        .details-link:hover {
-          color: white;
-          text-decoration: underline;
-        }
-        .astroliv-footer {
-          background-color: rgba(20, 10, 30, 0.9);
-          padding: 40px 0;
-          margin-top: 60px;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .footer-content {
-          display: flex;
-          justify-content: space-around;
-          flex-wrap: wrap;
-        }
-        .footer-logo {
-          font-size: 1.5em;
-          font-family: 'Brush Script MT', cursive;
-          color: #e0b0ff;
-        }
-        .footer-links ul, .footer-address ul {
-          list-style: none;
-          padding: 0;
-        }
-        .footer-links a, .footer-address a {
-          color: #ccc;
-          text-decoration: none;
-        }
-        .footer-links a:hover, .footer-address a:hover {
-          color: #e0b0ff;
-        }
-        .footer-links h4, .footer-address h4 {
-          color: #e0b0ff;
-          margin-bottom: 10px;
-        }
-        @media (max-width: 768px) {
-          .zodiac-block {
-            flex-direction: column;
-            width: 95%;
-          }
-          .zodiac-icon {
-            text-align: center;
-          }
-          .zodiac-content {
-            grid-template-columns: 1fr;
-          }
-          .footer-content {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 20px;
-          }
-          .zodiac-nav button {
-            padding: 8px 16px;
-            font-size: 12px;
-          }
-        }
-      `}</style>
+          <div className="text-center text-white/30 text-xs mt-8">
+            © 2026 StellarFit. Пусть звёзды ведут тебя ✨
+          </div>
+        </footer>
+      </div>
     </div>
   )
 }

@@ -717,3 +717,89 @@ label {
 [data-theme="light"] .from-teal-900\/40 {
   opacity: 0.3;
 }
+/* ============================================
+   СТРАНИЦА ДИЗАЙНЕРОВ (адаптация)
+   ============================================ */
+
+/* Карточки дизайнеров */
+.group {
+  transition: all 0.3s ease;
+}
+
+[data-theme="light"] .group {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="light"] .group:hover {
+  background: rgba(236, 72, 153, 0.08);
+  border-color: var(--accent);
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+  .grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+    gap: 1rem;
+  }
+  
+  .group .p-6 {
+    padding: 1rem;
+  }
+  
+  .group h3 {
+    font-size: 1.25rem;
+  }
+  
+  .group p {
+    font-size: 0.8rem;
+  }
+}
+
+/* Адаптация для страницы профиля */
+@media (max-width: 640px) {
+  .bg-gradient-to-r.from-pink-500\/20 {
+    padding: 1rem;
+  }
+  
+  .w-28.h-28 {
+    width: 4rem;
+    height: 4rem;
+  }
+  
+  .text-4xl.font-bold {
+    font-size: 1.25rem;
+  }
+  
+  .flex.flex-col.md\:flex-row {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .md\:text-left {
+    text-align: center;
+  }
+  
+  .justify-center.md\:justify-start {
+    justify-content: center;
+  }
+}
+
+/* Адаптация для таблиц админки */
+@media (max-width: 768px) {
+  .admin-table th,
+  .admin-table td {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Адаптация для форм */
+@media (max-width: 640px) {
+  input, textarea, select {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  button {
+    padding: 0.5rem 1rem;
+  }
+}
