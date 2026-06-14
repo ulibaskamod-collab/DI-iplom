@@ -42,64 +42,61 @@ export default function Navigation() {
   }, [])
 
   return (
-    <>
-      <div id="starsCanvas" className="stars-container" />
-      <nav className="navbar">
-        <div className="nav-container">
-          <Link href="/" className="nav-logo flex items-center gap-2" onClick={() => setIsOpen(false)}>
-            <Sparkles className="w-5 h-5 text-pink-400" />
-            StellarFit
+    <nav className="navbar">
+      <div className="nav-container">
+        <Link href="/" className="nav-logo flex items-center gap-2" onClick={() => setIsOpen(false)}>
+          <Sparkles className="w-5 h-5 text-pink-400" />
+          StellarFit
+        </Link>
+
+        <button className="menu-btn max-md:block hidden" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        <div className={`nav-links ${isOpen ? 'max-md:flex max-md:flex-col max-md:absolute max-md:top-full max-md:left-0 max-md:right-0 max-md:bg-purple-900/95 max-md:p-4 max-md:gap-3' : 'max-md:hidden'}`}>
+          <Link href="/" onClick={() => setIsOpen(false)}>
+            <Sparkles size={16} className="inline mr-1" />
+            Главная
+          </Link>
+          
+          <Link href="/zodiac" onClick={() => setIsOpen(false)}>
+            <Stars size={16} className="inline mr-1" />
+            Все знаки
+          </Link>
+          
+          <Link href="/designers" onClick={() => setIsOpen(false)}>
+            Дизайнеры
           </Link>
 
-          <button className="menu-btn max-md:block hidden" onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-
-          <div className={`nav-links ${isOpen ? 'max-md:flex max-md:flex-col max-md:absolute max-md:top-full max-md:left-0 max-md:right-0 max-md:bg-purple-900/95 max-md:p-4 max-md:gap-3' : 'max-md:hidden'}`}>
-            <Link href="/" onClick={() => setIsOpen(false)}>
-              <Sparkles size={16} className="inline mr-1" />
-              Главная
-            </Link>
-            
-            <Link href="/zodiac" onClick={() => setIsOpen(false)}>
-              <Stars size={16} className="inline mr-1" />
-              Все знаки
-            </Link>
-            
-            <Link href="/designers" onClick={() => setIsOpen(false)}>
-              Дизайнеры
-            </Link>
-
-            {status === 'authenticated' ? (
-              <>
-                {isAdmin && (
-                  <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-1 text-pink-400 hover:text-pink-300">
-                    <Shield size={16} className="inline mr-1" />
-                    Админ панель
-                  </Link>
-                )}
-                <Link href="/profile" onClick={() => setIsOpen(false)}>
-                  <User size={16} className="inline mr-1" />
-                  Профиль
+          {status === 'authenticated' ? (
+            <>
+              {isAdmin && (
+                <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-1 text-pink-400 hover:text-pink-300">
+                  <Shield size={16} className="inline mr-1" />
+                  Админ панель
                 </Link>
-                <button onClick={() => signOut()} className="nav-auth-btn flex items-center gap-1">
-                  <LogOut size={16} />
-                  Выйти
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/auth/signin" className="nav-auth-btn" onClick={() => setIsOpen(false)}>
-                  Войти
-                </Link>
-                <Link href="/auth/register" className="text-purple-300 hover:text-pink-400" onClick={() => setIsOpen(false)}>
-                  Регистрация
-                </Link>
-              </>
-            )}
-          </div>
+              )}
+              <Link href="/profile" onClick={() => setIsOpen(false)}>
+                <User size={16} className="inline mr-1" />
+                Профиль
+              </Link>
+              <button onClick={() => signOut()} className="nav-auth-btn flex items-center gap-1">
+                <LogOut size={16} />
+                Выйти
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/auth/signin" className="nav-auth-btn" onClick={() => setIsOpen(false)}>
+                Войти
+              </Link>
+              <Link href="/auth/register" className="text-purple-300 hover:text-pink-400" onClick={() => setIsOpen(false)}>
+                Регистрация
+              </Link>
+            </>
+          )}
         </div>
-      </nav>
-    </>
+      </div>
+    </nav>
   )
 }
