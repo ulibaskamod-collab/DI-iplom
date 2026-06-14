@@ -3,11 +3,24 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { Menu, X, Sparkles, Stars, User, Heart, LogOut } from 'lucide-react'
+import { Menu, X, Sparkles, Stars, User, LogOut, Shield } from 'lucide-react'
 
 export default function Navigation() {
   const { data: session, status } = useSession()
   const [isOpen, setIsOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  // Проверяем, является ли пользователь администратором
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetch(`/api/user/role?email=${session.user.email}`)
+        .then(res => res.json())
+        .then(data => {
+          setIsAdmin(data.role === 'admin')
+        })
+        .catch(() => setIsAdmin(false))
+    }
+  }, [session])
 
   useEffect(() => {
     const createStars = () => {
@@ -58,10 +71,13 @@ export default function Navigation() {
 
           {status === 'authenticated' ? (
             <>
-              <Link href="/favorites" onClick={() => setIsOpen(false)}>
-                <Heart size={16} className="inline mr-1" />
-                Избранное
-              </Link>
+              {/* Ссылка на админ-панель (только для администраторов) */}
+              {isAdmin && (
+                <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-1 text-pink-400 hover:text-pink-300">
+                  <Shield size={16} className="inline mr-1" />
+                  Админ панель
+                </Link>
+              )}
               <Link href="/profile" onClick={() => setIsOpen(false)}>
                 <User size={16} className="inline mr-1" />
                 Профиль
