@@ -2,39 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Переменные для тем */
+/* ============================================
+   ПЕРЕМЕННЫЕ ДЛЯ ТЕМ
+   ============================================ */
+
+/* СВЕТЛАЯ ТЕМА (розово-лавандовая) - ПО УМОЛЧАНИЮ */
 :root {
-  /* Светлая тема (по умолчанию) */
-  --bg-primary: linear-gradient(135deg, #fef2f2 0%, #f3e8ff 50%, #fce7f3 100%);
-  --bg-secondary: rgba(255, 255, 255, 0.85);
-  --card-bg: rgba(255, 255, 255, 0.9);
-  --text-primary: #1f2937;
-  --text-secondary: #4b5563;
-  --text-muted: #9ca3af;
+  /* Основные цвета фона */
+  --bg-primary: linear-gradient(135deg, #fdf2f8 0%, #f3e8ff 50%, #fce7f3 100%);
+  --bg-secondary: rgba(255, 245, 250, 0.92);
+  --card-bg: rgba(255, 255, 255, 0.95);
+  
+  /* Цвета текста */
+  --text-primary: #1e1b2b;
+  --text-secondary: #4a4458;
+  --text-muted: #8b85a0;
+  
+  /* Цвета границ и элементов */
   --border-color: rgba(0, 0, 0, 0.08);
-  --input-bg: rgba(0, 0, 0, 0.03);
-  --navbar-bg: rgba(255, 255, 255, 0.95);
+  --input-bg: rgba(255, 255, 255, 0.95);
+  --navbar-bg: rgba(255, 248, 252, 0.95);
+  
+  /* Акцентные цвета (розовый) */
   --accent: #ec4899;
-  --accent-hover: #be185d;
+  --accent-hover: #db2777;
   --accent-light: #fdf2f8;
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --accent-gradient: linear-gradient(135deg, #ec4899, #c084fc);
+  
+  /* Тени */
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
 }
 
+/* ТЁМНАЯ ТЕМА */
 [data-theme="dark"] {
   --bg-primary: linear-gradient(135deg, #0a0a1a 0%, #0d0d25 50%, #0a0a1a 100%);
-  --bg-secondary: rgba(40, 20, 60, 0.7);
-  --card-bg: rgba(255, 255, 255, 0.05);
+  --bg-secondary: rgba(40, 20, 60, 0.85);
+  --card-bg: rgba(255, 255, 255, 0.08);
+  
   --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --text-muted: rgba(255, 255, 255, 0.4);
+  --text-secondary: rgba(255, 255, 255, 0.75);
+  --text-muted: rgba(255, 255, 255, 0.45);
+  
   --border-color: rgba(255, 255, 255, 0.1);
   --input-bg: rgba(255, 255, 255, 0.1);
-  --navbar-bg: rgba(0, 0, 0, 0.6);
-  --accent: #ec4899;
-  --accent-hover: #f472b6;
+  --navbar-bg: rgba(0, 0, 0, 0.75);
+  
+  --accent: #f472b6;
+  --accent-hover: #ec4899;
   --accent-light: rgba(236, 72, 153, 0.2);
-  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --accent-gradient: linear-gradient(135deg, #ec4899, #a855f7);
+  
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
+
+/* ============================================
+   БАЗОВЫЕ СТИЛИ
+   ============================================ */
 
 * {
   margin: 0;
@@ -67,7 +92,10 @@ body {
   }
 }
 
-/* Навигация */
+/* ============================================
+   НАВИГАЦИЯ
+   ============================================ */
+
 .navbar {
   background: var(--navbar-bg);
   backdrop-filter: blur(12px);
@@ -77,7 +105,7 @@ body {
   left: 0;
   right: 0;
   z-index: 50;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .nav-container {
@@ -87,15 +115,17 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 }
 
 .nav-logo {
   font-size: 1.5rem;
   font-weight: bold;
-  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  white-space: nowrap;
 }
 
 .nav-links {
@@ -109,7 +139,8 @@ body {
   color: var(--text-secondary);
   transition: color 0.3s ease;
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .nav-links a:hover {
@@ -117,21 +148,40 @@ body {
 }
 
 .nav-auth-btn {
-  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  background: var(--accent-gradient);
   padding: 0.5rem 1.25rem;
   border-radius: 2rem;
   color: white !important;
   font-weight: 500;
 }
 
+/* Мобильное меню */
+.menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+@media (max-width: 1024px) {
+  .nav-links {
+    gap: 1rem;
+  }
+  
+  .nav-links a {
+    font-size: 0.85rem;
+  }
+}
+
 @media (max-width: 768px) {
-  .nav-container {
-    padding: 0.75rem 1rem;
+  .menu-btn {
+    display: block;
   }
   
   .nav-links {
-    position: absolute;
-    top: 100%;
+    position: fixed;
+    top: 60px;
     left: 0;
     right: 0;
     background: var(--navbar-bg);
@@ -141,25 +191,35 @@ body {
     gap: 0.75rem;
     display: none;
     border-bottom: 1px solid var(--border-color);
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
   }
   
   .nav-links.open {
     display: flex;
   }
   
-  .menu-btn {
-    display: block;
+  .nav-links a, .nav-links button {
+    width: 100%;
+    text-align: center;
+    padding: 0.5rem;
   }
 }
 
-/* Кнопка переключения темы */
+/* ============================================
+   КНОПКА ПЕРЕКЛЮЧЕНИЯ ТЕМЫ
+   ============================================ */
+
 .theme-toggle {
   background: var(--input-bg);
   border: 1px solid var(--border-color);
   border-radius: 2rem;
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .theme-toggle:hover {
@@ -167,7 +227,10 @@ body {
   border-color: var(--accent);
 }
 
-/* Карточки знаков зодиака */
+/* ============================================
+   КАРТОЧКИ ЗНАКОВ ЗОДИАКА
+   ============================================ */
+
 .zodiac-block {
   background: var(--bg-secondary);
   backdrop-filter: blur(8px);
@@ -184,7 +247,7 @@ body {
 
 .zodiac-block:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-lg);
 }
 
 @media (max-width: 768px) {
@@ -192,6 +255,7 @@ body {
     flex-direction: column;
     padding: 1.5rem;
     gap: 1rem;
+    margin: 1.5rem auto;
   }
 }
 
@@ -246,7 +310,7 @@ body {
 }
 
 [data-theme="dark"] .zodiac-item {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .zodiac-item h3 {
@@ -262,21 +326,25 @@ body {
   color: var(--text-secondary);
 }
 
-/* Главная страница с знаками */
+/* ============================================
+   ГЛАВНАЯ СТРАНИЦА СО ЗНАКАМИ
+   ============================================ */
+
 .astroliv-page {
   background: var(--bg-primary);
   min-height: 100vh;
+  padding-top: 80px;
 }
 
 .main-title {
   text-align: center;
   font-size: 3rem;
   font-family: 'Georgia', serif;
-  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  margin: 2rem 0;
+  margin: 1rem 0 2rem;
 }
 
 @media (max-width: 768px) {
@@ -311,7 +379,10 @@ body {
   transform: translateY(-2px);
 }
 
-/* Формы */
+/* ============================================
+   ФОРМЫ И ЭЛЕМЕНТЫ ВВОДА
+   ============================================ */
+
 input, textarea, select {
   background: var(--input-bg);
   border: 1px solid var(--border-color);
@@ -326,7 +397,7 @@ input, textarea, select {
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
 }
 
 input::placeholder, textarea::placeholder {
@@ -341,9 +412,12 @@ label {
   color: var(--text-secondary);
 }
 
-/* Кнопки */
+/* ============================================
+   КНОПКИ
+   ============================================ */
+
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  background: var(--accent-gradient);
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 0.75rem;
@@ -380,13 +454,21 @@ label {
   background: var(--border-color);
 }
 
-/* Таблицы */
+/* ============================================
+   ТАБЛИЦЫ АДМИНКИ
+   ============================================ */
+
 .admin-table {
   width: 100%;
   background: var(--card-bg);
   border-radius: 1rem;
-  overflow: hidden;
+  overflow-x: auto;
   border: 1px solid var(--border-color);
+}
+
+.admin-table table {
+  width: 100%;
+  min-width: 600px;
 }
 
 .admin-table th {
@@ -404,17 +486,24 @@ label {
 }
 
 .admin-table tr:hover td {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(0, 0, 0, 0.03);
 }
 
 @media (max-width: 768px) {
   .admin-table {
-    display: block;
-    overflow-x: auto;
+    border-radius: 0.75rem;
+  }
+  
+  .admin-table th, .admin-table td {
+    padding: 0.75rem;
+    font-size: 0.85rem;
   }
 }
 
-/* Модальные окна */
+/* ============================================
+   МОДАЛЬНЫЕ ОКНА
+   ============================================ */
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -447,7 +536,10 @@ label {
   }
 }
 
-/* Футер */
+/* ============================================
+   ФУТЕР
+   ============================================ */
+
 .astroliv-footer {
   background: var(--navbar-bg);
   border-top: 1px solid var(--border-color);
@@ -457,15 +549,24 @@ label {
 
 .footer-content {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+  }
 }
 
 .footer-logo {
   font-size: 1.5rem;
   font-family: 'Brush Script MT', cursive;
-  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -489,18 +590,13 @@ label {
 .footer-links h4, .footer-address h4 {
   color: var(--text-primary);
   margin-bottom: 0.75rem;
+  font-size: 1rem;
 }
 
-@media (max-width: 768px) {
-  .footer-content {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 1.5rem;
-  }
-}
+/* ============================================
+   АДАПТИВНАЯ СЕТКА
+   ============================================ */
 
-/* Адаптивная сетка для карточек */
 .grid-responsive {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -520,7 +616,10 @@ label {
   }
 }
 
-/* Анимация звёзд */
+/* ============================================
+   АНИМАЦИЯ ЗВЁЗД
+   ============================================ */
+
 .stars-container {
   position: fixed;
   top: 0;
@@ -533,29 +632,38 @@ label {
 
 .star {
   position: absolute;
-  background: white;
+  background: #fbb6ce;
   border-radius: 50%;
-  opacity: 0.5;
+  opacity: 0.6;
   animation: twinkle 2s infinite ease-in-out;
 }
 
 [data-theme="light"] .star {
-  background: #9ca3af;
-  opacity: 0.6;
+  background: #ec4899;
+  opacity: 0.4;
+}
+
+[data-theme="dark"] .star {
+  background: white;
+  opacity: 0.5;
 }
 
 @keyframes twinkle {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.8; }
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.2); }
 }
 
 .shooting-star {
   position: absolute;
   width: 2px;
   height: 2px;
-  background: linear-gradient(90deg, white, transparent);
+  background: linear-gradient(90deg, #fbb6ce, transparent);
   border-radius: 50%;
   animation: shoot 3s infinite linear;
+}
+
+[data-theme="light"] .shooting-star {
+  background: linear-gradient(90deg, #ec4899, transparent);
 }
 
 @keyframes shoot {
@@ -569,7 +677,10 @@ label {
   }
 }
 
-/* Утилиты */
+/* ============================================
+   УТИЛИТЫ
+   ============================================ */
+
 .text-accent {
   color: var(--accent);
 }
@@ -580,4 +691,29 @@ label {
 
 .border-accent {
   border-color: var(--accent);
+}
+
+/* Стили для карточек дизайнеров в светлой теме */
+[data-theme="light"] .group:hover {
+  background: rgba(236, 72, 153, 0.05);
+}
+
+[data-theme="light"] .bg-white/5 {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* Стили для градиентов знаков в светлой теме */
+[data-theme="light"] .from-red-900\/40,
+[data-theme="light"] .from-emerald-900\/40,
+[data-theme="light"] .from-yellow-900\/40,
+[data-theme="light"] .from-blue-900\/40,
+[data-theme="light"] .from-amber-900\/40,
+[data-theme="light"] .from-gray-900\/40,
+[data-theme="light"] .from-pink-900\/40,
+[data-theme="light"] .from-purple-900\/40,
+[data-theme="light"] .from-indigo-900\/40,
+[data-theme="light"] .from-slate-900\/40,
+[data-theme="light"] .from-cyan-900\/40,
+[data-theme="light"] .from-teal-900\/40 {
+  opacity: 0.3;
 }
