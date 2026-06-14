@@ -20,20 +20,23 @@ export default function Navigation() {
   }, [session])
 
   useEffect(() => {
-    const starsContainer = document.getElementById('starsCanvas')
-    if (!starsContainer) return
-    starsContainer.innerHTML = ''
-    for (let i = 0; i < 150; i++) {
-      const star = document.createElement('div')
-      star.classList.add('star')
-      star.style.width = Math.random() * 3 + 1 + 'px'
-      star.style.height = star.style.width
-      star.style.left = Math.random() * 100 + '%'
-      star.style.top = Math.random() * 100 + '%'
-      star.style.animationDelay = Math.random() * 5 + 's'
-      star.style.animationDuration = Math.random() * 2 + 1.5 + 's'
-      starsContainer.appendChild(star)
+    const createStars = () => {
+      const starsContainer = document.getElementById('starsCanvas')
+      if (!starsContainer) return
+      starsContainer.innerHTML = ''
+      for (let i = 0; i < 200; i++) {
+        const star = document.createElement('div')
+        star.classList.add('star')
+        star.style.width = Math.random() * 3 + 1 + 'px'
+        star.style.height = star.style.width
+        star.style.left = Math.random() * 100 + '%'
+        star.style.top = Math.random() * 100 + '%'
+        star.style.animationDelay = Math.random() * 5 + 's'
+        star.style.animationDuration = Math.random() * 2 + 1.5 + 's'
+        starsContainer.appendChild(star)
+      }
     }
+    createStars()
   }, [])
 
   return (
@@ -44,7 +47,7 @@ export default function Navigation() {
           StellarFit
         </Link>
 
-        <button className="menu-btn" onClick={() => setIsOpen(!isOpen)}>
+        <button className="menu-btn max-md:block hidden" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
