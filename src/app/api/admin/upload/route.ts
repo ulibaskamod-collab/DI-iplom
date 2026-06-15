@@ -17,13 +17,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Можно загружать только изображения' }, { status: 400 })
     }
 
-    // Просто возвращаем успех без реальной загрузки
-    // Изображение не сохраняется, просто возвращаем заглушку
-    const placeholderUrl = '/images/placeholder.jpg'
-    
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    const base64Image = `data:${file.type};base64,${buffer.toString('base64')}`
+
     return NextResponse.json({ 
       success: true, 
-      url: placeholderUrl 
+      url: base64Image 
     })
   } catch (error) {
     console.error('Upload error:', error)
