@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/src/lib/auth';
 import HomePageAllSigns from './(home)/page';
-import UserZodiacPage from '@/components/UserZodiacPage';
+import UserZodiacPage from '../components/UserZodiacPage';
 
 // Функция для получения slug знака по его названию
 function getSlugByZodiacName(zodiacName: string): string | null {
