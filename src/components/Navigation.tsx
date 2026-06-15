@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { Menu, X, Sparkles, Stars, User, Heart, LogOut, Shield } from 'lucide-react'
+import { Menu, X, Sparkles, Stars, User, LogOut, Shield } from 'lucide-react'
 
 export default function Navigation() {
   const { data: session, status } = useSession()
   const [isOpen, setIsOpen] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
 
+  // Проверяем, является ли пользователь администратором
   useEffect(() => {
     if (session?.user?.email) {
       fetch(`/api/user/role?email=${session.user.email}`)
@@ -70,6 +71,7 @@ export default function Navigation() {
 
           {status === 'authenticated' ? (
             <>
+              {/* Ссылка на админ-панель (только для администраторов) */}
               {isAdmin && (
                 <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-1 text-pink-400 hover:text-pink-300">
                   <Shield size={16} className="inline mr-1" />

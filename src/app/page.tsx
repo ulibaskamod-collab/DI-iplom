@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import { Heart, Sparkles, Star, ShoppingBag } from 'lucide-react'
 import HomePageAllSigns from './(home)/page'
 
-// Полные данные для всех знаков
+// Полные данные для всех знаков (как на странице /zodiac/[slug])
 const zodiacFullData: Record<string, any> = {
   oven: {
     name: 'Овен', symbol: '♈', element: 'Огонь', planet: 'Марс',
@@ -25,7 +25,7 @@ const zodiacFullData: Record<string, any> = {
     dates: '20 апреля – 20 мая', accentColor: '#2ECC71', heroImage: '🌿',
     title: 'Стиль Тельца: Природная элегантность',
     description: 'Чувственность, стойкость, любовь к роскоши. Телец — знак земной силы и красоты.',
-    styleDesc: 'Натуральные ткани, мягкие силуэты, теплые земляные оттенки.',
+    styleDesc: 'Натуральные ткани, мягкие силуэты, теплые земляные оттенки. Кашемир, шёлк, хлопок.',
     styleKeywords: ['Роскошь', 'Комфорт', 'Элегантность', 'Натуральность'],
     colors: ['#8B7355', '#D2B48C', '#556B2F', '#FFB6C1', '#F5DEB3'],
     colorNames: ['Коричневый', 'Бежевый', 'Оливковый', 'Пудровый', 'Кремовый'],
@@ -35,8 +35,8 @@ const zodiacFullData: Record<string, any> = {
     name: 'Близнецы', symbol: '♊', element: 'Воздух', planet: 'Меркурий',
     dates: '21 мая – 20 июня', accentColor: '#FFD700', heroImage: '🌀',
     title: 'Стиль Близнецов: Эклектика и игра',
-    description: 'Двойственность, коммуникабельность, жажда перемен.',
-    styleDesc: 'Смешение фактур и направлений: спорт-шик с бохо.',
+    description: 'Двойственность, коммуникабельность, жажда перемен. Близнецы — самый любознательный знак.',
+    styleDesc: 'Смешение фактур и направлений: спорт-шик с бохо, офисный жакет с джинсами.',
     styleKeywords: ['Эклектика', 'Многослойность', 'Игривость', 'Свобода'],
     colors: ['#FFD700', '#87CEEB', '#32CD32', '#FFA500', '#9370DB'],
     colorNames: ['Золотой', 'Голубой', 'Лайм', 'Оранжевый', 'Пурпурный'],
@@ -46,8 +46,8 @@ const zodiacFullData: Record<string, any> = {
     name: 'Рак', symbol: '♋', element: 'Вода', planet: 'Луна',
     dates: '21 июня – 22 июля', accentColor: '#6C5CE7', heroImage: '🌙',
     title: 'Стиль Рака: Лунная женственность',
-    description: 'Эмпатия, глубина чувств, любовь к дому.',
-    styleDesc: 'Мягкие драпировки, струящиеся ткани, пастельные оттенки.',
+    description: 'Эмпатия, глубина чувств, любовь к дому. Рак — самый заботливый и интуитивный знак.',
+    styleDesc: 'Мягкие драпировки, струящиеся ткани, пастельные оттенки и винтажные нотки.',
     styleKeywords: ['Нежность', 'Уют', 'Романтика', 'Защита'],
     colors: ['#FFFFFF', '#C0C0C0', '#F0F8FF', '#E6E6FA', '#48D1CC'],
     colorNames: ['Белый', 'Серебряный', 'Небесный', 'Лавандовый', 'Бирюзовый'],
@@ -57,8 +57,8 @@ const zodiacFullData: Record<string, any> = {
     name: 'Лев', symbol: '♌', element: 'Огонь', planet: 'Солнце',
     dates: '23 июля – 22 августа', accentColor: '#FFD700', heroImage: '👑',
     title: 'Стиль Льва: Старый Голливуд',
-    description: 'Величественный, страстный, королевский знак.',
-    styleDesc: 'Люкс-бренды, золото, леопардовый принт, бархат.',
+    description: 'Величественный, страстный, королевский знак. Солнце правит Львом, даря магнетизм и любовь к роскоши.',
+    styleDesc: 'Люкс-бренды, золото, леопардовый принт, бархат, пайетки.',
     styleKeywords: ['Роскошь', 'Власть', 'Гламур', 'Царственность'],
     colors: ['#FFD700', '#8B008B', '#FF4500', '#1A1A1A', '#DAA520', '#800020'],
     colorNames: ['Золотой', 'Пурпурный', 'Оранжевый', 'Чёрный', 'Шампань', 'Бургунди'],
@@ -68,8 +68,8 @@ const zodiacFullData: Record<string, any> = {
     name: 'Дева', symbol: '♍', element: 'Земля', planet: 'Меркурий',
     dates: '23 августа – 22 сентября', accentColor: '#95A5A6', heroImage: '🍃',
     title: 'Стиль Девы: Элегантный минимализм',
-    description: 'Элегантность, аналитический ум, безупречный вкус.',
-    styleDesc: 'Лаконичные силуэты, натуральные ткани, нейтральные оттенки.',
+    description: 'Элегантность, аналитический ум, безупречный вкус. Дева — знак чистоты и порядка.',
+    styleDesc: 'Лаконичные силуэты, натуральные ткани, нейтральные оттенки с акцентами на детали.',
     styleKeywords: ['Минимализм', 'Чистота', 'Практичность', 'Совершенство'],
     colors: ['#FFFFFF', '#808080', '#D3D3D3', '#F5F5DC', '#6B8E23'],
     colorNames: ['Белый', 'Серый', 'Светло-серый', 'Бежевый', 'Оливковый'],
@@ -79,7 +79,7 @@ const zodiacFullData: Record<string, any> = {
     name: 'Весы', symbol: '♎', element: 'Воздух', planet: 'Венера',
     dates: '23 сентября – 22 октября', accentColor: '#FFB6C1', heroImage: '🌸',
     title: 'Стиль Весов: Утончённая элегантность',
-    description: 'Гармония, дипломатичность, утончённость.',
+    description: 'Гармония, дипломатичность, утончённость. Весы — знак равновесия и эстетики.',
     styleDesc: 'Мягкие силуэты, пастельные тона, изысканные ткани.',
     styleKeywords: ['Гармония', 'Эстетика', 'Женственность', 'Шик'],
     colors: ['#FFB6C1', '#87CEEB', '#DDA0DD', '#F5DEB3', '#FFF0F5'],
@@ -90,8 +90,8 @@ const zodiacFullData: Record<string, any> = {
     name: 'Скорпион', symbol: '♏', element: 'Вода', planet: 'Плутон',
     dates: '23 октября – 21 ноября', accentColor: '#FF6B6B', heroImage: '🦂',
     title: 'Стиль Скорпиона: Тёмная элегантность',
-    description: 'Страсть, магнетизм, трансформация.',
-    styleDesc: 'Кожа, латекс, глубокий чёрный, винный и кроваво-красный.',
+    description: 'Страсть, магнетизм, трансформация. Скорпион — самый загадочный и сильный знак.',
+    styleDesc: 'Кожа, латекс, глубокий чёрный, винный и кроваво-красный. Стиль "рок-шик".',
     styleKeywords: ['Таинственность', 'Страсть', 'Магнетизм', 'Сила'],
     colors: ['#FF6B6B', '#8B0000', '#4B0082', '#800080', '#2E8B57'],
     colorNames: ['Коралловый', 'Кровавый', 'Индиго', 'Фиолетовый', 'Изумрудный'],
@@ -101,8 +101,8 @@ const zodiacFullData: Record<string, any> = {
     name: 'Стрелец', symbol: '♐', element: 'Огонь', planet: 'Юпитер',
     dates: '22 ноября – 21 декабря', accentColor: '#8A2BE2', heroImage: '🏹',
     title: 'Стиль Стрельца: Бохо-шик',
-    description: 'Искатель приключений, философ, огненный странник.',
-    styleDesc: 'Этнические мотивы, свободные силуэты, кожа, замша.',
+    description: 'Искатель приключений, философ, огненный странник. Стрелец — знак свободы и оптимизма.',
+    styleDesc: 'Свобода — главное правило. Этнические мотивы, свободные силуэты, кожа, замша.',
     styleKeywords: ['Свобода', 'Приключения', 'Этника', 'Оптимизм'],
     colors: ['#800080', '#0000CD', '#FFA500', '#40E0D0', '#DDA0DD'],
     colorNames: ['Пурпурный', 'Синий', 'Оранжевый', 'Бирюзовый', 'Лиловый'],
@@ -112,8 +112,8 @@ const zodiacFullData: Record<string, any> = {
     name: 'Козерог', symbol: '♑', element: 'Земля', planet: 'Сатурн',
     dates: '22 декабря – 19 января', accentColor: '#708090', heroImage: '🏔️',
     title: 'Стиль Козерога: Классика и статус',
-    description: 'Дисциплина, амбиции, безупречный вкус.',
-    styleDesc: 'Кашемир, твид, идеально скроенные костюмы.',
+    description: 'Дисциплина, амбиции, безупречный вкус. Козерог — знак горных вершин, символ власти.',
+    styleDesc: 'Кашемир, твид, идеально скроенные костюмы, минималистичные аксессуары.',
     styleKeywords: ['Власть', 'Классика', 'Статус', 'Элегантность'],
     colors: ['#1A1A1A', '#2F4F4F', '#696969', '#8B4513', '#F5F5DC'],
     colorNames: ['Чёрный', 'Тёмный', 'Серый', 'Коричневый', 'Бежевый'],
@@ -123,8 +123,8 @@ const zodiacFullData: Record<string, any> = {
     name: 'Водолей', symbol: '♒', element: 'Воздух', planet: 'Уран',
     dates: '20 января – 18 февраля', accentColor: '#00FFFF', heroImage: '💧',
     title: 'Стиль Водолея: Авангард и футуризм',
-    description: 'Инновации, свобода, авангард.',
-    styleDesc: 'Асимметрия, необычные фактуры, техно-аксессуары.',
+    description: 'Инновации, свобода, авангард. Водолей — знак будущего и нестандартного мышления.',
+    styleDesc: 'Необычные акценты, асимметрия, техно-аксессуары. Гость из будущего.',
     styleKeywords: ['Авангард', 'Футуризм', 'Технологичность', 'Свобода'],
     colors: ['#00FFFF', '#C0C0C0', '#0000FF', '#FF00FF', '#40E0D0'],
     colorNames: ['Бирюзовый', 'Серебряный', 'Синий', 'Неоновый', 'Мятный'],
@@ -134,8 +134,8 @@ const zodiacFullData: Record<string, any> = {
     name: 'Рыбы', symbol: '♓', element: 'Вода', planet: 'Нептун',
     dates: '19 февраля – 20 марта', accentColor: '#48D1CC', heroImage: '🐟',
     title: 'Стиль Рыб: Морская феерия',
-    description: 'Интуиция, глубинная эмпатия, творческий дар.',
-    styleDesc: 'Невесомые ткани, переливчатые оттенки, струящийся шифон.',
+    description: 'Интуиция, глубинная эмпатия, творческий дар. Рыбы — последний знак зодиака.',
+    styleDesc: 'Невесомые ткани, переливчатые оттенки, струящийся шифон, перламутр и блеск.',
     styleKeywords: ['Романтика', 'Таинственность', 'Творчество', 'Мечтательность'],
     colors: ['#48D1CC', '#E0FFFF', '#D8BFD8', '#F0E68C', '#FFB6C1'],
     colorNames: ['Бирюзовый', 'Белый', 'Лавандовый', 'Шампань', 'Розовый'],
@@ -172,6 +172,7 @@ function UserZodiacPage({ slug }: { slug: string }) {
 
   return (
     <div className={`min-h-screen bg-gradient-to-b ${sign.bgGradient}`}>
+      {/* Герой-секция */}
       <div className="relative h-[450px] md:h-[500px] overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-transparent z-10" />
         <div className="relative h-full flex flex-col items-center justify-center text-center px-4 z-20">
@@ -212,6 +213,7 @@ function UserZodiacPage({ slug }: { slug: string }) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-10">
+        {/* Стиль */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -235,6 +237,7 @@ function UserZodiacPage({ slug }: { slug: string }) {
           </div>
         </motion.div>
 
+        {/* Гардероб */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -276,6 +279,7 @@ function UserZodiacPage({ slug }: { slug: string }) {
           )}
         </motion.div>
 
+        {/* Ссылка на все знаки */}
         <div className="text-center mt-12">
           <Link href="/zodiac" className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition">
             <Star size={18} />
@@ -318,10 +322,12 @@ export default function Page() {
     )
   }
 
+  // Неавторизованные видят страницу со всеми знаками
   if (status === 'unauthenticated') {
     return <HomePageAllSigns />
   }
 
+  // Авторизованные, но знак не найден
   if (!userZodiacSlug) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
@@ -335,5 +341,6 @@ export default function Page() {
     )
   }
 
+  // Показываем красивую страницу знака пользователя
   return <UserZodiacPage slug={userZodiacSlug} />
 }

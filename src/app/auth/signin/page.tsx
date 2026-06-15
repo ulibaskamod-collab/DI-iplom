@@ -27,8 +27,11 @@ export default function SignInPage() {
       setError('Неверный email или пароль')
       setLoading(false)
     } else {
-      router.push('/')
+      // Обновляем сессию и редиректим
       router.refresh()
+      setTimeout(() => {
+        router.push('/')
+      }, 100)
     }
   }
 
@@ -36,7 +39,7 @@ export default function SignInPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
       <div className="max-w-md w-full bg-purple-900/30 backdrop-blur-sm rounded-2xl p-8 border border-purple-700/50">
         <h1 className="text-3xl font-bold text-center mb-6 text-white">Вход</h1>
-
+        
         {error && (
           <div className="bg-red-500/20 border border-red-500 rounded-lg p-3 text-red-300 text-sm text-center mb-4">
             {error}

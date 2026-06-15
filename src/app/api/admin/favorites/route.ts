@@ -60,4 +60,4 @@ export async function GET() {
       top_users: [],
     })
   }
-} 
+}
