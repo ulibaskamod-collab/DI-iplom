@@ -79,7 +79,7 @@ export default function AdminZodiacPage() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">Знаки зодиака</h1>
-          <p className="text-white/50 mt-1">Просмотр знаков зодиака</p>
+          <p className="text-white/50 mt-1">Редактирование знаков зодиака</p>
         </div>
         <button
           onClick={fetchZodiacSigns}
@@ -124,7 +124,7 @@ export default function AdminZodiacPage() {
                   <th className="px-6 py-4 text-left text-white">Стихия</th>
                   <th className="px-6 py-4 text-left text-white">Даты</th>
                   <th className="px-6 py-4 text-left text-white">Slug</th>
-                  <th className="px-6 py-4 text-center text-white">Просмотр</th>
+                  <th className="px-6 py-4 text-center text-white">Действия</th>
                 </tr>
               </thead>
               <tbody>
@@ -160,10 +160,15 @@ export default function AdminZodiacPage() {
                       <td className="px-6 py-4 text-white/60">{sign.start_date} - {sign.end_date}</td>
                       <td className="px-6 py-4 text-white/60">{sign.slug}</td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center justify-center">
+                        <div className="flex items-center justify-center gap-3">
                           <Link href={`/zodiac/${sign.slug}`} target="_blank">
                             <button className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition" title="Просмотр на сайте">
                               <Eye size={16} className="text-white/60" />
+                            </button>
+                          </Link>
+                          <Link href={`/admin/zodiac/${sign.id}/edit`}>
+                            <button className="p-2 rounded-lg bg-white/5 hover:bg-green-500/20 transition" title="Редактировать">
+                              <Edit size={16} className="text-green-400" />
                             </button>
                           </Link>
                         </div>
