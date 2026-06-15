@@ -12,8 +12,9 @@ const pool = new Pool({
 export async function GET() {
   try {
     const result = await pool.query(
-      'SELECT id, name, slug, element FROM zodiac_signs ORDER BY id'
+      'SELECT id, name, slug, element, start_date, end_date FROM zodiac_signs ORDER BY id'
     )
+    console.log('Зодиакальные знаки найдены:', result.rows.length)
     return NextResponse.json(result.rows)
   } catch (error) {
     console.error('GET zodiac error:', error)
