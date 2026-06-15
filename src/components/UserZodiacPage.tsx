@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { ShoppingBag } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { ShoppingBag } from 'lucide-react';
 
 const zodiacFullData: Record<string, any> = {
   oven: {
@@ -104,23 +104,23 @@ const zodiacFullData: Record<string, any> = {
 }
 
 interface UserZodiacPageProps {
-  slug: string
+  slug: string;
 }
 
 export default function UserZodiacPage({ slug }: UserZodiacPageProps) {
-  const sign = zodiacFullData[slug]
-  const [clothingItems, setClothingItems] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const sign = zodiacFullData[slug];
+  const [clothingItems, setClothingItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (sign) {
       fetch(`/api/zodiac/items?zodiacSlug=${slug}`)
-        .then(res => res.json())
-        .then(data => setClothingItems(data))
+        .then((res) => res.json())
+        .then((data) => setClothingItems(data))
         .catch(console.error)
-        .finally(() => setLoading(false))
+        .finally(() => setLoading(false));
     }
-  }, [slug, sign])
+  }, [slug, sign]);
 
   if (!sign) {
     return (
@@ -132,21 +132,27 @@ export default function UserZodiacPage({ slug }: UserZodiacPageProps) {
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-      {/* Герой-секция */}
       <div className="relative h-[450px] md:h-[500px] overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-transparent z-10" />
         <div className="relative h-full flex flex-col items-center justify-center text-center px-4 z-20">
-          <div className="text-7xl md:text-8xl mb-4 drop-shadow-2xl">{sign.heroImage}</div>
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-3" style={{ textShadow: `0 0 40px ${sign.accentColor}40` }}>
+          <div className="text-7xl md:text-8xl mb-4 drop-shadow-2xl">
+            {sign.heroImage}
+          </div>
+          <h1
+            className="text-5xl md:text-7xl font-bold text-white mb-3"
+            style={{ textShadow: `0 0 40px ${sign.accentColor}40` }}
+          >
             {sign.name}
           </h1>
           <div className="flex items-center gap-2 text-white/70 text-sm md:text-base">
-            <span>{sign.element} • {sign.planet} • {sign.dates}</span>
+            <span>
+              {sign.element} • {sign.planet} • {sign.dates}
+            </span>
           </div>
           <p className="text-white/70 text-base md:text-lg max-w-xl mx-auto mt-5 leading-relaxed">
             {sign.description}
@@ -155,18 +161,26 @@ export default function UserZodiacPage({ slug }: UserZodiacPageProps) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* Стиль */}
         <div className="bg-white/5 rounded-2xl p-6 md:p-8 mb-10 border border-white/10">
-          <h2 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: sign.accentColor }}>
+          <h2
+            className="text-2xl md:text-3xl font-bold mb-3"
+            style={{ color: sign.accentColor }}
+          >
             {sign.title}
           </h2>
-          <p className="text-white/70 text-base leading-relaxed">{sign.styleDesc}</p>
+          <p className="text-white/70 text-base leading-relaxed">
+            {sign.styleDesc}
+          </p>
           <div className="flex flex-wrap gap-2 mt-5">
             {sign.styleKeywords.map((keyword: string, idx: number) => (
               <span
                 key={idx}
                 className="px-3 py-1.5 rounded-full text-xs font-medium"
-                style={{ backgroundColor: `${sign.accentColor}15`, color: sign.accentColor, border: `1px solid ${sign.accentColor}30` }}
+                style={{
+                  backgroundColor: `${sign.accentColor}15`,
+                  color: sign.accentColor,
+                  border: `1px solid ${sign.accentColor}30`,
+                }}
               >
                 {keyword}
               </span>
@@ -174,10 +188,11 @@ export default function UserZodiacPage({ slug }: UserZodiacPageProps) {
           </div>
         </div>
 
-        {/* Гардероб */}
         <div>
-          <h2 className="text-2xl font-bold text-white mb-6">Гардероб {sign.name}</h2>
-          
+          <h2 className="text-2xl font-bold text-white mb-6">
+            Гардероб {sign.name}
+          </h2>
+
           {loading ? (
             <div className="flex justify-center py-20">
               <div className="animate-spin rounded-full h-10 w-10 border-2 border-white/20 border-t-white/80" />
@@ -190,10 +205,17 @@ export default function UserZodiacPage({ slug }: UserZodiacPageProps) {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
               {clothingItems.map((item) => (
-                <div key={item.id} className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition">
+                <div
+                  key={item.id}
+                  className="bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 transition"
+                >
                   <div className="aspect-square bg-gradient-to-br from-white/10 to-transparent relative">
                     {item.image_url ? (
-                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                      <img
+                        src={item.image_url}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <ShoppingBag className="w-10 h-10 text-white/20" />
@@ -201,9 +223,15 @@ export default function UserZodiacPage({ slug }: UserZodiacPageProps) {
                     )}
                   </div>
                   <div className="p-3">
-                    <p className="text-white text-sm font-medium truncate">{item.title || 'Без названия'}</p>
+                    <p className="text-white text-sm font-medium truncate">
+                      {item.title || 'Без названия'}
+                    </p>
                     <p className="text-white/40 text-xs mt-1">
-                      {item.gender === 'female' ? '👩 Женский' : item.gender === 'male' ? '👨 Мужской' : '👥 Унисекс'}
+                      {item.gender === 'female'
+                        ? '👩 Женский'
+                        : item.gender === 'male'
+                        ? '👨 Мужской'
+                        : '👥 Унисекс'}
                     </p>
                   </div>
                 </div>
@@ -213,5 +241,5 @@ export default function UserZodiacPage({ slug }: UserZodiacPageProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
