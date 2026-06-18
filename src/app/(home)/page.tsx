@@ -3,7 +3,6 @@
 export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
-import { useState } from 'react'
 
 const zodiacSlugs: Record<string, string> = {
   'Овен': 'oven',
@@ -148,9 +147,12 @@ export default function HomePage() {
 
   return (
     <div className="astroliv-page">
+      {/* Заголовок */}
       <section className="hero">
         <div className="container">
           <h1 className="main-title">Астрология души и нарядов</h1>
+          
+          {/* Кнопки-навигация по знакам */}
           <div className="zodiac-nav">
             {zodiacButtons.map((name) => (
               <button
@@ -167,6 +169,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Блоки знаков */}
       {zodiacBlocks.map((zodiac) => (
         <section
           key={zodiac.name}
@@ -179,6 +182,7 @@ export default function HomePage() {
           <div className="zodiac-info">
             <h2 className="zodiac-title">{zodiac.name}</h2>
             <p className="zodiac-date">{zodiac.dates}</p>
+            
             <div className="zodiac-content">
               <div className="zodiac-item">
                 <h3>Стиль и цветотип</h3>
@@ -197,6 +201,7 @@ export default function HomePage() {
                 <p>{zodiac.fate}</p>
               </div>
             </div>
+            
             <Link href={`/zodiac/${zodiacSlugs[zodiac.name]}`} className="details-link">
               Подробнее →
             </Link>
@@ -204,6 +209,7 @@ export default function HomePage() {
         </section>
       ))}
 
+      {/* Футер */}
       <footer className="astroliv-footer">
         <div className="container">
           <div className="footer-content">
@@ -224,7 +230,9 @@ export default function HomePage() {
         </div>
       </footer>
 
+      {/* Стили */}
       <style jsx>{`
+        /* Общие стили */
         .astroliv-page {
           font-family: 'Arial', sans-serif;
           margin: 0;
@@ -233,11 +241,14 @@ export default function HomePage() {
           color: #ffffff;
           min-height: 100vh;
         }
+
         .container {
           max-width: 1200px;
           margin: 0 auto;
           padding: 20px;
         }
+
+        /* Заголовок */
         .main-title {
           text-align: center;
           margin-top: 50px;
@@ -245,6 +256,8 @@ export default function HomePage() {
           font-family: 'Georgia', serif;
           color: #c090e0;
         }
+
+        /* Кнопки навигации */
         .zodiac-nav {
           text-align: center;
           margin-top: 30px;
@@ -253,6 +266,7 @@ export default function HomePage() {
           justify-content: center;
           gap: 10px;
         }
+
         .zodiac-nav button {
           background-color: #4a2a6a;
           border: none;
@@ -261,11 +275,15 @@ export default function HomePage() {
           color: #d0b0f0;
           cursor: pointer;
           transition: all 0.3s;
+          font-size: 14px;
         }
+
         .zodiac-nav button:hover {
           background-color: #6a4a8a;
           color: white;
         }
+
+        /* Блок знака */
         .zodiac-block {
           background-color: rgba(40, 20, 60, 0.7);
           border-radius: 15px;
@@ -278,9 +296,12 @@ export default function HomePage() {
           gap: 30px;
           transition: transform 0.3s;
         }
+
         .zodiac-block:hover {
           transform: translateY(-5px);
         }
+
+        /* Цвета для каждого знака */
         .aries { background-color: rgba(70, 30, 40, 0.7); }
         .taurus { background-color: rgba(30, 70, 40, 0.7); }
         .gemini { background-color: rgba(30, 70, 40, 0.7); }
@@ -293,37 +314,48 @@ export default function HomePage() {
         .capricorn { background-color: rgba(30, 40, 60, 0.7); }
         .aquarius { background-color: rgba(30, 50, 70, 0.7); }
         .pisces { background-color: rgba(40, 70, 60, 0.7); }
+
+        /* Иконка знака */
         .zodiac-icon {
           font-size: 4em;
           text-align: center;
           min-width: 80px;
         }
+
         .zodiac-symbol {
           filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
         }
+
+        /* Информация о знаке */
         .zodiac-info {
           flex: 1;
         }
+
         .zodiac-title {
           font-size: 2.5em;
           margin-bottom: 5px;
           color: #e0b0ff;
         }
+
         .zodiac-date {
           font-size: 1.2em;
           color: #ccc;
           margin-bottom: 20px;
         }
+
+        /* Сетка 2x2 для блоков */
         .zodiac-content {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 20px;
         }
+
         .zodiac-item {
           background-color: rgba(0, 0, 0, 0.3);
           border-radius: 10px;
           padding: 20px;
         }
+
         .zodiac-item h3 {
           font-size: 1.3em;
           margin-top: 0;
@@ -332,11 +364,14 @@ export default function HomePage() {
           padding-bottom: 10px;
           margin-bottom: 15px;
         }
+
         .zodiac-item p {
           font-size: 0.95em;
           line-height: 1.6;
           color: #eee;
         }
+
+        /* Ссылка "Подробнее" */
         .details-link {
           display: inline-block;
           margin-top: 20px;
@@ -344,58 +379,77 @@ export default function HomePage() {
           text-decoration: none;
           transition: color 0.3s;
         }
+
         .details-link:hover {
           color: white;
           text-decoration: underline;
         }
+
+        /* Футер */
         .astroliv-footer {
           background-color: rgba(20, 10, 30, 0.9);
           padding: 40px 0;
           margin-top: 60px;
           border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
+
         .footer-content {
           display: flex;
           justify-content: space-around;
           flex-wrap: wrap;
         }
+
         .footer-logo {
           font-size: 1.5em;
           font-family: 'Brush Script MT', cursive;
           color: #e0b0ff;
         }
-        .footer-links ul, .footer-address ul {
+
+        .footer-links ul,
+        .footer-address ul {
           list-style: none;
           padding: 0;
         }
-        .footer-links a, .footer-address a {
+
+        .footer-links a,
+        .footer-address a {
           color: #ccc;
           text-decoration: none;
         }
-        .footer-links a:hover, .footer-address a:hover {
+
+        .footer-links a:hover,
+        .footer-address a:hover {
           color: #e0b0ff;
         }
-        .footer-links h4, .footer-address h4 {
+
+        .footer-links h4,
+        .footer-address h4 {
           color: #e0b0ff;
           margin-bottom: 10px;
         }
+
+        /* Адаптивность для мобильных */
         @media (max-width: 768px) {
           .zodiac-block {
             flex-direction: column;
             width: 95%;
           }
+
           .zodiac-icon {
             text-align: center;
           }
+
           .zodiac-content {
             grid-template-columns: 1fr;
           }
+
           .footer-content {
             flex-direction: column;
             align-items: center;
             text-align: center;
             gap: 20px;
           }
+
           .zodiac-nav button {
             padding: 8px 16px;
             font-size: 12px;
