@@ -1,15 +1,16 @@
-
 'use client'
+
 export const dynamic = 'force-dynamic'
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { 
-  Users, Star, Shirt, Palette, Heart, 
-  RefreshCw, TrendingUp, ArrowRight, Sparkles
+import {
+  Users, Star, Shirt, Palette, Heart,
+  RefreshCw, TrendingUp, ArrowRight, Sparkles, Globe
 } from 'lucide-react'
+import { AdminButton } from '@/src/components/AdminButton'
 
 export default function AdminPage() {
   const { data: session, status } = useSession()
@@ -35,7 +36,6 @@ export default function AdminPage() {
   const fetchStats = async () => {
     setLoading(true)
     setError(null)
-    
     try {
       const res = await fetch('/api/admin/stats')
       if (!res.ok) {
@@ -67,52 +67,52 @@ export default function AdminPage() {
   if (status === 'loading' || loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-500"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-500" />
       </div>
     )
   }
 
   const statsCards = [
-    { 
-      title: 'Пользователи', 
-      value: stats.users, 
-      icon: Users, 
+    {
+      title: 'Пользователи',
+      value: stats.users,
+      icon: Users,
       color: 'blue',
       bg: 'from-blue-500/20 to-blue-600/10',
       border: 'border-blue-500/30',
       text: 'text-blue-400'
     },
-    { 
-      title: 'Знаки зодиака', 
-      value: stats.zodiacSigns, 
-      icon: Star, 
+    {
+      title: 'Знаки зодиака',
+      value: stats.zodiacSigns,
+      icon: Star,
       color: 'yellow',
       bg: 'from-yellow-500/20 to-yellow-600/10',
       border: 'border-yellow-500/30',
       text: 'text-yellow-400'
     },
-    { 
-      title: 'Одежда', 
-      value: stats.clothingItems, 
-      icon: Shirt, 
+    {
+      title: 'Одежда',
+      value: stats.clothingItems,
+      icon: Shirt,
       color: 'green',
       bg: 'from-green-500/20 to-green-600/10',
       border: 'border-green-500/30',
       text: 'text-green-400'
     },
-    { 
-      title: 'Дизайнеры', 
-      value: stats.designers, 
-      icon: Palette, 
+    {
+      title: 'Дизайнеры',
+      value: stats.designers,
+      icon: Palette,
       color: 'purple',
       bg: 'from-purple-500/20 to-purple-600/10',
       border: 'border-purple-500/30',
       text: 'text-purple-400'
     },
-    { 
-      title: 'Избранное', 
-      value: stats.favorites, 
-      icon: Heart, 
+    {
+      title: 'Избранное',
+      value: stats.favorites,
+      icon: Heart,
       color: 'red',
       bg: 'from-red-500/20 to-red-600/10',
       border: 'border-red-500/30',
@@ -121,47 +121,47 @@ export default function AdminPage() {
   ]
 
   const menuItems = [
-    { 
-      title: 'Знаки зодиака', 
-      description: 'Управление знаками зодиака', 
-      icon: Star, 
-      href: '/admin/zodiac', 
+    {
+      title: 'Знаки зодиака',
+      description: 'Управление знаками зодиака',
+      icon: Star,
+      href: '/admin/zodiac',
       color: 'from-yellow-500 to-orange-500',
       bg: 'bg-yellow-500/10',
       border: 'hover:border-yellow-500/30'
     },
-    { 
-      title: 'Одежда', 
-      description: 'Управление предметами одежды', 
-      icon: Shirt, 
-      href: '/admin/clothing', 
+    {
+      title: 'Одежда',
+      description: 'Управление предметами одежды',
+      icon: Shirt,
+      href: '/admin/clothing',
       color: 'from-green-500 to-emerald-500',
       bg: 'bg-green-500/10',
       border: 'hover:border-green-500/30'
     },
-    { 
-      title: 'Дизайнеры', 
-      description: 'Управление дизайнерами', 
-      icon: Palette, 
-      href: '/admin/designers', 
+    {
+      title: 'Дизайнеры',
+      description: 'Управление дизайнерами',
+      icon: Palette,
+      href: '/admin/designers',
       color: 'from-purple-500 to-pink-500',
       bg: 'bg-purple-500/10',
       border: 'hover:border-purple-500/30'
     },
-    { 
-      title: 'Пользователи', 
-      description: 'Управление пользователями', 
-      icon: Users, 
-      href: '/admin/users', 
+    {
+      title: 'Пользователи',
+      description: 'Управление пользователями',
+      icon: Users,
+      href: '/admin/users',
       color: 'from-blue-500 to-cyan-500',
       bg: 'bg-blue-500/10',
       border: 'hover:border-blue-500/30'
     },
-    { 
-      title: 'Избранное', 
-      description: 'Статистика избранного', 
-      icon: Heart, 
-      href: '/admin/favorites', 
+    {
+      title: 'Избранное',
+      description: 'Статистика избранного',
+      icon: Heart,
+      href: '/admin/favorites',
       color: 'from-red-500 to-pink-500',
       bg: 'bg-red-500/10',
       border: 'hover:border-red-500/30'
@@ -176,39 +176,45 @@ export default function AdminPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
             <span>Панель управления</span>
             <span className="text-sm font-normal text-white/40 hidden sm:inline">
-              {new Date().toLocaleDateString('ru-RU', { 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
+              {new Date().toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
               })}
             </span>
           </h1>
           <p className="text-white/50 text-sm mt-1 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block"></span>
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />
             Добро пожаловать, {session?.user?.email}
           </p>
         </div>
-        
-        {/* Кнопка обновления - красивая и интегрированная */}
+
         <div className="flex items-center gap-3">
+          {/* Кнопка "На сайт" */}
+          <Link href="/">
+            <AdminButton
+              variant="outline"
+              size="md"
+              icon={<Globe size={16} />}
+            >
+              <span className="hidden sm:inline">На сайт</span>
+            </AdminButton>
+          </Link>
+          
           {lastUpdated && (
             <span className="text-white/30 text-xs hidden sm:block">
               Обновлено: {lastUpdated.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
             </span>
           )}
-          <button
+          <AdminButton
+            variant="ghost"
+            size="sm"
+            icon={<RefreshCw size={16} className={loading ? 'animate-spin' : 'group-hover:rotate-180'} />}
             onClick={fetchStats}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500/20 to-purple-500/20 hover:from-pink-500/30 hover:to-purple-500/30 rounded-xl text-white/80 hover:text-white transition-all duration-200 border border-white/10 hover:border-pink-500/30 shadow-lg shadow-pink-500/5 group"
           >
-            <RefreshCw 
-              size={16} 
-              className={`${loading ? 'animate-spin' : 'group-hover:rotate-180'} transition-transform duration-500`} 
-            />
-            <span className="text-sm font-medium">
-              {loading ? 'Обновление...' : 'Обновить'}
-            </span>
-          </button>
+            {loading ? 'Обновление...' : 'Обновить'}
+          </AdminButton>
         </div>
       </div>
 

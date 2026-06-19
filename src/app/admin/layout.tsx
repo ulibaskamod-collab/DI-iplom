@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   Shield, Home, Star, Shirt, Palette, Users, Heart,
-  LogOut, Menu, X, ChevronRight, Sparkles
+  LogOut, Menu, X, ChevronRight, Sparkles, Globe
 } from 'lucide-react'
 import { AdminButton } from '@/src/components/AdminButton'
 
@@ -149,6 +149,20 @@ export default function AdminLayout({
 
         {/* Меню */}
         <nav className="flex-1 overflow-y-auto p-4 space-y-1.5 admin-sidebar">
+          {/* Ссылка на главную страницу сайта */}
+          <Link
+            href="/"
+            onClick={() => isMobile && setSidebarOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:text-white hover:bg-green-500/20 transition-all duration-200 group border border-white/5 hover:border-green-500/30"
+          >
+            <Globe className="w-5 h-5 text-green-400 group-hover:scale-110 transition-transform" />
+            <span className="text-sm font-medium">На сайт</span>
+            <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-white/30" />
+          </Link>
+
+          {/* Разделитель */}
+          <div className="h-px bg-white/10 my-2" />
+
           {menuItems.map((item) => (
             <Link
               key={item.href}
@@ -176,12 +190,14 @@ export default function AdminLayout({
               <p className="text-white/30 text-xs">Администратор</p>
             </div>
           </div>
+          
+          {/* Кнопка "На сайт" в футере (дубль для удобства) */}
           <Link
             href="/"
             className="flex items-center justify-center gap-2 mt-3 text-white/40 hover:text-white/60 transition-colors text-sm px-3 py-2 rounded-xl hover:bg-white/5"
           >
-            <LogOut className="w-4 h-4" />
-            На сайт
+            <Globe className="w-4 h-4" />
+            Перейти на сайт
           </Link>
         </div>
       </div>
