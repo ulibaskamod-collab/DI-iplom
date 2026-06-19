@@ -67,6 +67,7 @@ function FavoriteButton({ itemId }: { itemId: number }) {
 function ClothingCard({ item, idx }: { item: any; idx: number }) {
   const [imgError, setImgError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  const [showModal, setShowModal] = useState(false)
   
   const imageUrl = (!item.image_url || imgError) 
     ? 'https://via.placeholder.com/400x500?text=No+Image' 
@@ -91,79 +92,130 @@ function ClothingCard({ item, idx }: { item: any; idx: number }) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: idx * 0.06, duration: 0.4 }}
-      whileHover={{ y: -8 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className="group bg-white/[0.03] backdrop-blur-sm rounded-2xl overflow-hidden border border-white/[0.08] hover:border-white/20 transition-all duration-500 shadow-lg hover:shadow-2xl hover:shadow-black/30"
-    >
-      <div className="aspect-[3/4] bg-gradient-to-br from-white/[0.02] to-white/[0.05] relative overflow-hidden">
-        <motion.img
-          src={imageUrl}
-          alt={item.title || 'Одежда'}
-          className="w-full h-full object-cover"
-          animate={{ scale: isHovered ? 1.05 : 1 }}
-          transition={{ duration: 0.5 }}
-          loading="lazy"
-          onError={() => setImgError(true)}
-        />
-        
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-        
-        <div className="absolute top-3 right-3 z-10">
-          <FavoriteButton itemId={item.id} />
-        </div>
-        
-        {item.season && (
-          <div className="absolute bottom-3 left-3 z-10">
-            <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full text-[10px] font-medium text-white/90 border border-white/10 flex items-center gap-1">
-              {getSeasonIcon(item.season)}
-              <span className="hidden sm:inline">{item.season === 'winter' ? 'Зима' : item.season === 'spring' ? 'Весна' : item.season === 'summer' ? 'Лето' : 'Осень'}</span>
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: idx * 0.06, duration: 0.4 }}
+        whileHover={{ y: -8 }}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        className="group bg-white/[0.03] backdrop-blur-sm rounded-2xl overflow-hidden border border-white/[0.08] hover:border-white/20 transition-all duration-500 shadow-lg hover:shadow-2xl hover:shadow-black/30"
+      >
+        <div className="aspect-[3/4] bg-gradient-to-br from-white/[0.02] to-white/[0.05] relative overflow-hidden">
+          <motion.img
+            src={imageUrl}
+            alt={item.title || 'Одежда'}
+            className="w-full h-full object-cover"
+            animate={{ scale: isHovered ? 1.05 : 1 }}
+            transition={{ duration: 0.5 }}
+            loading="lazy"
+            onError={() => setImgError(true)}
+          />
+          
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          
+          <div className="absolute top-3 right-3 z-10">
+            <FavoriteButton itemId={item.id} />
+          </div>
+          
+          {item.season && (
+            <div className="absolute bottom-3 left-3 z-10">
+              <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full text-[10px] font-medium text-white/90 border border-white/10 flex items-center gap-1">
+                {getSeasonIcon(item.season)}
+                <span className="hidden sm:inline">{item.season === 'winter' ? 'Зима' : item.season === 'spring' ? 'Весна' : item.season === 'summer' ? 'Лето' : 'Осень'}</span>
+              </span>
+            </div>
+          )}
+
+          <div className="absolute bottom-3 right-3 z-10">
+            <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full text-[10px] font-medium text-white/90 border border-white/10">
+              {getGenderIcon(item.gender)}
             </span>
           </div>
-        )}
 
-        <div className="absolute bottom-3 right-3 z-10">
-          <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full text-[10px] font-medium text-white/90 border border-white/10">
-            {getGenderIcon(item.gender)}
-          </span>
+          {/* Кнопка "Быстрый просмотр" - теперь работает */}
+          <AnimatePresence>
+            {isHovered && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2"
+              >
+                <button 
+                  onClick={() => setShowModal(true)}
+                  className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium hover:bg-white/30 transition"
+                >
+                  Быстрый просмотр
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        <AnimatePresence>
-          {isHovered && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/40 flex items-center justify-center gap-2"
-            >
-              <button className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium hover:bg-white/30 transition">
-                Быстрый просмотр
-              </button>
-            </motion.div>
+        <div className="p-4">
+          <h3 className="text-white font-semibold text-sm truncate group-hover:text-pink-400 transition-colors duration-300">
+            {item.title || 'Без названия'}
+          </h3>
+          {item.description && (
+            <p className="text-white/40 text-xs mt-1.5 line-clamp-2 leading-relaxed">
+              {item.description}
+            </p>
           )}
-        </AnimatePresence>
-      </div>
-
-      <div className="p-4">
-        <h3 className="text-white font-semibold text-sm truncate group-hover:text-pink-400 transition-colors duration-300">
-          {item.title || 'Без названия'}
-        </h3>
-        {item.description && (
-          <p className="text-white/40 text-xs mt-1.5 line-clamp-2 leading-relaxed">
-            {item.description}
-          </p>
-        )}
-        <div className="mt-2 flex items-center gap-2">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-white/20 text-[10px]">✨</span>
-          <div className="flex-1 h-px bg-white/10" />
+          <div className="mt-2 flex items-center gap-2">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-white/20 text-[10px]">✨</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+
+      {/* Модальное окно "Быстрый просмотр" */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={() => setShowModal(false)}>
+          <div className="bg-gray-900 rounded-2xl max-w-md w-full p-6 border border-white/10" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-xl font-bold text-white">{item.title || 'Без названия'}</h2>
+              <button onClick={() => setShowModal(false)} className="text-white/50 hover:text-white">
+                ✕
+              </button>
+            </div>
+            
+            {item.image_url && (
+              <div className="aspect-square bg-gradient-to-br from-white/5 to-white/10 rounded-xl overflow-hidden mb-4">
+                <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+              </div>
+            )}
+            
+            {item.description && (
+              <p className="text-white/70 text-sm mb-3">{item.description}</p>
+            )}
+            
+            <div className="flex flex-wrap gap-2 mb-4">
+              {item.season && (
+                <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/60">
+                  {item.season === 'winter' && '❄️ Зима'}
+                  {item.season === 'spring' && '🌸 Весна'}
+                  {item.season === 'summer' && '☀️ Лето'}
+                  {item.season === 'autumn' && '🍂 Осень'}
+                </span>
+              )}
+              <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/60">
+                {item.gender === 'female' ? '👩 Женский' : item.gender === 'male' ? '👨 Мужской' : '👥 Унисекс'}
+              </span>
+            </div>
+            
+            <button
+              onClick={() => setShowModal(false)}
+              className="w-full py-2 bg-pink-500 rounded-xl text-white font-medium hover:bg-pink-600 transition"
+            >
+              Закрыть
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
