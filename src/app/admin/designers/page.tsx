@@ -1,5 +1,5 @@
-  
 'use client'
+
 export const dynamic = 'force-dynamic'
 
 import { useSession } from 'next-auth/react'
@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Palette, Trash2, Plus, Edit, Eye, Image as ImageIcon, RefreshCw } from 'lucide-react'
+import { AdminButton } from '@/src/components/AdminButton'
 
 interface Designer {
   id: number
@@ -43,10 +44,11 @@ export default function AdminDesignersPage() {
   }, [session, status, router])
 
   const fetchDesigners = async () => {
+    setLoading(true)
     try {
       const res = await fetch('/api/admin/designers')
       const data = await res.json()
-      setDesigners(data)
+      setDesigners(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Error:', error)
     } finally {
@@ -63,124 +65,120 @@ export default function AdminDesignersPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        
-        {/* Заголовок с кнопкой добавления */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Link href="/admin" className="text-gray-400 hover:text-white">
-              <ArrowLeft size={24} />
-            </Link>
-            <h1 className="text-3xl font-bold text-white">Дизайнеры</h1>
-            <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">
-              {designers.length}
-            </span>
+    <div>
+      {/* Заголовок */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <Link href="/admin" className="text-gray-400 hover:text-white transition p-2 rounded-lg hover:bg-white/5">
+            <ArrowLeft size={20} />
+          </Link>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+              <Palette className="w-7 h-7 text-purple-400" />
+              Дизайнеры
+            </h1>
+            <p className="text-white/40 text-sm mt-0.5 flex items-center gap-2">
+              <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded-full text-xs">
+                {designers.length}
+              </span>
+            </p>
           </div>
-          
-          {/* КНОПКА ДОБАВЛЕНИЯ ДИЗАЙНЕРА */}
-          <Link
-            href="/admin/designers/new"
-            className="flex items-center gap-2 px-4 py-2 bg-purple-500 rounded-xl text-white hover:bg-purple-600 transition"
-          >
-            <Plus size={18} />
-            Добавить дизайнера
+        </div>
+
+        <div className="flex items-center gap-2">
+          <AdminButton
+            variant="ghost"
+            size="sm"
+            icon={<RefreshCw size={16} />}
+            onClick={fetchDesigners}
+            title="Обновить" children={undefined}          />
+          <Link href="/admin/designers/new">
+            <AdminButton
+              variant="primary"
+              size="md"
+              icon={<Plus size={18} />}
+            >
+              Добавить дизайнера
+            </AdminButton>
           </Link>
         </div>
+      </div>
 
-        {/* Кнопка обновления */}
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={fetchDesigners}
-            className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
-            title="Обновить"
-          >
-            <RefreshCw size={16} className="text-white/60" />
-          </button>
-        </div>
-
-        {/* Список дизайнеров */}
-        {designers.length === 0 ? (
-          <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
-            <Palette className="w-20 h-20 text-purple-500 mx-auto mb-4 opacity-50" />
-            <p className="text-xl text-purple-300">Дизайнеров пока нет</p>
-            <Link
-              href="/admin/designers/new"
-              className="inline-block mt-4 px-4 py-2 bg-purple-500 rounded-xl text-white hover:bg-purple-600 transition"
-            >
+      {/* Список дизайнеров */}
+      {designers.length === 0 ? (
+        <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
+          <Palette className="w-20 h-20 text-purple-500 mx-auto mb-4 opacity-50" />
+          <p className="text-xl text-purple-300">Дизайнеров пока нет</p>
+          <Link href="/admin/designers/new" className="inline-block mt-4">
+            <AdminButton variant="primary" icon={<Plus size={18} />}>
               Добавить первого дизайнера
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {designers.map((designer) => (
-              <div key={designer.id} className="bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/30 transition group">
-                <div className="aspect-square bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center relative">
-                  {designer.designer_image ? (
-                    <img src={designer.designer_image} alt={designer.designer_name} className="w-full h-full object-cover" />
-                  ) : (
-                    <Palette className="w-20 h-20 text-purple-400 opacity-50" />
-                  )}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-3">
-                    <Link
-                      href={`/admin/designers/${designer.id}/edit`}
-                      className="p-2 bg-purple-500 rounded-full hover:bg-purple-600 transition"
-                      title="Редактировать"
-                    >
-                      <Edit size={18} className="text-white" />
-                    </Link>
-                    <Link
-                      href={`/admin/designers/${designer.id}/works`}
-                      className="p-2 bg-blue-500 rounded-full hover:bg-blue-600 transition"
-                      title="Управление работами"
-                    >
-                      <ImageIcon size={18} className="text-white" />
-                    </Link>
-                    <Link
-                      href={`/designers/${designer.id}`}
-                      target="_blank"
-                      className="p-2 bg-green-500 rounded-full hover:bg-green-600 transition"
-                      title="Посмотреть на сайте"
-                    >
-                      <Eye size={18} className="text-white" />
-                    </Link>
-                    <button
-                      onClick={() => deleteDesigner(designer.id)}
-                      className="p-2 bg-red-500 rounded-full hover:bg-red-600 transition"
-                      title="Удалить"
-                    >
-                      <Trash2 size={18} className="text-white" />
-                    </button>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-white mb-2">{designer.designer_name}</h3>
-                  <p className="text-gray-400 text-sm line-clamp-2 mb-4">{designer.bio}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-purple-300 text-xs">
-                      Работ: {designer.works_count || 0}
-                    </span>
-                    <Link
-                      href={`/admin/designers/${designer.id}/works`}
-                      className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
-                    >
-                      <ImageIcon size={14} />
-                      Работы
-                    </Link>
-                  </div>
+            </AdminButton>
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {designers.map((designer) => (
+            <div key={designer.id} className="bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/30 transition group">
+              <div className="aspect-square bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center relative">
+                {designer.designer_image ? (
+                  <img src={designer.designer_image} alt={designer.designer_name} className="w-full h-full object-cover" />
+                ) : (
+                  <Palette className="w-20 h-20 text-purple-400 opacity-50" />
+                )}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
+                  <Link href={`/admin/designers/${designer.id}/edit`}>
+                    <AdminButton
+                      variant="ghost"
+                      size="sm"
+                      icon={<Edit size={18} className="text-white" />}
+                      title="Редактировать" children={undefined}                    />
+                  </Link>
+                  <Link href={`/admin/designers/${designer.id}/works`}>
+                    <AdminButton
+                      variant="ghost"
+                      size="sm"
+                      icon={<ImageIcon size={18} className="text-white" />}
+                      title="Управление работами" children={undefined}                    />
+                  </Link>
+                  <Link href={`/designers/${designer.id}`} target="_blank">
+                    <AdminButton
+                      variant="ghost"
+                      size="sm"
+                      icon={<Eye size={18} className="text-white" />}
+                      title="Посмотреть на сайте" children={undefined}                    />
+                  </Link>
+                  <AdminButton
+                    variant="danger"
+                    size="sm"
+                    icon={<Trash2 size={18} className="text-white" />}
+                    onClick={() => deleteDesigner(designer.id)}
+                    title="Удалить" children={undefined}                  />
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <div className="p-4">
+                <h3 className="text-lg font-bold text-white mb-1 truncate">{designer.designer_name}</h3>
+                <p className="text-gray-400 text-sm line-clamp-2">{designer.bio}</p>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+                  <span className="text-purple-300 text-xs">
+                    Работ: {designer.works_count || 0}
+                  </span>
+                  <Link href={`/admin/designers/${designer.id}/works`} className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+                    <ImageIcon size={14} />
+                    Работы
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

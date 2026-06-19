@@ -22,6 +22,7 @@ export default function Navigation() {
     }
   }, [session])
 
+  // Создаем звезды на фоне
   useEffect(() => {
     const createStars = () => {
       const starsContainer = document.getElementById('starsCanvas')
@@ -41,6 +42,18 @@ export default function Navigation() {
     }
     createStars()
   }, [])
+
+  // Закрываем меню при клике вне
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (isOpen && !target.closest('.navbar') && !target.closest('.menu-btn')) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [isOpen])
 
   // Если сессия еще загружается, показываем упрощенную навигацию
   if (status === 'loading') {
@@ -64,21 +77,32 @@ export default function Navigation() {
           StellarFit
         </Link>
 
-        <button className="menu-btn max-md:block hidden" onClick={() => setIsOpen(!isOpen)}>
+        <button 
+          className="menu-btn md:hidden block p-2 rounded-lg hover:bg-white/10 transition" 
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsOpen(!isOpen)
+          }}
+          aria-label="Toggle menu"
+        >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
 
-        <div className={`nav-links ${isOpen ? 'max-md:flex max-md:flex-col max-md:absolute max-md:top-full max-md:left-0 max-md:right-0 max-md:bg-purple-900/95 max-md:p-4 max-md:gap-3' : 'max-md:hidden'}`}>
+        <div className={`
+          nav-links 
+          ${isOpen ? 'flex flex-col absolute top-full left-0 right-0 bg-purple-900/95 backdrop-blur-xl p-4 gap-3 border-b border-white/10 shadow-2xl' : 'hidden'}
+          md:flex md:relative md:bg-transparent md:p-0 md:gap-6 md:border-none md:shadow-none
+        `}>
           <Link href="/" onClick={() => setIsOpen(false)}>
             <Sparkles size={16} className="inline mr-1" />
             Главная
           </Link>
-          
+
           <Link href="/zodiac" onClick={() => setIsOpen(false)}>
             <Stars size={16} className="inline mr-1" />
             Все знаки
           </Link>
-          
+
           <Link href="/designers" onClick={() => setIsOpen(false)}>
             Дизайнеры
           </Link>
@@ -87,7 +111,11 @@ export default function Navigation() {
             <>
               {/* Ссылка на админ-панель (только для администраторов) */}
               {isAdmin && (
-                <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-1 text-pink-400 hover:text-pink-300">
+                <Link 
+                  href="/admin" 
+                  onClick={() => setIsOpen(false)} 
+                  className="flex items-center gap-1 text-pink-400 hover:text-pink-300"
+                >
                   <Shield size={16} className="inline mr-1" />
                   Админ панель
                 </Link>
@@ -96,7 +124,10 @@ export default function Navigation() {
                 <User size={16} className="inline mr-1" />
                 Профиль
               </Link>
-              <button onClick={() => signOut()} className="nav-auth-btn flex items-center gap-1">
+              <button 
+                onClick={() => signOut()} 
+                className="nav-auth-btn flex items-center gap-1"
+              >
                 <LogOut size={16} />
                 Выйти
               </button>

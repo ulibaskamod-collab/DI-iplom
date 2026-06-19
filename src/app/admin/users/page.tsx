@@ -1,12 +1,13 @@
-
 'use client'
+
 export const dynamic = 'force-dynamic'
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Trash2, Shield, User, Edit2, X, Check, Plus, RefreshCw } from 'lucide-react'
+import { ArrowLeft, Trash2, User, Edit2, X, Check, Plus, RefreshCw } from 'lucide-react'
+import { AdminButton } from '@/src/components/AdminButton'
 
 interface User {
   id: string
@@ -44,7 +45,6 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     setLoading(true)
     setError(null)
-    
     try {
       const res = await fetch('/api/admin/users')
       if (!res.ok) {
@@ -67,7 +67,6 @@ export default function AdminUsersPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, name, user_role }),
       })
-      
       if (res.ok) {
         await fetchUsers()
         setEditingUserId(null)
@@ -84,7 +83,6 @@ export default function AdminUsersPage() {
       alert('Нельзя удалить самого себя!')
       return
     }
-    
     if (confirm(`Удалить пользователя ${email}?`)) {
       try {
         const res = await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' })
@@ -102,16 +100,13 @@ export default function AdminUsersPage() {
   const addUser = async (e: React.FormEvent) => {
     e.preventDefault()
     setAdding(true)
-    
     try {
       const res = await fetch('/api/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(addForm),
       })
-      
       const data = await res.json()
-      
       if (res.ok) {
         alert('Пользователь успешно добавлен!')
         setShowAddModal(false)
@@ -139,8 +134,8 @@ export default function AdminUsersPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500" />
       </div>
     )
   }
@@ -148,18 +143,37 @@ export default function AdminUsersPage() {
   return (
     <div>
       {/* Заголовок */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Пользователи</h1>
-          <p className="text-white/50 text-sm mt-1">Управление пользователями и их ролями</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <Link href="/admin" className="text-gray-400 hover:text-white transition p-2 rounded-lg hover:bg-white/5">
+            <ArrowLeft size={20} />
+          </Link>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+              <User className="w-7 h-7 text-cyan-400" />
+              Пользователи
+            </h1>
+            <p className="text-white/40 text-sm mt-0.5">
+              Управление пользователями и их ролями
+            </p>
+          </div>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-green-500 rounded-xl text-white hover:bg-green-600 transition"
-        >
-          <Plus size={18} />
-          Добавить пользователя
-        </button>
+        <div className="flex items-center gap-2">
+          <AdminButton
+            variant="ghost"
+            size="sm"
+            icon={<RefreshCw size={16} />}
+            onClick={fetchUsers}
+            title="Обновить" children={undefined}          />
+          <AdminButton
+            variant="success"
+            size="md"
+            icon={<Plus size={18} />}
+            onClick={() => setShowAddModal(true)}
+          >
+            Добавить пользователя
+          </AdminButton>
+        </div>
       </div>
 
       {/* Статистика */}
@@ -172,33 +186,27 @@ export default function AdminUsersPage() {
               <p className="text-2xl font-bold text-white">{users.length}</p>
             </div>
           </div>
-          <button
-            onClick={fetchUsers}
-            className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
-            title="Обновить"
-          >
-            <RefreshCw size={16} className="text-white/60" />
-          </button>
         </div>
       </div>
 
-      {/* Таблица пользователей */}
+      {/* Список пользователей */}
       {users.length === 0 ? (
-        <div className="text-center py-16 bg-white/5 rounded-2xl">
+        <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
           <User className="w-16 h-16 text-white/20 mx-auto mb-4" />
           <p className="text-white/40">Пользователи не найдены</p>
         </div>
       ) : (
         <div className="bg-white/5 rounded-2xl overflow-hidden border border-white/10">
-          <div className="overflow-x-auto">
+          {/* Десктопная таблица */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-white/10 border-b border-white/10">
                 <tr>
-                  <th className="px-6 py-4 text-left text-white">Имя</th>
-                  <th className="px-6 py-4 text-left text-white">Email</th>
-                  <th className="px-6 py-4 text-left text-white">Роль</th>
-                  <th className="px-6 py-4 text-left text-white">Дата</th>
-                  <th className="px-6 py-4 text-center text-white">Действия</th>
+                  <th className="px-6 py-4 text-left text-white text-xs font-medium uppercase tracking-wider">Имя</th>
+                  <th className="px-6 py-4 text-left text-white text-xs font-medium uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-4 text-left text-white text-xs font-medium uppercase tracking-wider">Роль</th>
+                  <th className="px-6 py-4 text-left text-white text-xs font-medium uppercase tracking-wider">Дата</th>
+                  <th className="px-6 py-4 text-center text-white text-xs font-medium uppercase tracking-wider">Действия</th>
                 </tr>
               </thead>
               <tbody>
@@ -216,9 +224,7 @@ export default function AdminUsersPage() {
                         <span className="text-white font-medium">{user.name || 'Без имени'}</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-white/60">
-                      {user.email}
-                    </td>
+                    <td className="px-6 py-4 text-white/60 text-sm">{user.email}</td>
                     <td className="px-6 py-4">
                       {editingUserId === user.id ? (
                         <select
@@ -226,13 +232,13 @@ export default function AdminUsersPage() {
                           onChange={(e) => setEditForm({ ...editForm, user_role: e.target.value })}
                           className="px-2 py-1 bg-white/10 rounded text-white border border-white/20 focus:outline-none focus:border-pink-500"
                         >
-                          <option value="user">👤 Пользователь</option>
-                          <option value="admin">👑 Администратор</option>
+                          <option value="user" style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>👤 Пользователь</option>
+                          <option value="admin" style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>👑 Администратор</option>
                         </select>
                       ) : (
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          user.user_role === 'admin' 
-                            ? 'bg-green-500/20 text-green-300' 
+                          user.user_role === 'admin'
+                            ? 'bg-green-500/20 text-green-300'
                             : 'bg-blue-500/20 text-blue-300'
                         }`}>
                           {user.user_role === 'admin' ? '👑 Админ' : '👤 Пользователь'}
@@ -240,43 +246,39 @@ export default function AdminUsersPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 text-white/40 text-sm">
-                      {user.created_at ? new Date(user.created_at).toLocaleDateString('ru-RU') : '—'}
+                      {user.created_at ? new Date(user.created_at).toLocaleDateString('ru-RU') : '---'}
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
                         {editingUserId === user.id ? (
                           <>
-                            <button
+                            <AdminButton
+                              variant="success"
+                              size="sm"
+                              icon={<Check size={16} className="text-green-400" />}
                               onClick={() => updateUserRole(user.id, editForm.name, editForm.user_role)}
-                              className="p-2 rounded-lg bg-green-500/20 hover:bg-green-500/40 transition"
-                              title="Сохранить"
-                            >
-                              <Check size={16} className="text-green-400" />
-                            </button>
-                            <button
+                              title="Сохранить" children={undefined}                            />
+                            <AdminButton
+                              variant="ghost"
+                              size="sm"
+                              icon={<X size={16} className="text-gray-400" />}
                               onClick={cancelEdit}
-                              className="p-2 rounded-lg bg-gray-500/20 hover:bg-gray-500/40 transition"
-                              title="Отмена"
-                            >
-                              <X size={16} className="text-gray-400" />
-                            </button>
+                              title="Отмена" children={undefined}                            />
                           </>
                         ) : (
                           <>
-                            <button
-                              onClick={() => startEdit(user)}
-                              className="p-2 rounded-lg bg-white/5 hover:bg-white/20 transition"
-                              title="Редактировать"
-                            >
-                              <Edit2 size={16} className="text-yellow-400" />
-                            </button>
-                            <button
-                              onClick={() => deleteUser(user.id, user.email)}
-                              className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/40 transition"
-                              title="Удалить"
-                            >
-                              <Trash2 size={16} className="text-red-400" />
-                            </button>
+                            <AdminButton
+                                variant="ghost"
+                                size="sm"
+                                icon={<Edit2 size={16} className="text-yellow-400" />}
+                                onClick={() => startEdit(user)}
+                                title="Редактировать" children={undefined}                            />
+                            <AdminButton
+                                variant="danger"
+                                size="sm"
+                                icon={<Trash2 size={16} className="text-red-400" />}
+                                onClick={() => deleteUser(user.id, user.email)}
+                                title="Удалить" children={undefined}                            />
                           </>
                         )}
                       </div>
@@ -286,13 +288,51 @@ export default function AdminUsersPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Мобильные карточки */}
+          <div className="md:hidden divide-y divide-white/5">
+            {users.map((user) => (
+              <div key={user.id} className="p-4 hover:bg-white/5 transition">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-white font-medium truncate">{user.name || 'Без имени'}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                        user.user_role === 'admin'
+                          ? 'bg-green-500/20 text-green-300'
+                          : 'bg-blue-500/20 text-blue-300'
+                      }`}>
+                        {user.user_role === 'admin' ? '👑' : '👤'}
+                      </span>
+                    </div>
+                    <p className="text-white/60 text-sm truncate">{user.email}</p>
+                    <p className="text-white/30 text-xs mt-1">
+                      {user.created_at ? new Date(user.created_at).toLocaleDateString('ru-RU') : '---'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <AdminButton
+                      variant="ghost"
+                      size="sm"
+                      icon={<Edit2 size={15} className="text-yellow-400" />}
+                      onClick={() => startEdit(user)} children={undefined}                    />
+                    <AdminButton
+                      variant="danger"
+                      size="sm"
+                      icon={<Trash2 size={15} className="text-red-400" />}
+                      onClick={() => deleteUser(user.id, user.email)} children={undefined}                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {/* Модальное окно добавления пользователя */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-md border border-white/10">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-2xl p-6 w-full max-w-md border border-white/10 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Добавить пользователя</h2>
               <button
@@ -302,7 +342,7 @@ export default function AdminUsersPage() {
                 <X size={20} className="text-white/60" />
               </button>
             </div>
-            
+
             <form onSubmit={addUser} className="space-y-4">
               <div>
                 <label className="block text-white/70 text-sm mb-1">Имя</label>
@@ -314,7 +354,7 @@ export default function AdminUsersPage() {
                   placeholder="Имя пользователя"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-white/70 text-sm mb-1">Email *</label>
                 <input
@@ -326,7 +366,7 @@ export default function AdminUsersPage() {
                   placeholder="user@example.com"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-white/70 text-sm mb-1">Пароль *</label>
                 <input
@@ -338,7 +378,7 @@ export default function AdminUsersPage() {
                   placeholder="Минимум 6 символов"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-white/70 text-sm mb-1">Роль</label>
                 <select
@@ -346,26 +386,26 @@ export default function AdminUsersPage() {
                   onChange={(e) => setAddForm({ ...addForm, user_role: e.target.value })}
                   className="w-full px-3 py-2 bg-white/10 rounded-lg text-white border border-white/10 focus:outline-none focus:border-pink-500"
                 >
-                  <option value="user">👤 Пользователь</option>
-                  <option value="admin">👑 Администратор</option>
+                  <option value="user" style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>👤 Пользователь</option>
+                  <option value="admin" style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>👑 Администратор</option>
                 </select>
               </div>
-              
+
               <div className="flex gap-3 pt-4">
-                <button
+                <AdminButton
                   type="submit"
+                  variant="success"
+                  fullWidth
                   disabled={adding}
-                  className="flex-1 py-2 bg-green-500 rounded-xl text-white font-semibold hover:bg-green-600 transition disabled:opacity-50"
                 >
                   {adding ? 'Добавление...' : 'Добавить'}
-                </button>
-                <button
-                  type="button"
+                </AdminButton>
+                <AdminButton
+                  variant="ghost"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 bg-white/10 rounded-xl text-white hover:bg-white/20 transition"
                 >
                   Отмена
-                </button>
+                </AdminButton>
               </div>
             </form>
           </div>
