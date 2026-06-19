@@ -94,12 +94,10 @@ export default function Navigation() {
           md:flex md:relative md:bg-transparent md:p-0 md:gap-6 md:border-none md:shadow-none
         `}>
           <Link href="/" onClick={() => setIsOpen(false)}>
-            <Sparkles size={16} className="inline mr-1" />
             Главная
           </Link>
 
           <Link href="/zodiac" onClick={() => setIsOpen(false)}>
-            <Stars size={16} className="inline mr-1" />
             Все знаки
           </Link>
 
