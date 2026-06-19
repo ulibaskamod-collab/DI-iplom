@@ -319,4 +319,37 @@ select option {
   .stats-card {
     padding: 0.75rem !important;
   }
+}/* Адаптивная таблица одежды */
+@media (max-width: 768px) {
+  .admin-table-wrapper {
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+
+  .admin-table {
+    min-width: 550px;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 0.6rem 0.4rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .admin-table .actions-cell {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .admin-table .actions-cell button,
+  .admin-table .actions-cell a {
+    padding: 0.3rem !important;
+  }
+
+  .admin-table .actions-cell svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
 }

@@ -109,50 +109,51 @@ export default function AdminClothingPage() {
           />
         </div>
 
-        <div className="bg-white/5 rounded-2xl overflow-hidden border border-white/10">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-white/10 border-b border-white/10">
-                <tr>
-                  <th className="px-6 py-4 text-left text-white">ID</th>
-                  <th className="px-6 py-4 text-left text-white">Название</th>
-                  <th className="px-6 py-4 text-left text-white">Сезон</th>
-                  <th className="px-6 py-4 text-left text-white">Пол</th>
-                  <th className="px-6 py-4 text-left text-white">Знак ID</th>
-                  <th className="px-6 py-4 text-center text-white">Действия</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredItems.map((item) => (
-                  <tr key={item.id} className="border-b border-white/5 hover:bg-white/5 transition">
-                    <td className="px-6 py-4 text-white/60">{item.id}</td>
-                    <td className="px-6 py-4 text-white font-medium">{item.title || 'Без названия'}</td>
-                    <td className="px-6 py-4 text-white">{getSeasonEmoji(item.season)} {item.season}</td>
-                    <td className="px-6 py-4 text-white">
-                      {item.gender === 'female' ? ' Женский' : item.gender === 'male' ? ' Мужской' : ' Унисекс'}
-                    </td>
-                    
-                    <td className="px-6 py-4 text-white/60">{item.zodiac_sign_id}</td>
-                    <td className="px-6 py-4 text-center">
-  <div className="flex items-center justify-center gap-2">
-    <Link href={`/admin/clothing/${item.id}/edit`}>
-      <button className="p-2 rounded-lg bg-white/5 hover:bg-green-500/20 transition" title="Редактировать">
-        <Edit size={16} className="text-green-400" />
-      </button>
-    </Link>
-    <button
-      onClick={() => deleteItem(item.id)}
-      className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/40 transition"
-      title="Удалить"
-    >
-      <Trash2 size={16} className="text-red-400" />
-    </button>
-  </div>
-</td>
+        <div className="admin-table-wrapper">
+          <div className="bg-white/5 rounded-2xl overflow-hidden border border-white/10">
+            <div className="overflow-x-auto">
+              <table className="admin-table w-full">
+                <thead className="bg-white/10 border-b border-white/10">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-white">ID</th>
+                    <th className="px-6 py-4 text-left text-white">Название</th>
+                    <th className="px-6 py-4 text-left text-white">Сезон</th>
+                    <th className="px-6 py-4 text-left text-white">Пол</th>
+                    <th className="px-6 py-4 text-left text-white">Знак ID</th>
+                    <th className="px-6 py-4 text-center text-white">Действия</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredItems.map((item) => (
+                    <tr key={item.id} className="border-b border-white/5 hover:bg-white/5 transition">
+                      <td className="px-6 py-4 text-white/60">{item.id}</td>
+                      <td className="px-6 py-4 text-white font-medium">{item.title || 'Без названия'}</td>
+                      <td className="px-6 py-4 text-white">{getSeasonEmoji(item.season)} {item.season}</td>
+                      <td className="px-6 py-4 text-white">
+                        {item.gender === 'female' ? '👩 Женский' : item.gender === 'male' ? '👨 Мужской' : '👥 Унисекс'}
+                      </td>
+                      <td className="px-6 py-4 text-white/60">{item.zodiac_sign_id}</td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <Link href={`/admin/clothing/${item.id}/edit`}>
+                            <button className="p-2 rounded-lg bg-white/5 hover:bg-green-500/20 transition" title="Редактировать">
+                              <Edit size={16} className="text-green-400" />
+                            </button>
+                          </Link>
+                          <button
+                            onClick={() => deleteItem(item.id)}
+                            className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/40 transition"
+                            title="Удалить"
+                          >
+                            <Trash2 size={16} className="text-red-400" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 

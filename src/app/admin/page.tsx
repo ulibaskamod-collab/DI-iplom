@@ -104,18 +104,19 @@ export default function AdminPage() {
       </div>
 
       {/* Карточки статистики */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-        {statsCards.map((stat) => (
-          <div
-            key={stat.title}
-            className={`bg-gradient-to-br ${stat.bg} rounded-2xl p-4 border ${stat.border}`}
-          >
-            <stat.icon className={`w-8 h-8 ${stat.text} mb-2`} />
-            <p className="text-2xl font-bold text-white">{stat.value}</p>
-            <p className="text-white/50 text-sm">{stat.title}</p>
-          </div>
-        ))}
-      </div>
+// Замените grid на:
+<div className="stats-grid grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+  {statsCards.map((stat) => (
+    <div
+      key={stat.title}
+      className={`stats-card bg-gradient-to-br ${stat.bg} rounded-2xl p-4 border ${stat.border}`}
+    >
+      <stat.icon className={`stats-icon w-8 h-8 ${stat.text} mb-2`} />
+      <p className="stats-value text-2xl font-bold text-white">{stat.value}</p>
+      <p className="stats-label text-white/50 text-sm">{stat.title}</p>
+    </div>
+  ))}
+</div>
 
       {/* Меню-карточки */}
       {error && (
