@@ -352,4 +352,88 @@ select option {
     width: 14px !important;
     height: 14px !important;
   }
+}/* Админ-панель - мобильная адаптация */
+@media (max-width: 640px) {
+  .admin-page .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+
+  .admin-page .stats-card {
+    padding: 1rem !important;
+  }
+
+  .admin-page .stats-card .stats-value {
+    font-size: 1.25rem !important;
+  }
+
+  .admin-page .stats-card .stats-label {
+    font-size: 0.65rem !important;
+  }
+
+  .admin-page .menu-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .admin-page .menu-card {
+    padding: 1rem !important;
+  }
+
+  .admin-page .menu-card .menu-icon {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+  }
+
+  .admin-page .menu-card .menu-title {
+    font-size: 1rem !important;
+  }
+
+  .admin-page .menu-card .menu-description {
+    font-size: 0.8rem !important;
+  }
+
+  /* Таблицы */
+  .admin-table-wrapper {
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+
+  .admin-table {
+    min-width: 500px;
+    font-size: 0.75rem !important;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 0.5rem 0.4rem !important;
+  }
+
+  .admin-table .actions-cell {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .admin-table .actions-cell button,
+  .admin-table .actions-cell a {
+    padding: 0.3rem !important;
+  }
+
+  .admin-table .actions-cell svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+}
+
+/* Планшеты */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .admin-page .stats-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .admin-page .menu-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
 }
