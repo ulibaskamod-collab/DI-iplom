@@ -135,23 +135,7 @@ function ClothingCard({ item, idx }: { item: any; idx: number }) {
           </div>
 
           {/* Кнопка "Быстрый просмотр" - ТЕПЕРЬ РАБОТАЕТ */}
-          <AnimatePresence>
-            {isHovered && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2"
-              >
-                <button 
-                  onClick={() => setShowModal(true)}
-                  className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium hover:bg-white/30 transition"
-                >
-                  Быстрый просмотр
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+
         </div>
 
         <div className="p-4">
