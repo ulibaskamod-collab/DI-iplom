@@ -4,10 +4,11 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { 
-  Shield, Home, Star, Shirt, Palette, Users, Heart, 
-  LogOut, Menu, X, ChevronRight 
+import {
+  Shield, Home, Star, Shirt, Palette, Users, Heart,
+  LogOut, Menu, X, ChevronRight, Sparkles
 } from 'lucide-react'
+import { AdminButton } from '@/src/components/AdminButton'
 
 export default function AdminLayout({
   children,
@@ -23,14 +24,15 @@ export default function AdminLayout({
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024)
-      if (window.innerWidth >= 1024) {
+      const mobile = window.innerWidth < 1024
+      setIsMobile(mobile)
+      if (!mobile) {
         setSidebarOpen(true)
       } else {
         setSidebarOpen(false)
       }
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
@@ -71,7 +73,7 @@ export default function AdminLayout({
   if (status === 'loading' || checking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500" />
       </div>
     )
   }
@@ -93,26 +95,34 @@ export default function AdminLayout({
 
   return (
     <div className="admin-page min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
-      {/* Кнопка меню для мобильных и планшетов */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2.5 bg-gray-800/90 backdrop-blur-sm rounded-xl text-white border border-white/10 hover:bg-gray-700/90 transition-all duration-200 shadow-lg"
-          aria-label="Toggle menu"
-        >
-          {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
-      </div>
+      {/* Верхняя панель для мобильных */}
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-xl border-b border-white/10 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <Link href="/admin" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center shadow-lg shadow-pink-500/25">
+              <Shield className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-white font-bold text-sm">Admin Panel</span>
+          </Link>
+          
+          <AdminButton
+            variant="ghost"
+            size="sm"
+            icon={sidebarOpen ? <X size={22} /> : <Menu size={22} />}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="Toggle menu" children={undefined}          />
+        </div>
+      </header>
 
       {/* Затемнение */}
       {sidebarOpen && isMobile && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Сайдбар */}
       <div className={`
         fixed top-0 left-0 h-full w-[280px] bg-gray-900/95 backdrop-blur-xl border-r border-white/10 z-50
         transition-transform duration-300 ease-in-out
@@ -122,9 +132,9 @@ export default function AdminLayout({
       `}>
         {/* Логотип */}
         <div className="p-5 border-b border-white/10">
-          <Link 
-            href="/admin" 
-            className="flex items-center gap-3" 
+          <Link
+            href="/admin"
+            className="flex items-center gap-3"
             onClick={() => isMobile && setSidebarOpen(false)}
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center shadow-lg shadow-pink-500/25">
@@ -138,7 +148,7 @@ export default function AdminLayout({
         </div>
 
         {/* Меню */}
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1.5">
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1.5 admin-sidebar">
           {menuItems.map((item) => (
             <Link
               key={item.href}
@@ -178,6 +188,7 @@ export default function AdminLayout({
 
       {/* Основной контент */}
       <div className="lg:ml-[280px] min-h-screen">
+        <div className="lg:hidden h-[64px]" />
         <div className="p-4 sm:p-6 md:p-8">
           <div className="max-w-7xl mx-auto">
             {children}
