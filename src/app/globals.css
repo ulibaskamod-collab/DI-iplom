@@ -118,28 +118,55 @@ input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: #ec4899;
 }
-/* Исправление для селектов в админке */
-select {
-  color: #ffffff !important;
-  background-color: rgba(255, 255, 255, 0.1) !important;
+
+/* Стили для форм и селектов в админ-панели */
+select option {
+  background-color: #1a1a2e;
+  color: #ffffff;
 }
 
+/* Для всех селектов в админке */
+.admin-page select,
+.admin-page select option,
 select option {
   background-color: #1a1a2e !important;
   color: #ffffff !important;
-  padding: 8px 12px;
 }
 
-select option:hover {
-  background-color: #2a2a4e !important;
+/* Стили для инпутов в админке */
+.admin-page input,
+.admin-page textarea,
+.admin-page select {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
-/* Для всех селектов в bg-white/10 */
-.bg-white\\/10 select {
+.admin-page input::placeholder,
+.admin-page textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.admin-page input:focus,
+.admin-page textarea:focus,
+.admin-page select:focus {
+  border-color: #ec4899 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2) !important;
+}
+
+/* Стили для селектов в формах добавления */
+.bg-white\/10 select,
+.bg-white\/10 select option {
+  background-color: #1a1a2e !important;
   color: #ffffff !important;
 }
 
-.bg-white\\/10 select option {
+.bg-white\/10 select {
+  color: #ffffff !important;
+}
+
+.bg-white\/10 select option {
   background-color: #1a1a2e !important;
   color: #ffffff !important;
 }
