@@ -258,3 +258,6 @@ export default function AdminPage() {
     </div>
   )
 }
+
+
+export const dynamic = 'force-dynamic'
