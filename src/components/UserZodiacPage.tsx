@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Heart, Sparkles, Star, ShoppingBag, 
-  Quote, Eye
+  Quote, Eye, X
 } from 'lucide-react'
 
 // Компонент кнопки избранного
@@ -63,7 +63,7 @@ function FavoriteButton({ itemId }: { itemId: number }) {
   )
 }
 
-// Компонент карточки одежды
+// Компонент карточки одежды (с работающим "Быстрый просмотр")
 function ClothingCard({ item, idx }: { item: any; idx: number }) {
   const [imgError, setImgError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
@@ -134,7 +134,7 @@ function ClothingCard({ item, idx }: { item: any; idx: number }) {
             </span>
           </div>
 
-          {/* Кнопка "Быстрый просмотр" - теперь работает */}
+          {/* Кнопка "Быстрый просмотр" - ТЕПЕРЬ РАБОТАЕТ */}
           <AnimatePresence>
             {isHovered && (
               <motion.div
@@ -172,49 +172,66 @@ function ClothingCard({ item, idx }: { item: any; idx: number }) {
       </motion.div>
 
       {/* Модальное окно "Быстрый просмотр" */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={() => setShowModal(false)}>
-          <div className="bg-gray-900 rounded-2xl max-w-md w-full p-6 border border-white/10" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-bold text-white">{item.title || 'Без названия'}</h2>
-              <button onClick={() => setShowModal(false)} className="text-white/50 hover:text-white">
-                ✕
-              </button>
-            </div>
-            
-            {item.image_url && (
-              <div className="aspect-square bg-gradient-to-br from-white/5 to-white/10 rounded-xl overflow-hidden mb-4">
-                <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
-              </div>
-            )}
-            
-            {item.description && (
-              <p className="text-white/70 text-sm mb-3">{item.description}</p>
-            )}
-            
-            <div className="flex flex-wrap gap-2 mb-4">
-              {item.season && (
-                <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/60">
-                  {item.season === 'winter' && '❄️ Зима'}
-                  {item.season === 'spring' && '🌸 Весна'}
-                  {item.season === 'summer' && '☀️ Лето'}
-                  {item.season === 'autumn' && '🍂 Осень'}
-                </span>
-              )}
-              <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/60">
-                {item.gender === 'female' ? '👩 Женский' : item.gender === 'male' ? '👨 Мужской' : '👥 Унисекс'}
-              </span>
-            </div>
-            
-            <button
-              onClick={() => setShowModal(false)}
-              className="w-full py-2 bg-pink-500 rounded-xl text-white font-medium hover:bg-pink-600 transition"
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
+            onClick={() => setShowModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-900 rounded-2xl max-w-md w-full p-6 border border-white/10"
+              onClick={(e) => e.stopPropagation()}
             >
-              Закрыть
-            </button>
-          </div>
-        </div>
-      )}
+              <div className="flex justify-between items-start mb-4">
+                <h2 className="text-xl font-bold text-white">{item.title || 'Без названия'}</h2>
+                <button 
+                  onClick={() => setShowModal(false)} 
+                  className="text-white/50 hover:text-white transition"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              {item.image_url && (
+                <div className="aspect-square bg-gradient-to-br from-white/5 to-white/10 rounded-xl overflow-hidden mb-4">
+                  <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+              
+              {item.description && (
+                <p className="text-white/70 text-sm mb-3">{item.description}</p>
+              )}
+              
+              <div className="flex flex-wrap gap-2 mb-4">
+                {item.season && (
+                  <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/60">
+                    {item.season === 'winter' && '❄️ Зима'}
+                    {item.season === 'spring' && '🌸 Весна'}
+                    {item.season === 'summer' && '☀️ Лето'}
+                    {item.season === 'autumn' && '🍂 Осень'}
+                  </span>
+                )}
+                <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/60">
+                  {item.gender === 'female' ? '👩 Женский' : item.gender === 'male' ? '👨 Мужской' : '👥 Унисекс'}
+                </span>
+              </div>
+              
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-full py-2 bg-pink-500 rounded-xl text-white font-medium hover:bg-pink-600 transition"
+              >
+                Закрыть
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

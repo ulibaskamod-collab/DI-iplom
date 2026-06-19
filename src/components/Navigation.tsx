@@ -56,12 +56,10 @@ export default function Navigation() {
 
         <div className={`nav-links ${isOpen ? 'max-md:flex max-md:flex-col max-md:absolute max-md:top-full max-md:left-0 max-md:right-0 max-md:bg-purple-900/95 max-md:p-4 max-md:gap-3' : 'max-md:hidden'}`}>
           <Link href="/" onClick={() => setIsOpen(false)}>
-            <Sparkles size={16} className="inline mr-1" />
             Главная
           </Link>
           
           <Link href="/zodiac" onClick={() => setIsOpen(false)}>
-            <Stars size={16} className="inline mr-1" />
             Все знаки
           </Link>
           
