@@ -118,3 +118,28 @@ input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: #ec4899;
 }
+/* Исправление для селектов в админке */
+select {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+select option {
+  background-color: #1a1a2e !important;
+  color: #ffffff !important;
+  padding: 8px 12px;
+}
+
+select option:hover {
+  background-color: #2a2a4e !important;
+}
+
+/* Для всех селектов в bg-white/10 */
+.bg-white\\/10 select {
+  color: #ffffff !important;
+}
+
+.bg-white\\/10 select option {
+  background-color: #1a1a2e !important;
+  color: #ffffff !important;
+}

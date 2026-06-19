@@ -72,7 +72,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
+    <div className="admin-page min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
       {/* Sidebar */}
       <div className="fixed left-0 top-0 h-full w-64 bg-black/30 backdrop-blur-md border-r border-white/10 z-50">
         <div className="p-6">

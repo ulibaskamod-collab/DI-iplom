@@ -218,11 +218,12 @@ export default function AddClothingPage() {
                   value={formData.season}
                   onChange={(e) => setFormData({ ...formData, season: e.target.value })}
                   className="w-full px-4 py-3 bg-white/10 rounded-xl text-white border border-white/10 focus:outline-none focus:border-green-500 transition cursor-pointer"
+                  style={{ color: '#ffffff' }}
                 >
-                  <option value="summer">☀️ Лето</option>
-                  <option value="winter">❄️ Зима</option>
-                  <option value="spring">🌸 Весна</option>
-                  <option value="autumn">🍂 Осень</option>
+                  <option value="summer" style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>☀️ Лето</option>
+                  <option value="winter" style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>❄️ Зима</option>
+                  <option value="spring" style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>🌸 Весна</option>
+                  <option value="autumn" style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>🍂 Осень</option>
                 </select>
               </div>
               <div>
@@ -231,10 +232,11 @@ export default function AddClothingPage() {
                   value={formData.gender}
                   onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                   className="w-full px-4 py-3 bg-white/10 rounded-xl text-white border border-white/10 focus:outline-none focus:border-green-500 transition cursor-pointer"
+                  style={{ color: '#ffffff' }}
                 >
-                  <option value="unisex">👥 Унисекс</option>
-                  <option value="female">👩 Женский</option>
-                  <option value="male">👨 Мужской</option>
+                  <option value="unisex" style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>👥 Унисекс</option>
+                  <option value="female" style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>👩 Женский</option>
+                  <option value="male" style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>👨 Мужской</option>
                 </select>
               </div>
             </div>
@@ -246,10 +248,11 @@ export default function AddClothingPage() {
                 value={formData.zodiac_sign_id}
                 onChange={(e) => setFormData({ ...formData, zodiac_sign_id: e.target.value })}
                 className="w-full px-4 py-3 bg-white/10 rounded-xl text-white border border-white/10 focus:outline-none focus:border-green-500 transition cursor-pointer"
+                style={{ color: '#ffffff' }}
               >
-                <option value="">Выберите знак...</option>
+                <option value="" style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>Выберите знак...</option>
                 {zodiacSigns.map((sign) => (
-                  <option key={sign.id} value={sign.id}>
+                  <option key={sign.id} value={sign.id} style={{ backgroundColor: '#1a1a2e', color: '#ffffff' }}>
                     {sign.name}
                   </option>
                 ))}
