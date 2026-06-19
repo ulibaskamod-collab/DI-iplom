@@ -170,3 +170,153 @@ select option {
   background-color: #1a1a2e !important;
   color: #ffffff !important;
 }
+/* Адаптивные таблицы для админки */
+@media (max-width: 768px) {
+  .admin-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+
+  .admin-table {
+    min-width: 600px;
+    width: 100%;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 0.75rem 0.5rem !important;
+    font-size: 0.8rem !important;
+    white-space: nowrap;
+  }
+
+  .admin-table .actions-cell {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .admin-table .actions-cell button,
+  .admin-table .actions-cell a {
+    padding: 0.4rem !important;
+  }
+
+  /* Карточки вместо таблиц на мобильных */
+  .admin-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .admin-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .admin-card .card-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .admin-card .card-row:last-child {
+    border-bottom: none;
+  }
+
+  .admin-card .card-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+  }
+
+  .admin-card .card-value {
+    color: white;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-align: right;
+    word-break: break-word;
+    max-width: 60%;
+  }
+}
+
+/* Адаптивные формы */
+@media (max-width: 768px) {
+  .admin-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-form input,
+  .admin-form textarea,
+  .admin-form select {
+    font-size: 16px !important; /* Предотвращает зум на iOS */
+    padding: 0.75rem !important;
+  }
+
+  .admin-form label {
+    font-size: 0.9rem !important;
+  }
+
+  .admin-form .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .admin-form .form-actions button,
+  .admin-form .form-actions a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Модальные окна на мобильных */
+  .admin-modal {
+    margin: 1rem !important;
+    max-width: 100% !important;
+    border-radius: 1rem !important;
+  }
+
+  .admin-modal .modal-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.5rem;
+  }
+}
+
+/* Статистика на мобильных */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+
+  .stats-card {
+    padding: 1rem !important;
+  }
+
+  .stats-card .stats-icon {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+
+  .stats-card .stats-value {
+    font-size: 1.5rem !important;
+  }
+
+  .stats-card .stats-label {
+    font-size: 0.7rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+  }
+
+  .stats-card {
+    padding: 0.75rem !important;
+  }
+}
