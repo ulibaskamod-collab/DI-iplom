@@ -42,6 +42,20 @@ export default function Navigation() {
     createStars()
   }, [])
 
+  // Если сессия еще загружается, показываем упрощенную навигацию
+  if (status === 'loading') {
+    return (
+      <nav className="navbar">
+        <div className="nav-container">
+          <Link href="/" className="nav-logo flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-pink-400" />
+            StellarFit
+          </Link>
+        </div>
+      </nav>
+    )
+  }
+
   return (
     <nav className="navbar">
       <div className="nav-container">
@@ -56,10 +70,12 @@ export default function Navigation() {
 
         <div className={`nav-links ${isOpen ? 'max-md:flex max-md:flex-col max-md:absolute max-md:top-full max-md:left-0 max-md:right-0 max-md:bg-purple-900/95 max-md:p-4 max-md:gap-3' : 'max-md:hidden'}`}>
           <Link href="/" onClick={() => setIsOpen(false)}>
+            <Sparkles size={16} className="inline mr-1" />
             Главная
           </Link>
           
           <Link href="/zodiac" onClick={() => setIsOpen(false)}>
+            <Stars size={16} className="inline mr-1" />
             Все знаки
           </Link>
           

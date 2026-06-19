@@ -134,7 +134,6 @@ function ClothingCard({ item, idx }: { item: any; idx: number }) {
             </span>
           </div>
 
-          {/* Кнопка "Быстрый просмотр" - ТЕПЕРЬ РАБОТАЕТ */}
 
         </div>
 
