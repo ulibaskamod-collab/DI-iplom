@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic'
-
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { Pool } from 'pg'
@@ -11,6 +9,22 @@ const pool = new Pool({
     rejectUnauthorized: false,
   },
 })
+
+// Маппинг знаков на slugs
+const zodiacSlugs: Record<string, string> = {
+  'Овен': 'oven',
+  'Телец': 'telec',
+  'Близнецы': 'bliznetsy',
+  'Рак': 'rak',
+  'Лев': 'lev',
+  'Дева': 'deva',
+  'Весы': 'vesy',
+  'Скорпион': 'skorpion',
+  'Стрелец': 'strelets',
+  'Козерог': 'kozerog',
+  'Водолей': 'vodoley',
+  'Рыбы': 'ryby',
+}
 
 export async function GET() {
   try {
@@ -27,21 +41,6 @@ export async function GET() {
 
     const user = result.rows[0]
 
-    const slugs: Record<string, string> = {
-      'Овен': 'oven',
-      'Телец': 'telec',
-      'Близнецы': 'bliznetsy',
-      'Рак': 'rak',
-      'Лев': 'lev',
-      'Дева': 'deva',
-      'Весы': 'vesy',
-      'Скорпион': 'skorpion',
-      'Стрелец': 'strelets',
-      'Козерог': 'kozerog',
-      'Водолей': 'vodoley',
-      'Рыбы': 'ryby',
-    }
-
     if (!user || !user.zodiac_sign) {
       return NextResponse.json({
         zodiac_sign: null,
@@ -50,7 +49,7 @@ export async function GET() {
       })
     }
 
-    const slug = slugs[user.zodiac_sign]
+    const slug = zodiacSlugs[user.zodiac_sign]
 
     return NextResponse.json({
       zodiac_sign: user.zodiac_sign,
