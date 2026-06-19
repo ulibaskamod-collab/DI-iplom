@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { 
   Users, Star, Shirt, Palette, Heart, 
-  RefreshCw, TrendingUp, ArrowRight 
+  RefreshCw, TrendingUp, ArrowRight, Sparkles
 } from 'lucide-react'
 
 export default function AdminPage() {
@@ -21,6 +21,7 @@ export default function AdminPage() {
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -46,6 +47,7 @@ export default function AdminPage() {
         designers: data.designers || 0,
         favorites: data.favorites || 0,
       })
+      setLastUpdated(new Date())
     } catch (error) {
       console.error('Error fetching stats:', error)
       setError('Не удалось загрузить статистику')
@@ -184,13 +186,28 @@ export default function AdminPage() {
             Добро пожаловать, {session?.user?.email}
           </p>
         </div>
-        <button
-          onClick={fetchStats}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-all duration-200 text-sm border border-white/10 hover:border-white/20 shrink-0"
-        >
-          <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-          Обновить
-        </button>
+        
+        {/* Кнопка обновления - красивая и интегрированная */}
+        <div className="flex items-center gap-3">
+          {lastUpdated && (
+            <span className="text-white/30 text-xs hidden sm:block">
+              Обновлено: {lastUpdated.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+          <button
+            onClick={fetchStats}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500/20 to-purple-500/20 hover:from-pink-500/30 hover:to-purple-500/30 rounded-xl text-white/80 hover:text-white transition-all duration-200 border border-white/10 hover:border-pink-500/30 shadow-lg shadow-pink-500/5 group"
+          >
+            <RefreshCw 
+              size={16} 
+              className={`${loading ? 'animate-spin' : 'group-hover:rotate-180'} transition-transform duration-500`} 
+            />
+            <span className="text-sm font-medium">
+              {loading ? 'Обновление...' : 'Обновить'}
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Статистика */}
@@ -205,9 +222,12 @@ export default function AdminPage() {
         {statsCards.map((stat) => (
           <div
             key={stat.title}
-            className={`bg-gradient-to-br ${stat.bg} rounded-2xl p-4 border ${stat.border} hover:scale-[1.02] transition-transform duration-200`}
+            className={`bg-gradient-to-br ${stat.bg} rounded-2xl p-4 border ${stat.border} hover:scale-[1.02] transition-transform duration-200 group`}
           >
-            <stat.icon className={`w-6 h-6 ${stat.text} mb-2`} />
+            <div className="flex items-center justify-between">
+              <stat.icon className={`w-6 h-6 ${stat.text} mb-2`} />
+              <span className="text-[10px] text-white/20 group-hover:text-white/40 transition-colors">↑</span>
+            </div>
             <p className="text-2xl font-bold text-white">{stat.value}</p>
             <p className="text-white/50 text-xs truncate">{stat.title}</p>
           </div>
@@ -223,10 +243,10 @@ export default function AdminPage() {
             className={`group ${item.bg} rounded-2xl p-6 border border-white/5 hover:border-white/20 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/20`}
           >
             <div className="flex items-start justify-between">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg`}>
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg shadow-black/20 group-hover:shadow-pink-500/20 transition-shadow`}>
                 <item.icon className="w-6 h-6 text-white" />
               </div>
-              <ArrowRight className="w-5 h-5 text-white/20 group-hover:text-white/50 transition-colors" />
+              <ArrowRight className="w-5 h-5 text-white/20 group-hover:text-white/50 transition-colors group-hover:translate-x-1 transform" />
             </div>
             <h3 className="text-lg font-semibold text-white mt-4 group-hover:text-pink-400 transition-colors">
               {item.title}
