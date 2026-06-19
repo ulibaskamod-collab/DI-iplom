@@ -1,4 +1,3 @@
-// src/components/ImageUploadField.tsx
 'use client'
 
 import { useImageUpload } from '@/src/lib/hooks/useImageUpload'
