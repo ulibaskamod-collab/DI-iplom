@@ -68,9 +68,9 @@ export default function Navigation() {
   const isAuthenticated = status === 'authenticated'
   
   const menuItems = [
-    { href: '/', label: 'Главная', icon: Home, color: 'text-blue-400' },
-    { href: '/zodiac', label: 'Все знаки', icon: Star, color: 'text-yellow-400' },
-    { href: '/designers', label: 'Дизайнеры', icon: Palette, color: 'text-purple-400' },
+    { href: '/', label: 'Главная',  color: 'text-blue-400' },
+    { href: '/zodiac', label: 'Все знаки',  color: 'text-yellow-400' },
+    { href: '/designers', label: 'Дизайнеры',color: 'text-purple-400' },
   ]
 
   const adminItems = [
