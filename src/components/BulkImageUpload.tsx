@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Upload, X, Loader2, Copy, Trash2, Plus, Image as ImageIcon, Sparkles, ChevronDown, ChevronUp } from 'lucide-react'
+import { Upload, X, Loader2, Trash2, Plus, Image as ImageIcon, ChevronDown, ChevronUp } from 'lucide-react'
 
 interface BulkImageUploadProps {
   folder: 'clothing' | 'designers' | 'works'
@@ -11,7 +11,6 @@ interface BulkImageUploadProps {
 
 interface Template {
   id: string
-  // Для одежды
   name: string
   description: string
   gender: string
@@ -21,10 +20,8 @@ interface Template {
   images: File[]
   imagePreviews: string[]
   uploadedImages: string[]
-  // Для дизайнеров
   designer_name: string
   bio: string
-  // Для работ
   designer_id: number
   work_title: string
 }
@@ -55,7 +52,6 @@ export function BulkImageUpload({
   const [designers, setDesigners] = useState<{id: number, designer_name: string}[]>([])
   const [expandedTemplates, setExpandedTemplates] = useState<Set<string>>(new Set())
   
-  // Массовые настройки
   const [bulkSettings, setBulkSettings] = useState({
     gender: 'unisex',
     zodiac_sign_id: 0,
@@ -92,7 +88,6 @@ export function BulkImageUpload({
     }
   }, [folder])
 
-  // Создать шаблон
   const createTemplate = (): Template => {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 4)
     
@@ -157,7 +152,6 @@ export function BulkImageUpload({
 
   const removeTemplate = (index: number) => {
     const newTemplates = [...templates]
-    // Освобождаем память от превью
     newTemplates[index].imagePreviews.forEach(p => URL.revokeObjectURL(p))
     newTemplates.splice(index, 1)
     setTemplates(newTemplates)
@@ -179,7 +173,6 @@ export function BulkImageUpload({
     setTemplates(newTemplates)
   }
 
-  // Применить настройки ко всем шаблонам
   const applyBulkSettings = () => {
     const newTemplates = templates.map(t => ({
       ...t,
@@ -194,10 +187,12 @@ export function BulkImageUpload({
     setTimeout(() => setSuccess(null), 3000)
   }
 
-  // Загрузить фото для шаблона
+  // ===== ГЛАВНОЕ: ЗАГРУЗКА ФОТО В ШАБЛОН =====
   const handleImagesSelect = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || [])
     setError(null)
+
+    if (selectedFiles.length === 0) return
 
     // Проверяем каждый файл
     for (const file of selectedFiles) {
@@ -221,7 +216,11 @@ export function BulkImageUpload({
       imagePreviews: [...newTemplates[index].imagePreviews, ...newPreviews]
     }
     setTemplates(newTemplates)
+    
+    // Очищаем input, чтобы можно было загрузить снова
     e.target.value = ''
+    
+    console.log(`✅ Добавлено ${selectedFiles.length} фото в шаблон ${index+1}`)
   }
 
   const removeImage = (templateIndex: number, imageIndex: number) => {
@@ -241,14 +240,14 @@ export function BulkImageUpload({
     setSuccess(null)
   }
 
-  // Загрузить все
+  // ===== ЗАГРУЗКА ВСЕГО =====
   const uploadAll = async () => {
     if (templates.length === 0) {
       setError('Сначала создайте шаблоны')
       return
     }
 
-    // Проверка заполнения обязательных полей
+    // Проверка заполнения
     for (let i = 0; i < templates.length; i++) {
       const t = templates[i]
       
@@ -265,14 +264,8 @@ export function BulkImageUpload({
         return
       }
       
-      // Для одежды и работ проверяем, что есть хотя бы одно фото
-      if ((folder === 'clothing' || folder === 'works') && t.images.length === 0) {
+      if (t.images.length === 0) {
         setError(`Шаблон ${i+1}: не загружено ни одного фото`)
-        return
-      }
-      // Для дизайнеров проверяем, что есть фото
-      if (folder === 'designers' && t.images.length === 0) {
-        setError(`Шаблон ${i+1}: не загружено фото дизайнера`)
         return
       }
     }
@@ -286,28 +279,21 @@ export function BulkImageUpload({
     const totalImages = templates.reduce((acc, t) => acc + t.images.length, 0)
     let uploadedSoFar = 0
 
-    // Проходим по каждому шаблону
     for (let tIndex = 0; tIndex < templates.length; tIndex++) {
       const template = templates[tIndex]
       const uploadedImages: string[] = []
 
-      console.log(`📤 Загрузка шаблона ${tIndex + 1}:`, template)
-
-      // Загружаем все фото для этого шаблона
       for (let i = 0; i < template.images.length; i++) {
         const formData = new FormData()
         formData.append('image', template.images[i])
         formData.append('folder', folder)
 
         try {
-          console.log(`📤 Загрузка фото ${i+1} из ${template.images.length} для шаблона ${tIndex+1}`)
-          
           const response = await fetch('/api/admin/upload', {
             method: 'POST',
             body: formData,
           })
           const data = await response.json()
-          console.log(`📥 Ответ загрузки фото:`, data)
           
           if (data.success) {
             uploadedImages.push(data.url)
@@ -323,32 +309,20 @@ export function BulkImageUpload({
         }
       }
 
-      // Сохраняем шаблон с загруженными фото
       if (uploadedImages.length > 0) {
         let endpoint = ''
         let payload: any = {}
 
         if (folder === 'clothing') {
           endpoint = '/api/admin/bulk-clothing'
-          payload = {
-            templates: [template],
-            images: uploadedImages
-          }
+          payload = { templates: [template], images: uploadedImages }
         } else if (folder === 'designers') {
           endpoint = '/api/admin/bulk-designers'
-          payload = {
-            templates: [template],
-            images: uploadedImages
-          }
+          payload = { templates: [template], images: uploadedImages }
         } else if (folder === 'works') {
           endpoint = '/api/admin/bulk-works'
-          payload = {
-            templates: [template],
-            images: uploadedImages
-          }
+          payload = { templates: [template], images: uploadedImages }
         }
-
-        console.log(`📤 Отправка в API ${endpoint}:`, payload)
 
         try {
           const saveResponse = await fetch(endpoint, {
@@ -358,7 +332,6 @@ export function BulkImageUpload({
           })
 
           const saveData = await saveResponse.json()
-          console.log(`📥 Ответ API ${endpoint}:`, saveData)
 
           if (saveResponse.ok) {
             allUploadedData.push({
@@ -385,13 +358,13 @@ export function BulkImageUpload({
 
     const totalSaved = allUploadedData.reduce((acc, d) => acc + (d.saved ? d.saved.length : 0), 0)
     if (totalSaved > 0) {
-      setSuccess(`✅ Успешно загружено и сохранено ${totalSaved} записей в ${allUploadedData.length} шаблонах!`)
+      setSuccess(`✅ Успешно загружено и сохранено ${totalSaved} записей!`)
     } else if (allUploadedData.length > 0) {
-      setSuccess(`⚠️ Фото загружены, но не сохранены в БД. Проверьте консоль для ошибок.`)
+      setSuccess(`⚠️ Фото загружены, но не сохранены в БД. Проверьте консоль.`)
     }
   }
 
-  // Рендер шаблона
+  // ===== РЕНДЕР ШАБЛОНА =====
   const renderTemplate = (template: Template, index: number) => {
     const isExpanded = expandedTemplates.has(template.id)
     const hasImages = template.imagePreviews.length > 0
@@ -399,7 +372,6 @@ export function BulkImageUpload({
 
     return (
       <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
-        {/* Заголовок шаблона */}
         <div 
           className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/5 transition"
           onClick={() => toggleTemplate(template.id)}
@@ -432,7 +404,6 @@ export function BulkImageUpload({
           </div>
         </div>
 
-        {/* Содержимое шаблона (развернуто) */}
         {isExpanded && (
           <div className="p-4 pt-0 border-t border-white/5">
             <div className="space-y-3 mt-3">
@@ -550,7 +521,7 @@ export function BulkImageUpload({
                 </>
               )}
 
-              {/* Загрузка фото (для одежды и работ - много фото, для дизайнеров - одно) */}
+              {/* ===== ЗАГРУЗКА ФОТО ===== */}
               {!isDesignerMode && (
                 <div className="bg-white/5 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-2">
@@ -670,7 +641,7 @@ export function BulkImageUpload({
         </div>
       )}
 
-      {/* Массовые настройки (только для одежды и работ) */}
+      {/* Массовые настройки */}
       {(folder === 'clothing' || folder === 'works') && templates.length > 0 && (
         <div className="bg-white/5 rounded-xl p-4 border border-white/10">
           <div className="flex items-center justify-between mb-3">
