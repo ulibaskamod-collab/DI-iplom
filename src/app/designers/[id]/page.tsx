@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Palette, Globe, Star, Shirt, ImageIcon } from 'lucide-react'
+import { ArrowLeft, Palette, Globe, Star, Shirt, ImageIcon, Loader2 } from 'lucide-react'
 
 interface Designer {
   id: number
@@ -32,22 +32,38 @@ export default function DesignerDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [imageError, setImageError] = useState(false)
-  // Храним ошибки загрузки каждого изображения
   const [workImageErrors, setWorkImageErrors] = useState<Record<number, boolean>>({})
 
   useEffect(() => {
-    if (!id) return
+    if (!id) {
+      setError('ID дизайнера не указан')
+      setLoading(false)
+      return
+    }
+
+    console.log('🔍 Загружаем дизайнера с ID:', id)
 
     fetch(`/api/designers/${id}`)
-      .then(res => res.json())
-      .then(data => {
+      .then(async (res) => {
+        console.log('📥 Ответ API:', res.status)
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`)
+        }
+        const data = await res.json()
+        console.log('📦 Данные:', data)
+        return data
+      })
+      .then((data) => {
+        if (data.error) {
+          throw new Error(data.error)
+        }
         setDesigner(data.designer || null)
         setWorks(Array.isArray(data.works) ? data.works : [])
         setLoading(false)
       })
       .catch((err) => {
-        console.error('Error fetching designer:', err)
-        setError('Не удалось загрузить данные дизайнера')
+        console.error('❌ Ошибка загрузки:', err)
+        setError(err.message || 'Не удалось загрузить данные дизайнера')
         setLoading(false)
       })
   }, [id])
@@ -59,7 +75,10 @@ export default function DesignerDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500" />
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
+          <p className="text-white/50">Загрузка...</p>
+        </div>
       </div>
     )
   }
@@ -67,12 +86,17 @@ export default function DesignerDetailPage() {
   if (error || !designer) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">
+        <div className="text-center max-w-md">
+          <div className="text-6xl mb-4">😕</div>
+          <h1 className="text-2xl font-bold text-white mb-2">
             {error || 'Дизайнер не найден'}
           </h1>
-          <Link href="/designers" className="text-pink-400 hover:text-pink-300">
-            ← К списку дизайнеров
+          <p className="text-white/50 text-sm mb-6">
+            Проверьте правильность ссылки или вернитесь к списку
+          </p>
+          <Link href="/designers" className="text-pink-400 hover:text-pink-300 transition inline-flex items-center gap-2">
+            <ArrowLeft size={16} />
+            К списку дизайнеров
           </Link>
         </div>
       </div>
@@ -161,6 +185,7 @@ export default function DesignerDetailPage() {
                           src={work.work_image}
                           alt={work.work_title || 'Работа'}
                           className="w-full h-full object-cover"
+                          loading="lazy"
                           onError={() => handleWorkImageError(work.id)}
                         />
                       ) : (
