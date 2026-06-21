@@ -24,6 +24,7 @@ export default function AdminDesignersPage() {
   const router = useRouter()
   const [designers, setDesigners] = useState<Designer[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -32,25 +33,40 @@ export default function AdminDesignersPage() {
     }
 
     if (session?.user?.email) {
-      fetch(`/api/user/role?email=${session.user.email}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.role !== 'admin') router.push('/')
-        })
-        .catch(() => router.push('/'))
+      checkAdminAndFetch()
     }
-
-    fetchDesigners()
   }, [session, status, router])
+
+  const checkAdminAndFetch = async () => {
+    try {
+      const roleRes = await fetch(`/api/user/role?email=${session?.user?.email}`)
+      const roleData = await roleRes.json()
+      
+      if (roleData.role !== 'admin') {
+        router.push('/')
+        return
+      }
+      
+      await fetchDesigners()
+    } catch (error) {
+      console.error('Error checking admin:', error)
+      router.push('/')
+    }
+  }
 
   const fetchDesigners = async () => {
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch('/api/admin/designers')
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`)
+      }
       const data = await res.json()
       setDesigners(Array.isArray(data) ? data : [])
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error fetching designers:', error)
+      setError('Не удалось загрузить дизайнеров')
     } finally {
       setLoading(false)
     }
@@ -58,15 +74,34 @@ export default function AdminDesignersPage() {
 
   const deleteDesigner = async (id: number) => {
     if (confirm('Удалить дизайнера и все его работы? Это действие необратимо!')) {
-      await fetch(`/api/admin/designers?id=${id}`, { method: 'DELETE' })
-      setDesigners(designers.filter(d => d.id !== id))
+      try {
+        await fetch(`/api/admin/designers?id=${id}`, { method: 'DELETE' })
+        setDesigners(designers.filter(d => d.id !== id))
+      } catch (error) {
+        console.error('Error deleting designer:', error)
+        alert('Ошибка при удалении')
+      }
     }
   }
 
-  if (loading) {
+  if (status === 'loading' || loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-red-400 text-lg">{error}</p>
+        <button
+          onClick={fetchDesigners}
+          className="mt-4 px-4 py-2 bg-pink-500 rounded-xl text-white hover:bg-pink-600 transition"
+        >
+          Попробовать снова
+        </button>
       </div>
     )
   }
@@ -93,12 +128,13 @@ export default function AdminDesignersPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <AdminButton
-            variant="ghost"
-            size="sm"
-            icon={<RefreshCw size={16} />}
+          <button
             onClick={fetchDesigners}
-            title="Обновить" children={undefined}          />
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition text-white/60 hover:text-white"
+            title="Обновить"
+          >
+            <RefreshCw size={18} />
+          </button>
           <Link href="/admin/designers/new">
             <AdminButton
               variant="primary"
@@ -125,41 +161,46 @@ export default function AdminDesignersPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {designers.map((designer) => (
-            <div key={designer.id} className="bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/30 transition group">
+            <div 
+              key={designer.id} 
+              className="bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/30 transition group"
+            >
               <div className="aspect-square bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center relative">
                 {designer.designer_image ? (
-                  <img src={designer.designer_image} alt={designer.designer_name} className="w-full h-full object-cover" />
+                  <img 
+                    src={designer.designer_image} 
+                    alt={designer.designer_name} 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                    }}
+                  />
                 ) : (
                   <Palette className="w-20 h-20 text-purple-400 opacity-50" />
                 )}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
                   <Link href={`/admin/designers/${designer.id}/edit`}>
-                    <AdminButton
-                      variant="ghost"
-                      size="sm"
-                      icon={<Edit size={18} className="text-white" />}
-                      title="Редактировать" children={undefined}                    />
+                    <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition" title="Редактировать">
+                      <Edit size={18} className="text-white" />
+                    </button>
                   </Link>
                   <Link href={`/admin/designers/${designer.id}/works`}>
-                    <AdminButton
-                      variant="ghost"
-                      size="sm"
-                      icon={<ImageIcon size={18} className="text-white" />}
-                      title="Управление работами" children={undefined}                    />
+                    <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition" title="Управление работами">
+                      <ImageIcon size={18} className="text-white" />
+                    </button>
                   </Link>
                   <Link href={`/designers/${designer.id}`} target="_blank">
-                    <AdminButton
-                      variant="ghost"
-                      size="sm"
-                      icon={<Eye size={18} className="text-white" />}
-                      title="Посмотреть на сайте" children={undefined}                    />
+                    <button className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition" title="Посмотреть на сайте">
+                      <Eye size={18} className="text-white" />
+                    </button>
                   </Link>
-                  <AdminButton
-                    variant="danger"
-                    size="sm"
-                    icon={<Trash2 size={18} className="text-white" />}
+                  <button
                     onClick={() => deleteDesigner(designer.id)}
-                    title="Удалить" children={undefined}                  />
+                    className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/40 transition"
+                    title="Удалить"
+                  >
+                    <Trash2 size={18} className="text-red-400" />
+                  </button>
                 </div>
               </div>
               <div className="p-4">

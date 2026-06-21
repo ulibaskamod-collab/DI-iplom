@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Pool } from 'pg'
 
-// Добавляем SSL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -13,12 +12,15 @@ const pool = new Pool({
 export async function GET() {
   try {
     const result = await pool.query(
-      'SELECT * FROM designers ORDER BY id DESC'
+      `SELECT d.*, 
+              (SELECT COUNT(*) FROM designer_works WHERE designer_id = d.id) as works_count
+       FROM designers d 
+       ORDER BY d.id DESC`
     )
     return NextResponse.json(result.rows)
   } catch (error) {
     console.error('GET designers error:', error)
-    return NextResponse.json([])
+    return NextResponse.json([], { status: 500 })
   }
 }
 
@@ -49,7 +51,7 @@ export async function POST(req: NextRequest) {
 // DELETE - удалить дизайнера
 export async function DELETE(req: NextRequest) {
   const id = req.nextUrl.searchParams.get('id')
-  
+
   if (!id) {
     return NextResponse.json({ error: 'ID required' }, { status: 400 })
   }
