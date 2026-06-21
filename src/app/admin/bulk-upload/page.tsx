@@ -3,11 +3,11 @@
 export const dynamic = 'force-dynamic'
 
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'  // ← ПРАВИЛЬНЫЙ ИМПОРТ
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Upload, Image as ImageIcon } from 'lucide-react'
 import { BulkImageUpload } from '@/src/components/BulkImageUpload'
-import { useRouter } from 'next/router'
 
 export default function BulkUploadPage() {
   const { data: session, status } = useSession()
