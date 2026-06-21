@@ -1,22 +1,25 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
-  const response = NextResponse.next()
+export default withAuth(
+  function middleware(req) {
+    const token = req.nextauth.token;
+    const isAdmin = token?.role === "admin";
+    const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
 
-  // Кэширование статических файлов
-  if (request.nextUrl.pathname.match(/\.(jpg|jpeg|png|webp|avif|svg|ico|css|js)$/)) {
-    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+    if (isAdminRoute && !isAdmin) {
+      return NextResponse.redirect(new URL("/auth/signin", req.url));
+    }
+
+    return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token }) => !!token,
+    },
   }
-
-  // Кэширование API запросов
-  if (request.nextUrl.pathname.startsWith('/api/')) {
-    response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300')
-  }
-
-  return response
-}
+);
 
 export const config = {
-  matcher: ['/((?!api/auth|_next/static|_next/image|favicon.ico).*)'],
-}
+  matcher: ["/admin/:path*", "/profile/:path*", "/favorites/:path*"],
+};
