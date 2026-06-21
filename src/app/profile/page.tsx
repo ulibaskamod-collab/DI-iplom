@@ -1,4 +1,3 @@
-
 'use client'
 export const dynamic = 'force-dynamic'
 
@@ -106,57 +105,40 @@ export default function ProfilePage() {
     }
   }, [session])
 
- const handleEditSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setMessage(null)
-  setLoading(true)
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMessage(null)
+    setLoading(true)
 
-  try {
-    console.log('Sending update:', {
-      name: editForm.name,
-      birthDate: editForm.birthDate,
-      gender: editForm.gender,
-    })
+    try {
+      const res = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editForm.name,
+          birthDate: editForm.birthDate,
+          gender: editForm.gender,
+        }),
+      })
 
-    const res = await fetch('/api/user/profile', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: editForm.name,
-        birthDate: editForm.birthDate,
-        gender: editForm.gender,
-      }),
-    })
+      const data = await res.json()
 
-    const data = await res.json()
-    console.log('Response:', data)
-
-    if (res.ok && data.success) {
-      setProfile(data.user)
-      setEditing(false)
-      setMessage({ text: '✅ Профиль успешно обновлен!', type: 'success' })
-      setTimeout(() => setMessage(null), 3000)
-    } else {
-      setMessage({ text: data.error || '❌ Ошибка при обновлении', type: 'error' })
+      if (res.ok && data.success) {
+        setProfile(data.user)
+        setEditing(false)
+        setMessage({ text: '✅ Профиль успешно обновлен!', type: 'success' })
+        setTimeout(() => setMessage(null), 3000)
+      } else {
+        setMessage({ text: data.error || '❌ Ошибка при обновлении', type: 'error' })
+      }
+    } catch (error) {
+      console.error('Update error:', error)
+      setMessage({ text: '❌ Ошибка соединения с сервером', type: 'error' })
+    } finally {
+      setLoading(false)
     }
-  } catch (error) {
-    console.error('Update error:', error)
-    setMessage({ text: '❌ Ошибка соединения с сервером', type: 'error' })
-  } finally {
-    setLoading(false)
   }
-}
-const updateZodiac = async () => {
-  const res = await fetch('/api/user/update-zodiac', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ birthDate: editForm.birthDate })
-  })
-  const data = await res.json()
-  if (data.success) {
-    console.log('Знак обновлен:', data.zodiac_sign)
-  }
-}
+
   const removeFavorite = async (itemId: number) => {
     try {
       const res = await fetch(`/api/user/favorites?clothingItemId=${itemId}`, {
@@ -317,6 +299,7 @@ const updateZodiac = async () => {
             >
               {editing ? (
                 <form onSubmit={handleEditSubmit} className="p-6 space-y-5">
+                  {/* Поле: Имя */}
                   <div>
                     <label className="block text-white/70 text-sm mb-2 flex items-center gap-2">
                       <User size={16} />
@@ -331,23 +314,21 @@ const updateZodiac = async () => {
                     />
                   </div>
 
-                 // В компоненте ProfilePage, в секции редактирования профиля:
+                  {/* Поле: Дата рождения со звездным календарем */}
+                  <div>
+                    <label className="block text-white/70 text-sm mb-2 flex items-center gap-2">
+                      <Cake size={16} />
+                      Дата рождения
+                    </label>
+                    <StarDatePicker
+                      value={editForm.birthDate}
+                      onChange={(date) => setEditForm({ ...editForm, birthDate: date })}
+                      placeholder="ДД.ММ.ГГГГ"
+                    />
+                    <p className="text-white/30 text-xs mt-1">✨ Выберите дату рождения</p>
+                  </div>
 
-// В секции редактирования профиля (editing === true)
-
-<div>
-  <label className="block text-white/70 text-sm mb-2 flex items-center gap-2">
-    <Cake size={16} />
-    Дата рождения
-  </label>
-  <StarDatePicker
-    value={editForm.birthDate}
-    onChange={(date) => setEditForm({ ...editForm, birthDate: date })}
-    placeholder="ДД.ММ.ГГГГ"
-  />
-  <p className="text-white/30 text-xs mt-1">✨ Выберите дату рождения</p>
-</div>
-
+                  {/* Поле: Пол */}
                   <div>
                     <label className="block text-white/70 text-sm mb-2 flex items-center gap-2">
                       <Shield size={16} />
@@ -381,6 +362,7 @@ const updateZodiac = async () => {
                     </div>
                   </div>
 
+                  {/* Кнопки */}
                   <div className="flex gap-3 pt-4">
                     <button
                       type="submit"
@@ -576,5 +558,4 @@ const updateZodiac = async () => {
       </div>
     </div>
   )
-
 }
