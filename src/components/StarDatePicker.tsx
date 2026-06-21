@@ -129,6 +129,7 @@ export function StarDatePicker({
     const today = new Date()
     setViewDate(new Date(today.getFullYear(), today.getMonth(), 1))
     setShowYearPicker(false)
+    setIsOpen(false)
   }
 
   const formatDisplayDate = (dateStr: string) => {
@@ -154,7 +155,7 @@ export function StarDatePicker({
       </div>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-2 p-4 bg-gradient-to-b from-purple-900/95 to-[#0d0d25]/95 backdrop-blur-xl rounded-2xl border border-purple-700/50 shadow-2xl z-[9999] min-w-[280px] max-w-full animate-fade-in">
+        <div className="absolute left-0 right-0 mt-2 p-4 bg-gradient-to-b from-purple-900/95 to-[#0d0d25]/95 backdrop-blur-xl rounded-2xl border border-purple-700/50 shadow-2xl z-[9999] min-w-[280px] max-w-full">
           
           <div className="flex items-center justify-between mb-4">
             <button
@@ -173,13 +174,6 @@ export function StarDatePicker({
               >
                 {monthsFull[viewDate.getMonth()]} {viewDate.getFullYear()}
                 <ChevronDown size={14} className="text-white/40 flex-shrink-0" />
-              </button>
-              <button
-                type="button"
-                onClick={goToday}
-                className="text-xs text-pink-400 hover:text-pink-300 transition px-2.5 py-1 rounded-full bg-pink-500/20 hover:bg-pink-500/30 flex-shrink-0"
-              >
-                Сегодня
               </button>
             </div>
             
@@ -240,9 +234,6 @@ export function StarDatePicker({
                     `}
                   >
                     {date.getDate()}
-                    {isToday(date) && (
-                      <Sparkles className="w-2.5 h-2.5 text-pink-400 mx-auto mt-0.5" />
-                    )}
                   </button>
                 ) : (
                   <div className="w-full h-full" />
