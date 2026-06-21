@@ -381,13 +381,15 @@ export function BulkImageUpload({
               onChange={(e) => {
                 const value = e.target.value
                 updateTemplate(index, 'styleTemplate', value)
-                updateTemplate(index, 'name', value)
+                if (value) {
+                  updateTemplate(index, 'name', value)
+                }
               }}
               className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 w-32"
             >
               <option value="">Шаблон</option>
               {STYLE_TEMPLATES.map(t => (
-                <option key={t.id} value={t.label}>{t.icon}</option>
+                <option key={t.id} value={t.label}>{t.label}</option>
               ))}
             </select>
           </div>
@@ -555,7 +557,7 @@ export function BulkImageUpload({
                 >
                   <option value="">📝 Шаблон названия</option>
                   {STYLE_TEMPLATES.map(t => (
-                    <option key={t.id} value={t.label}>{t.icon} {t.label}</option>
+                    <option key={t.id} value={t.label}>{t.label}</option>
                   ))}
                 </select>
                 <select
