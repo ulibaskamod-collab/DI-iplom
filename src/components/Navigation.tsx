@@ -6,7 +6,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { 
   Menu, X, Sparkles, User, LogOut, Shield, 
   Home, Star, Palette, ChevronRight, Heart,
-  Shirt, Users, Upload, Globe, Settings
+  Shirt, Users, Upload, Globe
 } from 'lucide-react'
 
 export default function Navigation() {
@@ -52,16 +52,6 @@ export default function Navigation() {
     }
   }, [isOpen])
 
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener('keydown', handleEscape)
-    return () => document.removeEventListener('keydown', handleEscape)
-  }, [isOpen])
-
   if (status === 'loading' || !mounted) {
     return (
       <nav className="navbar">
@@ -78,23 +68,19 @@ export default function Navigation() {
   const isAuthenticated = status === 'authenticated'
   
   const menuItems = [
-    { href: '/', label: 'Главная', icon: Home, color: '#60a5fa' },
-    { href: '/zodiac', label: 'Все знаки', icon: Star, color: '#fbbf24' },
-    { href: '/designers', label: 'Дизайнеры', icon: Palette, color: '#a78bfa' },
-  ]
-
-  const userItems = [
-    { href: '/profile', label: 'Профиль', icon: User, color: '#f472b6' },
+    { href: '/', label: 'Главная', icon: Home, color: 'text-blue-400' },
+    { href: '/zodiac', label: 'Все знаки', icon: Star, color: 'text-yellow-400' },
+    { href: '/designers', label: 'Дизайнеры', icon: Palette, color: 'text-purple-400' },
   ]
 
   const adminItems = [
-    { href: '/admin', label: 'Главная', icon: Home, color: '#60a5fa' },
-    { href: '/admin/zodiac', label: 'Знаки зодиака', icon: Star, color: '#fbbf24' },
-    { href: '/admin/clothing', label: 'Одежда', icon: Shirt, color: '#34d399' },
-    { href: '/admin/designers', label: 'Дизайнеры', icon: Palette, color: '#a78bfa' },
-    { href: '/admin/bulk-upload', label: 'Массовая загрузка', icon: Upload, color: '#f472b6' },
-    { href: '/admin/users', label: 'Пользователи', icon: Users, color: '#22d3ee' },
-    { href: '/admin/favorites', label: 'Избранное', icon: Heart, color: '#fb7185' },
+    { href: '/admin', label: 'Главная', icon: Home, color: 'text-blue-400' },
+    { href: '/admin/zodiac', label: 'Знаки зодиака', icon: Star, color: 'text-yellow-400' },
+    { href: '/admin/clothing', label: 'Одежда', icon: Shirt, color: 'text-green-400' },
+    { href: '/admin/designers', label: 'Дизайнеры', icon: Palette, color: 'text-purple-400' },
+    { href: '/admin/bulk-upload', label: 'Массовая загрузка', icon: Upload, color: 'text-pink-400' },
+    { href: '/admin/users', label: 'Пользователи', icon: Users, color: 'text-cyan-400' },
+    { href: '/admin/favorites', label: 'Избранное', icon: Heart, color: 'text-red-400' },
   ]
 
   return (
@@ -154,123 +140,133 @@ export default function Navigation() {
       </nav>
 
       {/* ===== МОБИЛЬНОЕ МЕНЮ ===== */}
-      <div className={`mobile-overlay ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(false)} />
+      <div className={`mobile-menu-overlay ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(false)} />
       
       <div className={`mobile-menu ${isOpen ? 'open' : ''}`}>
-        {/* Верхняя часть с логотипом и закрытием */}
-        <div className="mobile-header">
-          <div className="mobile-brand">
-            <div className="mobile-brand-icon">
-              <Sparkles className="w-5 h-5 text-white" />
+        {/* Заголовок */}
+        <div className="mobile-menu-header">
+          <div className="mobile-menu-logo">
+            <div className="mobile-logo-icon">
+              <Shield className="w-5 h-5 text-white" />
             </div>
-            <span className="mobile-brand-text">StellarFit</span>
+            <span>StellarFit</span>
           </div>
-          <button className="mobile-close" onClick={() => setIsOpen(false)}>
+          <button className="mobile-menu-close" onClick={() => setIsOpen(false)}>
             <X size={22} />
           </button>
         </div>
 
-        {/* Профиль пользователя */}
+        {/* Информация о пользователе */}
         {isAuthenticated && session?.user && (
-          <div className="mobile-profile">
-            <div className="mobile-avatar">
+          <div className="mobile-user-info">
+            <div className="mobile-user-avatar">
               {session.user.email?.[0]?.toUpperCase() || 'U'}
             </div>
-            <div className="mobile-profile-info">
-              <p className="mobile-profile-email">{session.user.email}</p>
-              <p className="mobile-profile-role">
-                {isAdmin ? '👑 Администратор' : '👤 Пользователь'}
+            <div className="mobile-user-details">
+              <p className="mobile-user-email">{session.user.email}</p>
+              <p className="mobile-user-role">
+                {isAdmin ? 'Администратор' : 'Пользователь'}
               </p>
             </div>
           </div>
         )}
 
-        {/* Основные пункты меню */}
-        <div className="mobile-section">
-          <div className="mobile-section-label">Меню</div>
+        {/* Разделитель */}
+        <div className="mobile-menu-divider" />
+
+        {/* Пункты меню */}
+        <div className="mobile-menu-items">
           {menuItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="mobile-link"
+              className="mobile-menu-item"
               onClick={() => setIsOpen(false)}
             >
-              <item.icon size={20} style={{ color: item.color }} />
+              <item.icon size={20} className={item.color} />
               <span>{item.label}</span>
-              <ChevronRight size={16} className="mobile-arrow" />
+              <ChevronRight size={16} className="mobile-menu-arrow" />
             </Link>
           ))}
-          {isAuthenticated && userItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="mobile-link"
-              onClick={() => setIsOpen(false)}
-            >
-              <item.icon size={20} style={{ color: item.color }} />
-              <span>{item.label}</span>
-              <ChevronRight size={16} className="mobile-arrow" />
-            </Link>
-          ))}
-        </div>
 
-        {/* Админ-панель */}
-        {isAdmin && (
-          <div className="mobile-section">
-            <div className="mobile-section-label admin-label">
-              <Shield size={14} className="inline mr-2" />
-              Администрирование
-            </div>
+          {isAuthenticated && (
+            <Link
+              href="/profile"
+              className="mobile-menu-item"
+              onClick={() => setIsOpen(false)}
+            >
+              <User size={20} className="text-pink-400" />
+              <span>Профиль</span>
+              <ChevronRight size={16} className="mobile-menu-arrow" />
+            </Link>
+          )}
+
+          {isAdmin && (
             <Link
               href="/"
-              className="mobile-link mobile-link-site"
+              className="mobile-menu-item mobile-menu-site"
               onClick={() => setIsOpen(false)}
             >
               <Globe size={20} className="text-green-400" />
               <span>На сайт</span>
-              <ChevronRight size={16} className="mobile-arrow" />
+              <ChevronRight size={16} className="mobile-menu-arrow" />
             </Link>
-            {adminItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="mobile-link"
-                onClick={() => setIsOpen(false)}
-              >
-                <item.icon size={20} style={{ color: item.color }} />
-                <span>{item.label}</span>
-                <ChevronRight size={16} className="mobile-arrow" />
-              </Link>
-            ))}
-          </div>
-        )}
+          )}
 
-        {/* Нижняя часть */}
-        <div className="mobile-footer">
-          <div className="mobile-divider" />
+          {isAdmin && (
+            <>
+              <div className="mobile-menu-divider-light" />
+              <div className="mobile-menu-admin-label">
+                <span>Админ панель</span>
+              </div>
+            </>
+          )}
+
+          {isAdmin && adminItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="mobile-menu-item"
+              onClick={() => setIsOpen(false)}
+            >
+              <item.icon size={20} className={item.color} />
+              <span>{item.label}</span>
+              <ChevronRight size={16} className="mobile-menu-arrow" />
+            </Link>
+          ))}
+
+          <div className="mobile-menu-divider-light" />
+          
           {isAuthenticated ? (
             <button 
               onClick={() => {
                 signOut()
                 setIsOpen(false)
               }} 
-              className="mobile-logout"
+              className="mobile-menu-item mobile-menu-logout"
             >
               <LogOut size={20} className="text-red-400" />
               <span className="text-red-400">Выйти</span>
             </button>
           ) : (
-            <div className="mobile-auth">
-              <Link href="/auth/signin" className="mobile-auth-link" onClick={() => setIsOpen(false)}>
+            <>
+              <Link
+                href="/auth/signin"
+                className="mobile-menu-item mobile-menu-auth"
+                onClick={() => setIsOpen(false)}
+              >
                 <LogOut size={20} className="text-green-400" />
                 <span>Войти</span>
               </Link>
-              <Link href="/auth/register" className="mobile-auth-link register" onClick={() => setIsOpen(false)}>
-                <span>Регистрация</span>
+              <Link
+                href="/auth/register"
+                className="mobile-menu-item mobile-menu-register"
+                onClick={() => setIsOpen(false)}
+              >
+                <span className="ml-9">Регистрация</span>
               </Link>
-            </div>
+            </>
           )}
-          <p className="mobile-magic">✨ Пусть звёзды ведут тебя ✨</p>
         </div>
       </div>
 
@@ -282,11 +278,11 @@ export default function Navigation() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: linear-gradient(160deg, #0a0a1a 0%, #0d0d25 40%, #0a0a1a 100%);
-          backdrop-filter: blur(24px);
+          background: linear-gradient(180deg, #0a0a1a 0%, #0d0d25 50%, #0a0a1a 100%);
+          backdrop-filter: blur(20px);
           z-index: 100;
           transform: translateX(-100%);
-          transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
           display: flex;
           flex-direction: column;
           overflow-y: auto;
@@ -297,41 +293,39 @@ export default function Navigation() {
           transform: translateX(0);
         }
 
-        /* Затемнение */
-        .mobile-overlay {
+        .mobile-menu-overlay {
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.7);
+          background: rgba(0, 0, 0, 0.6);
           z-index: 99;
           opacity: 0;
           pointer-events: none;
-          transition: opacity 0.35s ease;
+          transition: opacity 0.3s ease;
         }
 
-        .mobile-overlay.open {
+        .mobile-menu-overlay.open {
           opacity: 1;
           pointer-events: all;
         }
 
-        /* ===== ВЕРХНЯЯ ЧАСТЬ ===== */
-        .mobile-header {
+        .mobile-menu-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 1.25rem 1.5rem 1rem;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          padding: 1.25rem 1.5rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
           flex-shrink: 0;
         }
 
-        .mobile-brand {
+        .mobile-menu-logo {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          font-size: 1.2rem;
+          font-size: 1.25rem;
           font-weight: bold;
         }
 
-        .mobile-brand-icon {
+        .mobile-logo-icon {
           width: 36px;
           height: 36px;
           border-radius: 10px;
@@ -339,47 +333,44 @@ export default function Navigation() {
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 15px rgba(236, 72, 153, 0.25);
         }
 
-        .mobile-brand-text {
-          background: linear-gradient(135deg, #f0c8a0, #e8b8a0);
+        .mobile-menu-logo span {
+          background: linear-gradient(135deg, #f0c8a0 0%, #e8b8a0 40%, #f0c8a0 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
 
-        .mobile-close {
-          width: 40px;
-          height: 40px;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.06);
+        .mobile-menu-close {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 10px;
-          color: rgba(255, 255, 255, 0.5);
+          color: rgba(255, 255, 255, 0.6);
           cursor: pointer;
+          padding: 0.5rem;
+          transition: all 0.3s ease;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.3s ease;
         }
 
-        .mobile-close:hover {
-          background: rgba(255, 255, 255, 0.08);
+        .mobile-menu-close:hover {
+          background: rgba(255, 255, 255, 0.1);
           color: white;
         }
 
-        /* ===== ПРОФИЛЬ ===== */
-        .mobile-profile {
+        .mobile-user-info {
           display: flex;
           align-items: center;
           gap: 1rem;
           padding: 1.25rem 1.5rem;
-          background: rgba(255, 255, 255, 0.02);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          background: rgba(255, 255, 255, 0.03);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
           flex-shrink: 0;
         }
 
-        .mobile-avatar {
+        .mobile-user-avatar {
           width: 44px;
           height: 44px;
           border-radius: 50%;
@@ -387,193 +378,121 @@ export default function Navigation() {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-weight: 600;
+          font-weight: bold;
           font-size: 1.1rem;
           color: white;
           flex-shrink: 0;
-          box-shadow: 0 4px 15px rgba(236, 72, 153, 0.25);
+          box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
         }
 
-        .mobile-profile-info {
+        .mobile-user-details {
           flex: 1;
           min-width: 0;
         }
 
-        .mobile-profile-email {
+        .mobile-user-email {
           color: white;
-          font-size: 0.85rem;
+          font-size: 0.9rem;
           font-weight: 500;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
         }
 
-        .mobile-profile-role {
-          color: rgba(255, 255, 255, 0.35);
-          font-size: 0.7rem;
+        .mobile-user-role {
+          color: rgba(255, 255, 255, 0.4);
+          font-size: 0.75rem;
           margin-top: 0.1rem;
         }
 
-        /* ===== СЕКЦИИ ===== */
-        .mobile-section {
-          padding: 0.25rem 0;
+        .mobile-menu-divider {
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+          margin: 0.5rem 1.5rem;
           flex-shrink: 0;
         }
 
-        .mobile-section-label {
-          padding: 0.75rem 1.5rem 0.5rem;
-          font-size: 0.6rem;
+        .mobile-menu-divider-light {
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+          margin: 0.25rem 1.5rem;
+          flex-shrink: 0;
+        }
+
+        .mobile-menu-admin-label {
+          padding: 0.5rem 1.5rem 0.25rem;
+          font-size: 0.65rem;
           text-transform: uppercase;
           letter-spacing: 2px;
-          color: rgba(255, 255, 255, 0.12);
+          color: rgba(255, 255, 255, 0.15);
           font-weight: 600;
         }
 
-        .admin-label {
-          color: rgba(236, 72, 153, 0.3);
-          padding-top: 0.25rem;
+        .mobile-menu-items {
+          display: flex;
+          flex-direction: column;
+          padding: 0.25rem 0;
+          flex: 1;
         }
 
-        /* ===== ССЫЛКИ ===== */
-        .mobile-link {
+        .mobile-menu-item {
           display: flex;
           align-items: center;
           gap: 1rem;
-          padding: 0.6rem 1.5rem;
-          color: rgba(255, 255, 255, 0.6);
+          padding: 0.75rem 1.5rem;
+          color: rgba(255, 255, 255, 0.7);
           text-decoration: none;
-          transition: all 0.2s ease;
+          transition: all 0.25s ease;
           cursor: pointer;
           background: none;
           border: none;
           width: 100%;
           text-align: left;
-          font-size: 0.9rem;
+          font-size: 0.95rem;
           border-radius: 0;
         }
 
-        .mobile-link:hover {
-          background: rgba(255, 255, 255, 0.04);
+        .mobile-menu-item:hover {
+          background: rgba(255, 255, 255, 0.05);
           color: white;
         }
 
-        .mobile-link:active {
-          transform: scale(0.97);
-        }
-
-        .mobile-arrow {
+        .mobile-menu-arrow {
           margin-left: auto;
-          color: rgba(255, 255, 255, 0.06);
+          color: rgba(255, 255, 255, 0.1);
           flex-shrink: 0;
-          transition: all 0.3s ease;
+          transition: transform 0.3s ease;
         }
 
-        .mobile-link:hover .mobile-arrow {
+        .mobile-menu-item:hover .mobile-menu-arrow {
           transform: translateX(4px);
-          color: rgba(255, 255, 255, 0.2);
+          color: rgba(255, 255, 255, 0.3);
         }
 
-        .mobile-link-site {
-          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        .mobile-menu-site {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
           margin-bottom: 0.25rem;
         }
 
-        .mobile-link-site span {
-          color: rgba(255, 255, 255, 0.5);
+        .mobile-menu-site span {
+          color: rgba(255, 255, 255, 0.6);
         }
 
-        /* ===== ФУТЕР ===== */
-        .mobile-footer {
-          margin-top: auto;
-          padding: 1rem 1.5rem 1.5rem;
-          flex-shrink: 0;
+        .mobile-menu-logout span {
+          color: rgba(255, 107, 107, 0.7);
         }
 
-        .mobile-divider {
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-          margin-bottom: 1rem;
+        .mobile-menu-logout:hover {
+          background: rgba(255, 107, 107, 0.08) !important;
         }
 
-        .mobile-logout {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 0.6rem 0;
-          color: rgba(255, 107, 107, 0.6);
-          background: none;
-          border: none;
-          cursor: pointer;
-          width: 100%;
-          text-align: left;
-          font-size: 0.9rem;
-          transition: all 0.2s ease;
-          border-radius: 8px;
-          padding: 0.6rem 0.75rem;
-        }
-
-        .mobile-logout:hover {
-          background: rgba(255, 107, 107, 0.06);
+        .mobile-menu-logout:hover span {
           color: #ff6b6b;
         }
 
-        .mobile-auth {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-
-        .mobile-auth-link {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          padding: 0.6rem 0.75rem;
-          color: rgba(255, 255, 255, 0.7);
-          text-decoration: none;
-          transition: all 0.2s ease;
-          border-radius: 8px;
-          font-size: 0.9rem;
-        }
-
-        .mobile-auth-link:hover {
-          background: rgba(255, 255, 255, 0.04);
-        }
-
-        .mobile-auth-link.register {
-          padding-left: 2.75rem;
-          color: rgba(255, 255, 255, 0.35);
-          font-size: 0.85rem;
-        }
-
-        .mobile-magic {
-          text-align: center;
-          color: rgba(255, 255, 255, 0.06);
-          font-size: 0.7rem;
-          letter-spacing: 3px;
-          font-family: 'Georgia', serif;
-          margin-top: 0.75rem;
-          padding-top: 0.75rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.02);
-        }
-
-        /* ===== СКРОЛЛБАР ===== */
-        .mobile-menu::-webkit-scrollbar {
-          width: 3px;
-        }
-
-        .mobile-menu::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        .mobile-menu::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 10px;
-        }
-
-        /* ===== АДАПТИВНОСТЬ ===== */
         @media (min-width: 769px) {
           .mobile-menu,
-          .mobile-overlay {
+          .mobile-menu-overlay {
             display: none !important;
           }
         }
@@ -585,50 +504,40 @@ export default function Navigation() {
         }
 
         @media (max-width: 480px) {
-          .mobile-header {
-            padding: 1rem 1.25rem 0.75rem;
-          }
-          
-          .mobile-brand-text {
-            font-size: 1rem;
-          }
-          
-          .mobile-brand-icon {
-            width: 32px;
-            height: 32px;
-          }
-          
-          .mobile-profile {
+          .mobile-menu-header {
             padding: 1rem 1.25rem;
           }
           
-          .mobile-avatar {
-            width: 38px;
-            height: 38px;
-            font-size: 0.9rem;
+          .mobile-user-info {
+            padding: 1rem 1.25rem;
           }
           
-          .mobile-profile-email {
+          .mobile-user-avatar {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+          }
+          
+          .mobile-user-email {
             font-size: 0.8rem;
           }
           
-          .mobile-link {
-            padding: 0.5rem 1.25rem;
-            font-size: 0.85rem;
-            gap: 0.75rem;
+          .mobile-menu-item {
+            padding: 0.65rem 1.25rem;
+            font-size: 0.9rem;
           }
           
-          .mobile-section-label {
-            padding: 0.5rem 1.25rem 0.35rem;
+          .mobile-menu-admin-label {
+            padding: 0.4rem 1.25rem 0.2rem;
             font-size: 0.55rem;
           }
           
-          .mobile-footer {
-            padding: 0.75rem 1.25rem 1.25rem;
+          .mobile-menu-divider {
+            margin: 0.4rem 1.25rem;
           }
           
-          .mobile-magic {
-            font-size: 0.6rem;
+          .mobile-menu-divider-light {
+            margin: 0.2rem 1.25rem;
           }
         }
       `}</style>
