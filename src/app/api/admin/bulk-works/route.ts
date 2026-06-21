@@ -18,23 +18,42 @@ export async function POST(req: NextRequest) {
     }
 
     const savedItems = []
+    const errors = []
 
-    for (const item of items) {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i]
       const { designer_id, work_title, description, work_image } = item
 
-      const result = await pool.query(
-        `INSERT INTO designer_works (designer_id, work_title, work_image, description)
-         VALUES ($1, $2, $3, $4)
-         RETURNING *`,
-        [designer_id, work_title, work_image, description || null]
+      // Проверяем, существует ли дизайнер
+      const designerCheck = await pool.query(
+        'SELECT id FROM designers WHERE id = $1',
+        [designer_id]
       )
 
-      savedItems.push(result.rows[0])
+      if (designerCheck.rows.length === 0) {
+        errors.push(`Дизайнер с ID ${designer_id} не найден для записи ${i+1}`)
+        continue
+      }
+
+      try {
+        const result = await pool.query(
+          `INSERT INTO designer_works (designer_id, work_title, work_image, description)
+           VALUES ($1, $2, $3, $4)
+           RETURNING *`,
+          [designer_id, work_title, work_image, description || null]
+        )
+
+        savedItems.push(result.rows[0])
+      } catch (err) {
+        console.error('Error saving work:', err)
+        errors.push(`Ошибка сохранения записи ${i+1}`)
+      }
     }
 
     return NextResponse.json({
       success: true,
       saved: savedItems.length,
+      errors: errors.length > 0 ? errors : undefined,
       items: savedItems
     })
 
