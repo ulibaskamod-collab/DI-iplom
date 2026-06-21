@@ -7,7 +7,10 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "postinstall": "prisma generate",
-    "clean": "rm -rf node_modules/.prisma node_modules/@prisma"
+    "clean": "rm -rf node_modules/.prisma node_modules/@prisma",
+    "seed": "node scripts/seed-db.js",
+    "clear-db": "node scripts/clear-db.js",
+    "reset-db": "prisma db push --force-reset && npm run seed"
   },
   "engines": {
     "node": "20.18.0",
