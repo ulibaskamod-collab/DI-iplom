@@ -86,7 +86,7 @@ function FavoriteButton({ itemId }: { itemId: number }) {
   )
 }
 
-// ===== КОМПОНЕНТ КАРТОЧКИ ОДЕЖДЫ =====
+// ===== КОМПОНЕНТ КАРТОЧКИ ОДЕЖДЫ (ТОЛЬКО ОДИН РАЗ!) =====
 function ClothingCard({ item, idx }: { item: any; idx: number }) {
   const [imgError, setImgError] = useState(false)
 

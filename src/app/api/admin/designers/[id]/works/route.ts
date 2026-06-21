@@ -17,7 +17,7 @@ export async function GET(
     const designerId = parseInt(params.id)
 
     if (isNaN(designerId)) {
-      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid designer ID' }, { status: 400 })
     }
 
     const result = await pool.query(
@@ -39,6 +39,8 @@ export async function POST(
 ) {
   try {
     const body = await req.json()
+    console.log('📦 Получены данные для работы:', body)
+
     const { work_title, description, work_image } = body
 
     if (!work_title) {
@@ -51,16 +53,31 @@ export async function POST(
       return NextResponse.json({ error: 'Invalid designer ID' }, { status: 400 })
     }
 
+    // Проверяем, существует ли дизайнер
+    const designerCheck = await pool.query(
+      'SELECT id FROM designers WHERE id = $1',
+      [designerId]
+    )
+
+    if (designerCheck.rows.length === 0) {
+      return NextResponse.json({ error: 'Дизайнер не найден' }, { status: 404 })
+    }
+
     const result = await pool.query(
       `INSERT INTO designer_works (designer_id, work_title, work_image, description)
        VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [designerId, work_title, work_image, description || null]
+      [designerId, work_title, work_image || '', description || null]
     )
 
-    return NextResponse.json({ success: true, work: result.rows[0] })
+    console.log('✅ Работа сохранена:', result.rows[0])
+
+    return NextResponse.json({ 
+      success: true, 
+      work: result.rows[0] 
+    })
   } catch (error: any) {
-    console.error('POST work error:', error)
+    console.error('❌ POST work error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
