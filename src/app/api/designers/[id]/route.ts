@@ -6,6 +6,9 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false,
   },
+  // Оптимизация соединений
+  max: 10,
+  idleTimeoutMillis: 30000,
 })
 
 export async function GET(
@@ -16,30 +19,49 @@ export async function GET(
     const designerId = parseInt(params.id)
 
     if (isNaN(designerId)) {
-      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid ID', designer: null, works: [] }, { status: 400 })
     }
 
-    // Получаем дизайнера
-    const designerRes = await pool.query(
-      'SELECT * FROM designers WHERE id = $1',
-      [designerId]
-    )
+    // Оптимизированный запрос с JOIN
+    const result = await pool.query(`
+      SELECT 
+        d.id,
+        d.designer_name,
+        d.bio,
+        d.designer_image,
+        d.social_links,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', dw.id,
+              'work_title', dw.work_title,
+              'work_image', dw.work_image,
+              'description', dw.description
+            )
+          ) FILTER (WHERE dw.id IS NOT NULL),
+          '[]'
+        ) as works
+      FROM designers d
+      LEFT JOIN designer_works dw ON d.id = dw.designer_id
+      WHERE d.id = $1
+      GROUP BY d.id
+    `, [designerId])
 
-    if (designerRes.rows.length === 0) {
-      return NextResponse.json({ error: 'Designer not found' }, { status: 404 })
+    if (result.rows.length === 0) {
+      return NextResponse.json({ error: 'Designer not found', designer: null, works: [] }, { status: 404 })
     }
 
-    // Получаем работы дизайнера
-    const worksRes = await pool.query(
-      'SELECT id, work_title, work_image, description FROM designer_works WHERE designer_id = $1 ORDER BY id DESC',
-      [designerId]
-    )
-
-    console.log(`✅ Найдено работ: ${worksRes.rows.length}`)
-
+    const row = result.rows[0]
+    
     return NextResponse.json({
-      designer: designerRes.rows[0],
-      works: worksRes.rows || [],
+      designer: {
+        id: row.id,
+        designer_name: row.designer_name,
+        bio: row.bio,
+        designer_image: row.designer_image,
+        social_links: row.social_links,
+      },
+      works: row.works || [],
     })
 
   } catch (error) {
