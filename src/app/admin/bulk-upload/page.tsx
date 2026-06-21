@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Upload, Image as ImageIcon, Sparkles } from 'lucide-react'
+import { ArrowLeft, Upload, Image as ImageIcon } from 'lucide-react'
 import { BulkImageUpload } from '@/src/components/BulkImageUpload'
 
 export default function BulkUploadPage() {
@@ -37,18 +37,18 @@ export default function BulkUploadPage() {
   const folderInfo = {
     clothing: {
       label: '👕 Одежда',
-      description: 'Загрузите одежду с указанием названия, пола и знака зодиака',
-      maxFiles: 10
+      description: 'Сначала заполните данные, затем добавьте фото',
+      maxItems: 10
     },
     designers: {
       label: '🎨 Дизайнеры',
-      description: 'Загрузите дизайнеров с указанием имени и биографии',
-      maxFiles: 10
+      description: 'Сначала заполните данные, затем добавьте фото',
+      maxItems: 10
     },
     works: {
       label: '🖼️ Работы',
-      description: 'Загрузите работы и привяжите их к существующим дизайнерам',
-      maxFiles: 10
+      description: 'Сначала заполните данные, затем добавьте фото',
+      maxItems: 10
     }
   }
 
@@ -66,7 +66,7 @@ export default function BulkUploadPage() {
               Массовая загрузка
             </h1>
             <p className="text-white/40 text-sm mt-0.5">
-              Загружайте до 10 файлов за раз — всё сохраняется в базу данных
+              Заполните данные → Добавьте фото → Сохраните в базу
             </p>
           </div>
         </div>
@@ -91,7 +91,7 @@ export default function BulkUploadPage() {
               <div className="text-2xl mb-1">{info.label.split(' ')[0]}</div>
               <div className="text-white font-medium">{info.label.split(' ').slice(1).join(' ')}</div>
               <div className="text-white/40 text-xs mt-1">{info.description}</div>
-              <div className="text-white/20 text-xs mt-1">Макс. {info.maxFiles} файлов</div>
+              <div className="text-white/20 text-xs mt-1">Макс. {info.maxItems} записей</div>
             </button>
           ))}
         </div>
@@ -101,7 +101,7 @@ export default function BulkUploadPage() {
       <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
         <BulkImageUpload
           folder={selectedFolder}
-          maxFiles={folderInfo[selectedFolder].maxFiles}
+          maxItems={folderInfo[selectedFolder].maxItems}
           onUploadComplete={handleUploadComplete}
         />
       </div>
