@@ -24,9 +24,6 @@ export default function BulkUploadPage() {
 
   const handleUploadComplete = (data: any[]) => {
     setAllData(prev => [...prev, ...data])
-    
-    const message = data.map((item, i) => `${i+1}. ${item.url}`).join('\n')
-    alert(`✅ Успешно загружено ${data.length} фото!\n\n${message}`)
   }
 
   if (status === 'loading') {
@@ -69,13 +66,13 @@ export default function BulkUploadPage() {
               Массовая загрузка
             </h1>
             <p className="text-white/40 text-sm mt-0.5">
-              Загружайте до 10 файлов за раз с данными
+              Загружайте до 10 файлов за раз — всё сохраняется в базу данных
             </p>
           </div>
         </div>
       </div>
 
-      {/* Выбор папки */}
+      {/* Выбор типа */}
       <div className="bg-white/5 rounded-2xl p-6 border border-white/10 mb-6">
         <label className="block text-white/70 text-sm font-medium mb-3">
           Выберите тип загрузки
@@ -115,7 +112,7 @@ export default function BulkUploadPage() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white font-medium flex items-center gap-2">
               <ImageIcon size={18} className="text-green-400" />
-              Загружено: {allData.length} файлов
+              Всего загружено: {allData.length} записей
             </h3>
             <button
               onClick={() => {

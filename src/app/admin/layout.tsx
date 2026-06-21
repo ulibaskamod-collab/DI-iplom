@@ -63,7 +63,7 @@ export default function AdminLayout({
   }, [session, status, router])
 
   const menuItems = [
-  { href: '/admin', label: 'Главная', icon: Home, color: 'text-blue-400' },
+    { href: '/admin', label: 'Главная', icon: Home, color: 'text-blue-400' },
   { href: '/admin/zodiac', label: 'Знаки зодиака', icon: Star, color: 'text-yellow-400' },
   { href: '/admin/clothing', label: 'Одежда', icon: Shirt, color: 'text-green-400' },
   { href: '/admin/designers', label: 'Дизайнеры', icon: Palette, color: 'text-purple-400' },
