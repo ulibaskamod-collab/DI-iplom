@@ -13,27 +13,11 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Проверяем, что ID передан
-    if (!params?.id) {
-      console.error('❌ ID не передан')
-      return NextResponse.json(
-        { error: 'ID не указан', designer: null, works: [] },
-        { status: 400 }
-      )
-    }
-
     const designerId = parseInt(params.id)
 
-    // Проверяем, что ID - число
     if (isNaN(designerId)) {
-      console.error('❌ Неверный ID:', params.id)
-      return NextResponse.json(
-        { error: 'Неверный ID', designer: null, works: [] },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
     }
-
-    console.log('🔍 Поиск дизайнера с ID:', designerId)
 
     // Получаем дизайнера
     const designerRes = await pool.query(
@@ -42,18 +26,12 @@ export async function GET(
     )
 
     if (designerRes.rows.length === 0) {
-      console.log('❌ Дизайнер не найден:', designerId)
-      return NextResponse.json(
-        { error: 'Дизайнер не найден', designer: null, works: [] },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Designer not found' }, { status: 404 })
     }
-
-    console.log('✅ Дизайнер найден:', designerRes.rows[0].designer_name)
 
     // Получаем работы дизайнера
     const worksRes = await pool.query(
-      'SELECT * FROM designer_works WHERE designer_id = $1 ORDER BY id DESC',
+      'SELECT id, work_title, work_image, description FROM designer_works WHERE designer_id = $1 ORDER BY id DESC',
       [designerId]
     )
 
@@ -65,9 +43,9 @@ export async function GET(
     })
 
   } catch (error) {
-    console.error('❌ Ошибка GET designer detail:', error)
+    console.error('GET designer detail error:', error)
     return NextResponse.json(
-      { error: 'Ошибка сервера', designer: null, works: [] },
+      { error: 'Server error', designer: null, works: [] },
       { status: 500 }
     )
   }

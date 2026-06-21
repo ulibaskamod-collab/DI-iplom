@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Palette, Globe, Star, Shirt, ImageIcon, Loader2 } from 'lucide-react'
+import { ArrowLeft, Palette, Globe, Star, Shirt, ImageIcon } from 'lucide-react'
 
 interface Designer {
   id: number
@@ -35,35 +35,21 @@ export default function DesignerDetailPage() {
   const [workImageErrors, setWorkImageErrors] = useState<Record<number, boolean>>({})
 
   useEffect(() => {
-    if (!id) {
-      setError('ID дизайнера не указан')
-      setLoading(false)
-      return
-    }
-
-    console.log('🔍 Загружаем дизайнера с ID:', id)
+    if (!id) return
 
     fetch(`/api/designers/${id}`)
       .then(async (res) => {
-        console.log('📥 Ответ API:', res.status)
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`)
-        }
-        const data = await res.json()
-        console.log('📦 Данные:', data)
-        return data
+        if (!res.ok) throw new Error('Ошибка загрузки')
+        return res.json()
       })
       .then((data) => {
-        if (data.error) {
-          throw new Error(data.error)
-        }
         setDesigner(data.designer || null)
         setWorks(Array.isArray(data.works) ? data.works : [])
         setLoading(false)
       })
       .catch((err) => {
-        console.error('❌ Ошибка загрузки:', err)
-        setError(err.message || 'Не удалось загрузить данные дизайнера')
+        console.error('Error fetching designer:', err)
+        setError('Не удалось загрузить данные дизайнера')
         setLoading(false)
       })
   }, [id])
@@ -75,10 +61,7 @@ export default function DesignerDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
-          <p className="text-white/50">Загрузка...</p>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500" />
       </div>
     )
   }
@@ -86,17 +69,12 @@ export default function DesignerDetailPage() {
   if (error || !designer) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="text-center max-w-md">
-          <div className="text-6xl mb-4">😕</div>
-          <h1 className="text-2xl font-bold text-white mb-2">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">
             {error || 'Дизайнер не найден'}
           </h1>
-          <p className="text-white/50 text-sm mb-6">
-            Проверьте правильность ссылки или вернитесь к списку
-          </p>
-          <Link href="/designers" className="text-pink-400 hover:text-pink-300 transition inline-flex items-center gap-2">
-            <ArrowLeft size={16} />
-            К списку дизайнеров
+          <Link href="/designers" className="text-pink-400 hover:text-pink-300">
+            ← К списку дизайнеров
           </Link>
         </div>
       </div>
@@ -109,7 +87,6 @@ export default function DesignerDetailPage() {
       <div className="relative h-[400px] bg-gradient-to-b from-purple-900/40 to-black/80">
         <div className="max-w-7xl mx-auto px-4 h-full flex items-end pb-12">
           <div className="flex items-end gap-6">
-            {/* Аватар */}
             <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center border-4 border-white/20 overflow-hidden flex-shrink-0">
               {designer.designer_image && !imageError ? (
                 <img
@@ -148,7 +125,6 @@ export default function DesignerDetailPage() {
 
       {/* Контент */}
       <div className="max-w-7xl mx-auto px-4 py-12">
-        {/* Биография */}
         <div className="bg-white/5 rounded-2xl p-8 mb-12 border border-white/10">
           <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
             <Star className="text-yellow-400" size={24} />
@@ -159,7 +135,7 @@ export default function DesignerDetailPage() {
           </p>
         </div>
 
-        {/* Работы */}
+        {/* ===== РАБОТЫ ===== */}
         <div>
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
             <Shirt className="text-purple-400" size={24} />
@@ -176,20 +152,24 @@ export default function DesignerDetailPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {works.map((work) => {
                 const hasError = workImageErrors[work.id] || false
-                
+                const imageUrl = work.work_image || ''
+
                 return (
                   <div key={work.id} className="group bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition">
                     <div className="aspect-square bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center relative">
-                      {work.work_image && !hasError ? (
+                      {imageUrl && !hasError ? (
                         <img
-                          src={work.work_image}
+                          src={imageUrl}
                           alt={work.work_title || 'Работа'}
                           className="w-full h-full object-cover"
                           loading="lazy"
                           onError={() => handleWorkImageError(work.id)}
                         />
                       ) : (
-                        <ImageIcon className="w-12 h-12 text-purple-400 opacity-50" />
+                        <div className="flex flex-col items-center justify-center">
+                          <ImageIcon className="w-12 h-12 text-purple-400 opacity-50" />
+                          <span className="text-purple-400/50 text-xs mt-2">Нет фото</span>
+                        </div>
                       )}
                     </div>
                     <div className="p-4">
