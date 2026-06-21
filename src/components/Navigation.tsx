@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { 
   Menu, X, Sparkles, User, LogOut, Shield, 
-  Home, Star, Palette, Heart, Crown, ChevronRight 
+  Home, Star, Palette, ChevronRight 
 } from 'lucide-react'
 
 export default function Navigation() {
@@ -18,7 +18,6 @@ export default function Navigation() {
     setMounted(true)
   }, [])
 
-  // Проверяем, является ли пользователь администратором
   useEffect(() => {
     if (session?.user?.email) {
       fetch(`/api/user/role?email=${session.user.email}`)
@@ -30,7 +29,6 @@ export default function Navigation() {
     }
   }, [session])
 
-  // Закрываем меню при клике вне
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement
@@ -42,7 +40,6 @@ export default function Navigation() {
     return () => document.removeEventListener('click', handleClickOutside)
   }, [isOpen])
 
-  // Блокируем скролл при открытом меню
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -54,7 +51,6 @@ export default function Navigation() {
     }
   }, [isOpen])
 
-  // Закрываем меню при нажатии Escape
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -65,22 +61,6 @@ export default function Navigation() {
     return () => document.removeEventListener('keydown', handleEscape)
   }, [isOpen])
 
-  // Меню для авторизованных пользователей
-  const userMenuItems = [
-    { href: '/', label: 'Главная', icon: Home },
-    { href: '/zodiac', label: 'Все знаки', icon: Star },
-    { href: '/designers', label: 'Дизайнеры', icon: Palette },
-    { href: '/profile', label: 'Профиль', icon: User },
-  ]
-
-  // Меню для неавторизованных
-  const guestMenuItems = [
-    { href: '/', label: 'Главная', icon: Home },
-    { href: '/zodiac', label: 'Все знаки', icon: Star },
-    { href: '/designers', label: 'Дизайнеры', icon: Palette },
-  ]
-
-  // Если сессия еще загружается, показываем упрощенную навигацию
   if (status === 'loading' || !mounted) {
     return (
       <nav className="navbar">
@@ -95,109 +75,128 @@ export default function Navigation() {
   }
 
   const isAuthenticated = status === 'authenticated'
-  const menuItems = isAuthenticated ? userMenuItems : guestMenuItems
+  const menuItems = [
+    { href: '/', label: 'Главная', icon: Home },
+    { href: '/zodiac', label: 'Все знаки', icon: Star },
+    { href: '/designers', label: 'Дизайнеры', icon: Palette },
+  ]
 
   return (
-    <nav className="navbar">
-      <div className="nav-container">
-        <Link href="/" className="nav-logo" onClick={() => setIsOpen(false)}>
-          <Sparkles className="w-5 h-5 text-pink-400" />
-          <span>StellarFit</span>
-        </Link>
+    <>
+      <nav className="navbar">
+        <div className="nav-container">
+          <Link href="/" className="nav-logo" onClick={() => setIsOpen(false)}>
+            <Sparkles className="w-5 h-5 text-pink-400" />
+            <span>StellarFit</span>
+          </Link>
 
-        <button 
-          className="menu-btn" 
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle menu"
-        >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          <button 
+            className="menu-btn" 
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
 
-        {/* Десктопное меню */}
-        <div className="nav-links-desktop">
-          {menuItems.map((item) => (
-            <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
-              <item.icon size={16} className="inline mr-1" />
-              {item.label}
-            </Link>
-          ))}
-          
-          {isAuthenticated ? (
-            <>
-              {isAdmin && (
-                <Link href="/admin" onClick={() => setIsOpen(false)} className="text-pink-400 hover:text-pink-300">
-                  <Shield size={16} className="inline mr-1" />
-                  Админ панель
-                </Link>
-              )}
-              <button onClick={() => signOut()} className="nav-auth-btn">
-                <LogOut size={16} />
-                Выйти
-              </button>
-            </>
-          ) : (
-            <>
-              <Link href="/auth/signin" className="nav-auth-btn" onClick={() => setIsOpen(false)}>
-                Войти
-              </Link>
-              <Link href="/auth/register" onClick={() => setIsOpen(false)}>
-                Регистрация
-              </Link>
-            </>
-          )}
-        </div>
-
-        {/* ===== МОБИЛЬНОЕ МЕНЮ (как у админки) ===== */}
-        <div className={`nav-links-mobile ${isOpen ? 'open' : ''}`}>
-          {/* Заголовок меню */}
-          <div className="mobile-menu-header">
-            <div className="mobile-menu-logo">
-              <Sparkles className="w-6 h-6 text-pink-400" />
-              <span>StellarFit</span>
-            </div>
-            <button 
-              className="mobile-menu-close"
-              onClick={() => setIsOpen(false)}
-            >
-              <X size={24} />
-            </button>
-          </div>
-
-          {/* Информация о пользователе */}
-          {isAuthenticated && session?.user && (
-            <div className="mobile-user-info">
-              <div className="mobile-user-avatar">
-                {session.user.email?.[0]?.toUpperCase() || 'U'}
-              </div>
-              <div className="mobile-user-details">
-                <p className="mobile-user-email">{session.user.email}</p>
-                <p className="mobile-user-role">
-                  {isAdmin ? '👑 Администратор' : '👤 Пользователь'}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Разделитель */}
-          <div className="mobile-menu-divider" />
-
-          {/* Пункты меню */}
-          <div className="mobile-menu-items">
+          {/* Десктопное меню */}
+          <div className="nav-links-desktop">
             {menuItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="mobile-menu-item"
-                onClick={() => setIsOpen(false)}
-              >
-                <item.icon size={20} />
-                <span>{item.label}</span>
-                <ChevronRight size={16} className="ml-auto text-white/20" />
+              <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
+                <item.icon size={16} className="inline mr-1" />
+                {item.label}
               </Link>
             ))}
+            
+            {isAuthenticated ? (
+              <>
+                {isAdmin && (
+                  <Link href="/admin" onClick={() => setIsOpen(false)} className="text-pink-400 hover:text-pink-300">
+                    <Shield size={16} className="inline mr-1" />
+                    Админ панель
+                  </Link>
+                )}
+                <Link href="/profile" onClick={() => setIsOpen(false)}>
+                  <User size={16} className="inline mr-1" />
+                  Профиль
+                </Link>
+                <button onClick={() => signOut()} className="nav-auth-btn">
+                  <LogOut size={16} />
+                  Выйти
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/signin" className="nav-auth-btn" onClick={() => setIsOpen(false)}>
+                  Войти
+                </Link>
+                <Link href="/auth/register" onClick={() => setIsOpen(false)}>
+                  Регистрация
+                </Link>
+              </>
+            )}
           </div>
+        </div>
+      </nav>
 
-          {/* Разделитель для админки */}
+      {/* ===== МОБИЛЬНОЕ МЕНЮ (НА ВСЮ ШИРИНУ) ===== */}
+      <div className={`mobile-menu-overlay ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(false)} />
+      
+      <div className={`mobile-menu ${isOpen ? 'open' : ''}`}>
+        {/* Заголовок */}
+        <div className="mobile-menu-header">
+          <div className="mobile-menu-logo">
+            <Sparkles className="w-6 h-6 text-pink-400" />
+            <span>StellarFit</span>
+          </div>
+          <button className="mobile-menu-close" onClick={() => setIsOpen(false)}>
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Информация о пользователе */}
+        {isAuthenticated && session?.user && (
+          <div className="mobile-user-info">
+            <div className="mobile-user-avatar">
+              {session.user.email?.[0]?.toUpperCase() || 'U'}
+            </div>
+            <div className="mobile-user-details">
+              <p className="mobile-user-email">{session.user.email}</p>
+              <p className="mobile-user-role">
+                {isAdmin ? '👑 Администратор' : '👤 Пользователь'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="mobile-menu-divider" />
+
+        {/* Пункты меню */}
+        <div className="mobile-menu-items">
+          {menuItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="mobile-menu-item"
+              onClick={() => setIsOpen(false)}
+            >
+              <item.icon size={20} />
+              <span>{item.label}</span>
+              <ChevronRight size={16} className="mobile-menu-arrow" />
+            </Link>
+          ))}
+
+          {isAuthenticated && (
+            <Link
+              href="/profile"
+              className="mobile-menu-item"
+              onClick={() => setIsOpen(false)}
+            >
+              <User size={20} />
+              <span>Профиль</span>
+              <ChevronRight size={16} className="mobile-menu-arrow" />
+            </Link>
+          )}
+
           {isAdmin && (
             <>
               <div className="mobile-menu-divider" />
@@ -206,14 +205,13 @@ export default function Navigation() {
                 className="mobile-menu-item mobile-menu-admin"
                 onClick={() => setIsOpen(false)}
               >
-                <Shield size={20} className="text-pink-400" />
-                <span className="text-pink-400">Админ панель</span>
-                <ChevronRight size={16} className="ml-auto text-pink-400/30" />
+                <Shield size={20} />
+                <span>Админ панель</span>
+                <ChevronRight size={16} className="mobile-menu-arrow" />
               </Link>
             </>
           )}
 
-          {/* Кнопка выхода/входа */}
           <div className="mobile-menu-divider" />
           
           {isAuthenticated ? (
@@ -224,8 +222,8 @@ export default function Navigation() {
               }} 
               className="mobile-menu-item mobile-menu-logout"
             >
-              <LogOut size={20} className="text-red-400" />
-              <span className="text-red-400">Выйти</span>
+              <LogOut size={20} />
+              <span>Выйти</span>
             </button>
           ) : (
             <>
@@ -249,38 +247,53 @@ export default function Navigation() {
         </div>
       </div>
 
-      {/* Стили для мобильного меню */}
       <style jsx>{`
-        .nav-links-mobile {
+        /* ===== МОБИЛЬНОЕ МЕНЮ ===== */
+        .mobile-menu {
           position: fixed;
           top: 0;
-          right: -320px;
+          left: 0;
+          right: 0;
           bottom: 0;
-          width: 320px;
-          max-width: 85vw;
-          background: linear-gradient(180deg, #1a0a2a 0%, #0d0d25 100%);
+          background: linear-gradient(180deg, #0a0a1a 0%, #0d0d25 50%, #0a0a1a 100%);
           backdrop-filter: blur(20px);
-          border-left: 1px solid rgba(255, 255, 255, 0.05);
-          box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
           z-index: 100;
-          transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transform: translateX(-100%);
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           display: flex;
           flex-direction: column;
-          padding: 0;
           overflow-y: auto;
+          padding: 0;
         }
 
-        .nav-links-mobile.open {
-          right: 0;
+        .mobile-menu.open {
+          transform: translateX(0);
         }
 
-        /* Заголовок меню */
+        /* Затемнение */
+        .mobile-menu-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.6);
+          z-index: 99;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.3s ease;
+        }
+
+        .mobile-menu-overlay.open {
+          opacity: 1;
+          pointer-events: all;
+        }
+
+        /* Заголовок */
         .mobile-menu-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
           padding: 1.25rem 1.5rem;
           border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          flex-shrink: 0;
         }
 
         .mobile-menu-logo {
@@ -290,6 +303,13 @@ export default function Navigation() {
           font-size: 1.25rem;
           font-weight: bold;
           color: white;
+        }
+
+        .mobile-menu-logo span {
+          background: linear-gradient(135deg, #f0c8a0, #e8b8a0);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
         .mobile-menu-close {
@@ -314,6 +334,7 @@ export default function Navigation() {
           padding: 1.25rem 1.5rem;
           background: rgba(255, 255, 255, 0.03);
           border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          flex-shrink: 0;
         }
 
         .mobile-user-avatar {
@@ -339,7 +360,9 @@ export default function Navigation() {
           color: white;
           font-size: 0.9rem;
           font-weight: 500;
-          truncate: true;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .mobile-user-role {
@@ -353,6 +376,7 @@ export default function Navigation() {
           height: 1px;
           background: rgba(255, 255, 255, 0.05);
           margin: 0.25rem 1.5rem;
+          flex-shrink: 0;
         }
 
         /* Пункты меню */
@@ -360,13 +384,14 @@ export default function Navigation() {
           display: flex;
           flex-direction: column;
           padding: 0.5rem 0;
+          flex: 1;
         }
 
         .mobile-menu-item {
           display: flex;
           align-items: center;
           gap: 1rem;
-          padding: 0.75rem 1.5rem;
+          padding: 0.85rem 1.5rem;
           color: rgba(255, 255, 255, 0.7);
           text-decoration: none;
           transition: all 0.2s ease;
@@ -375,7 +400,7 @@ export default function Navigation() {
           border: none;
           width: 100%;
           text-align: left;
-          font-size: 0.95rem;
+          font-size: 1rem;
         }
 
         .mobile-menu-item:hover {
@@ -384,6 +409,12 @@ export default function Navigation() {
         }
 
         .mobile-menu-item svg {
+          flex-shrink: 0;
+        }
+
+        .mobile-menu-arrow {
+          margin-left: auto;
+          color: rgba(255, 255, 255, 0.15);
           flex-shrink: 0;
         }
 
@@ -396,7 +427,7 @@ export default function Navigation() {
         }
 
         .mobile-menu-logout {
-          color: rgba(255, 107, 107, 0.7) !important;
+          color: rgba(255, 107, 107, 0.6) !important;
         }
 
         .mobile-menu-logout:hover {
@@ -408,39 +439,21 @@ export default function Navigation() {
           color: rgba(255, 255, 255, 0.8) !important;
         }
 
-        /* Затемнение фона */
-        .mobile-overlay {
-          position: fixed;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.5);
-          z-index: 99;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.3s ease;
-        }
-
-        .mobile-overlay.open {
-          opacity: 1;
-          pointer-events: all;
-        }
-
-        /* Скрываем мобильное меню на десктопе */
+        /* Скрываем на десктопе */
         @media (min-width: 769px) {
-          .nav-links-mobile {
+          .mobile-menu,
+          .mobile-menu-overlay {
             display: none !important;
           }
         }
 
-        /* Показываем только на мобильных */
+        /* Скрываем десктопное на мобильных */
         @media (max-width: 768px) {
           .nav-links-desktop {
             display: none !important;
           }
         }
       `}</style>
-
-      {/* Затемнение */}
-      <div className={`mobile-overlay ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(false)} />
-    </nav>
+    </>
   )
 }
