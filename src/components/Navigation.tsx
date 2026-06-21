@@ -3,14 +3,13 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
-import { Menu, X, Sparkles, User, LogOut, Shield } from 'lucide-react'
+import { Menu, X, Sparkles, User, LogOut, Shield, Home, Star, Palette } from 'lucide-react'
 
 export default function Navigation() {
   const { data: session, status } = useSession()
   const [isOpen, setIsOpen] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
 
-  // Проверяем, является ли пользователь администратором
   useEffect(() => {
     if (session?.user?.email) {
       fetch(`/api/user/role?email=${session.user.email}`)
@@ -22,7 +21,6 @@ export default function Navigation() {
     }
   }, [session])
 
-  // Закрываем меню при клике вне
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement
@@ -34,7 +32,6 @@ export default function Navigation() {
     return () => document.removeEventListener('click', handleClickOutside)
   }, [isOpen])
 
-  // Блокируем скролл при открытом меню
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -46,7 +43,17 @@ export default function Navigation() {
     }
   }, [isOpen])
 
-  // Если сессия еще загружается, показываем упрощенную навигацию
+  // Закрываем меню при нажатии Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [isOpen])
+
   if (status === 'loading') {
     return (
       <nav className="navbar">
@@ -78,14 +85,17 @@ export default function Navigation() {
 
         <div className={`nav-links ${isOpen ? 'open' : ''}`}>
           <Link href="/" onClick={() => setIsOpen(false)}>
+            <Home size={18} className="inline mr-2" />
             Главная
           </Link>
 
           <Link href="/zodiac" onClick={() => setIsOpen(false)}>
+            <Star size={18} className="inline mr-2" />
             Все знаки
           </Link>
 
           <Link href="/designers" onClick={() => setIsOpen(false)}>
+            <Palette size={18} className="inline mr-2" />
             Дизайнеры
           </Link>
 
@@ -97,19 +107,22 @@ export default function Navigation() {
                   onClick={() => setIsOpen(false)} 
                   className="text-pink-400 hover:text-pink-300"
                 >
-                  <Shield size={16} className="inline mr-1" />
+                  <Shield size={18} className="inline mr-2" />
                   Админ панель
                 </Link>
               )}
               <Link href="/profile" onClick={() => setIsOpen(false)}>
-                <User size={16} className="inline mr-1" />
+                <User size={18} className="inline mr-2" />
                 Профиль
               </Link>
               <button 
-                onClick={() => signOut()} 
+                onClick={() => {
+                  signOut()
+                  setIsOpen(false)
+                }} 
                 className="nav-auth-btn"
               >
-                <LogOut size={16} />
+                <LogOut size={18} />
                 Выйти
               </button>
             </>
