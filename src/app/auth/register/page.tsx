@@ -43,7 +43,6 @@ export default function RegisterPage() {
     setLoading(true)
     setError('')
 
-    // Валидация имени
     if (!formData.name.trim()) {
       setError('Пожалуйста, введите ваше имя')
       setLoading(false)
@@ -56,7 +55,6 @@ export default function RegisterPage() {
       return
     }
 
-    // Валидация даты
     if (!formData.birthDate) {
       setError('Пожалуйста, выберите дату рождения')
       setLoading(false)
@@ -107,7 +105,7 @@ export default function RegisterPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-white/5 backdrop-blur-sm rounded-3xl p-8 border border-white/10"
+        className="max-w-md w-full bg-purple-900/30 backdrop-blur-sm rounded-3xl p-8 border border-purple-700/50"
       >
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
@@ -118,7 +116,7 @@ export default function RegisterPage() {
           <h1 className="text-2xl font-bold text-white">
             Создать аккаунт
           </h1>
-          <p className="text-white/40 text-sm mt-1">Присоединяйтесь к звёздному сообществу</p>
+          <p className="text-purple-300 text-sm mt-1">Присоединяйтесь к звёздному сообществу</p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -129,44 +127,41 @@ export default function RegisterPage() {
           )}
 
           <div className="space-y-4">
-            {/* Имя */}
             <div>
-              <label className="block text-sm mb-1.5 text-white/60">Имя</label>
+              <label className="block text-sm mb-1.5 text-purple-300">Имя</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
                 <input
                   name="name"
                   type="text"
                   value={formData.name}
                   onChange={handleNameChange}
                   required
-                  className="w-full px-4 py-3 bg-white/5 rounded-xl text-white border border-white/10 focus:outline-none focus:border-pink-500 pl-11 placeholder:text-white/20"
+                  className="w-full px-4 py-3 bg-white/10 rounded-xl text-white border border-white/10 focus:outline-none focus:border-pink-500 pl-11 placeholder:text-white/30"
                   placeholder="Ваше имя"
                   maxLength={50}
                 />
               </div>
             </div>
 
-            {/* Email */}
             <div>
-              <label className="block text-sm mb-1.5 text-white/60">Email</label>
+              <label className="block text-sm mb-1.5 text-purple-300">Email</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
                 <input
                   name="email"
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 bg-white/5 rounded-xl text-white border border-white/10 focus:outline-none focus:border-pink-500 pl-11 placeholder:text-white/20"
+                  className="w-full px-4 py-3 bg-white/10 rounded-xl text-white border border-white/10 focus:outline-none focus:border-pink-500 pl-11 placeholder:text-white/30"
                   placeholder="your@email.com"
                 />
               </div>
             </div>
 
-            {/* Дата рождения */}
             <div>
-              <label className="block text-sm mb-1.5 text-white/60">Дата рождения</label>
+              <label className="block text-sm mb-1.5 text-purple-300">Дата рождения</label>
               <StarDatePicker
                 value={formData.birthDate}
                 onChange={(date) => setFormData({ ...formData, birthDate: date })}
@@ -174,9 +169,8 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* Пол */}
             <div>
-              <label className="block text-sm mb-1.5 text-white/60">Пол</label>
+              <label className="block text-sm mb-1.5 text-purple-300">Пол</label>
               <div className="flex gap-6">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -188,7 +182,7 @@ export default function RegisterPage() {
                     className="accent-pink-500 w-4 h-4"
                   />
                   <Venus size={16} className="text-pink-400" />
-                  <span className="text-white/70 text-sm">Женский</span>
+                  <span className="text-white/80 text-sm">Женский</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -200,16 +194,15 @@ export default function RegisterPage() {
                     className="accent-blue-500 w-4 h-4"
                   />
                   <Mars size={16} className="text-blue-400" />
-                  <span className="text-white/70 text-sm">Мужской</span>
+                  <span className="text-white/80 text-sm">Мужской</span>
                 </label>
               </div>
             </div>
 
-            {/* Пароль */}
             <div>
-              <label className="block text-sm mb-1.5 text-white/60">Пароль</label>
+              <label className="block text-sm mb-1.5 text-purple-300">Пароль</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
                 <input
                   name="password"
                   type="password"
@@ -217,24 +210,23 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   required
                   minLength={8}
-                  className="w-full px-4 py-3 bg-white/5 rounded-xl text-white border border-white/10 focus:outline-none focus:border-pink-500 pl-11 placeholder:text-white/20"
+                  className="w-full px-4 py-3 bg-white/10 rounded-xl text-white border border-white/10 focus:outline-none focus:border-pink-500 pl-11 placeholder:text-white/30"
                   placeholder="минимум 8 символов"
                 />
               </div>
             </div>
 
-            {/* Подтверждение пароля */}
             <div>
-              <label className="block text-sm mb-1.5 text-white/60">Подтвердите пароль</label>
+              <label className="block text-sm mb-1.5 text-purple-300">Подтвердите пароль</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
                 <input
                   name="confirmPassword"
                   type="password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 bg-white/5 rounded-xl text-white border border-white/10 focus:outline-none focus:border-pink-500 pl-11 placeholder:text-white/20"
+                  className="w-full px-4 py-3 bg-white/10 rounded-xl text-white border border-white/10 focus:outline-none focus:border-pink-500 pl-11 placeholder:text-white/30"
                   placeholder="повторите пароль"
                 />
               </div>
@@ -250,7 +242,7 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="text-center mt-6 text-white/40 text-sm">
+        <p className="text-center mt-6 text-purple-300 text-sm">
           Уже есть аккаунт?{' '}
           <Link href="/auth/signin" className="text-pink-400 hover:text-pink-300 font-semibold">
             Войти
