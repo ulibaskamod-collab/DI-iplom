@@ -18,6 +18,7 @@ function FavoriteButton({ itemId }: { itemId: number }) {
   const [isFavorite, setIsFavorite] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  // Проверяем статус избранного
   useEffect(() => {
     if (session && itemId) {
       checkFavoriteStatus()
@@ -75,9 +76,9 @@ function FavoriteButton({ itemId }: { itemId: number }) {
     <button
       onClick={toggleFavorite}
       disabled={loading}
-      className={`p-2 rounded-full transition-all duration-300 ${
+      className={`p-2.5 rounded-full transition-all duration-300 ${
         isFavorite
-          ? 'bg-red-500/90 text-white scale-110 shadow-lg shadow-red-500/30'
+          ? 'bg-red-500 text-white scale-110 shadow-lg shadow-red-500/30'
           : 'bg-black/40 text-white/60 hover:text-red-400 hover:bg-black/60 backdrop-blur-sm'
       }`}
     >
@@ -89,7 +90,6 @@ function FavoriteButton({ itemId }: { itemId: number }) {
 // ===== КОМПОНЕНТ КАРТОЧКИ ОДЕЖДЫ =====
 function ClothingCard({ item, idx }: { item: any; idx: number }) {
   const [imgError, setImgError] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
 
   const imageUrl = (!item.image_url || imgError)
     ? 'https://via.placeholder.com/400x500?text=No+Image'
@@ -105,91 +105,44 @@ function ClothingCard({ item, idx }: { item: any; idx: number }) {
     }
   }
 
-  const getGenderIcon = (gender: string) => {
-    switch(gender) {
-      case 'female': return '👩'
-      case 'male': return '👨'
-      default: return '👥'
-    }
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: idx * 0.06, duration: 0.4 }}
-      whileHover={{ y: -8 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className="group bg-white/[0.03] backdrop-blur-sm rounded-2xl overflow-hidden border border-white/[0.08] hover:border-white/20 transition-all duration-500 shadow-lg hover:shadow-2xl hover:shadow-black/30"
+      whileHover={{ y: -6 }}
+      className="group bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-pink-500/30 transition-all duration-300"
     >
-      <div className="aspect-[3/4] bg-gradient-to-br from-white/[0.02] to-white/[0.05] relative overflow-hidden">
-        <motion.img
+      <div className="aspect-square bg-gradient-to-br from-white/5 to-white/10 relative">
+        <img
           src={imageUrl}
           alt={item.title || 'Одежда'}
           className="w-full h-full object-cover"
-          animate={{ scale: isHovered ? 1.05 : 1 }}
-          transition={{ duration: 0.5 }}
           loading="lazy"
           onError={() => setImgError(true)}
         />
-
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
         {/* ===== КНОПКА ИЗБРАННОГО ===== */}
         <div className="absolute top-3 right-3 z-10">
           <FavoriteButton itemId={item.id} />
         </div>
 
+        {/* Сезон */}
         {item.season && (
-          <div className="absolute bottom-3 left-3 z-10">
-            <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full text-[10px] font-medium text-white/90 border border-white/10 flex items-center gap-1">
-              {getSeasonIcon(item.season)}
-              <span className="hidden sm:inline">
-                {item.season === 'winter' ? 'Зима' : 
-                 item.season === 'spring' ? 'Весна' : 
-                 item.season === 'summer' ? 'Лето' : 'Осень'}
-              </span>
-            </span>
+          <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/50 backdrop-blur-sm rounded-full text-xs text-white/80">
+            {getSeasonIcon(item.season)}
           </div>
         )}
-
-        <div className="absolute bottom-3 right-3 z-10">
-          <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full text-[10px] font-medium text-white/90 border border-white/10">
-            {getGenderIcon(item.gender)}
-          </span>
-        </div>
-
-        <AnimatePresence>
-          {isHovered && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/40 flex items-center justify-center gap-2"
-            >
-              <button className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium hover:bg-white/30 transition">
-                Быстрый просмотр
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
-      <div className="p-4">
-        <h3 className="text-white font-semibold text-sm truncate group-hover:text-pink-400 transition-colors duration-300">
+      <div className="p-3">
+        <h3 className="text-white font-medium text-sm truncate">
           {item.title || 'Без названия'}
         </h3>
-        {item.description && (
-          <p className="text-white/40 text-xs mt-1.5 line-clamp-2 leading-relaxed">
-            {item.description}
-          </p>
-        )}
-        <div className="mt-2 flex items-center gap-2">
-          <div className="flex-1 h-px bg-white/10" />
-          <span className="text-white/20 text-[10px]">✨</span>
-          <div className="flex-1 h-px bg-white/10" />
-        </div>
+        <p className="text-white/40 text-xs mt-1">
+          {item.gender === 'female' ? '👩 Женский' : 
+           item.gender === 'male' ? '👨 Мужской' : '👥 Унисекс'}
+        </p>
       </div>
     </motion.div>
   )
@@ -264,13 +217,12 @@ export default function ZodiacPageContent({ signData, slug }: ZodiacPageContentP
   const [clothingItems, setClothingItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showHoroscope, setShowHoroscope] = useState(false)
-  const [activeTab, setActiveTab] = useState<'style' | 'compatibility' | 'lucky'>('style')
 
   useEffect(() => {
     fetch(`/api/zodiac/items?zodiacSlug=${slug}`)
       .then(res => res.json())
       .then(data => {
-        setClothingItems(data)
+        setClothingItems(Array.isArray(data) ? data : [])
         setLoading(false)
       })
       .catch(console.error)
@@ -366,10 +318,64 @@ export default function ZodiacPageContent({ signData, slug }: ZodiacPageContentP
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* Остальной контент страницы... */}
-        {/* (здесь остаются табы, цветовая палитра, хобби, факты) */}
+        {/* Стиль */}
+        <div className="bg-white/5 rounded-2xl p-6 md:p-8 mb-10 border border-white/10">
+          <h2 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: signData.accentColor }}>
+            {signData.title}
+          </h2>
+          <p className="text-white/70 text-base leading-relaxed">{signData.styleDesc}</p>
+          <div className="flex flex-wrap gap-2 mt-5">
+            {signData.styleKeywords.map((keyword: string, idx: number) => (
+              <span
+                key={idx}
+                className="px-3 py-1.5 rounded-full text-xs font-medium"
+                style={{ backgroundColor: `${signData.accentColor}15`, color: signData.accentColor, border: `1px solid ${signData.accentColor}30` }}
+              >
+                {keyword}
+              </span>
+            ))}
+          </div>
+        </div>
 
-        {/* Гардероб */}
+        {/* Цветовая палитра */}
+        <div className="mb-10">
+          <h3 className="text-xl font-semibold text-center mb-6 text-white/90">
+            Цветовая палитра {signData.name}
+          </h3>
+          <div className="flex flex-wrap justify-center gap-5">
+            {signData.colors.map((color: string, idx: number) => (
+              <div key={idx} className="flex flex-col items-center gap-2 cursor-pointer" onClick={() => navigator.clipboard.writeText(color)}>
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full shadow-lg" style={{ backgroundColor: color, boxShadow: `0 0 25px ${color}40` }} />
+                <span className="text-white/50 text-xs">{signData.colorNames[idx]}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-white/30 text-xs mt-4">💡 Нажмите на цвет, чтобы скопировать код</p>
+        </div>
+
+        {/* Хобби и факты */}
+        <div className="grid md:grid-cols-2 gap-6 mb-10">
+          <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-white">✨ Хобби и увлечения</h3>
+            <div className="flex flex-wrap gap-2">
+              {signData.hobbies.map((hobby: string, idx: number) => (
+                <span key={idx} className="px-3 py-1 bg-white/5 rounded-full text-xs text-white/60 border border-white/10">{hobby}</span>
+              ))}
+            </div>
+          </div>
+          <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-white">⭐ Интересные факты</h3>
+            <ul className="space-y-2">
+              {signData.facts.map((fact: string, idx: number) => (
+                <li key={idx} className="flex items-center gap-2 text-sm text-white/60">
+                  <span style={{ color: signData.accentColor }}>✦</span> {fact}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Гардероб с сердечками */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -379,7 +385,7 @@ export default function ZodiacPageContent({ signData, slug }: ZodiacPageContentP
             Гардероб {signData.name}
           </h2>
           <p className="text-center text-white/40 text-sm mb-8">
-            Выбирайте идеальные образы по сезону и стилю
+            ❤️ Нажмите на сердечко, чтобы добавить в избранное
           </p>
 
           {/* Фильтры */}
@@ -420,13 +426,13 @@ export default function ZodiacPageContent({ signData, slug }: ZodiacPageContentP
             </div>
           </div>
 
-          {/* Товары */}
+          {/* Товары с сердечками */}
           {loading ? (
             <div className="flex justify-center py-20">
               <div className="animate-spin rounded-full h-10 w-10 border-2 border-white/20 border-t-white/80" />
             </div>
           ) : filteredItems.length === 0 ? (
-            <div className="text-center py-16 bg-white/[0.02] rounded-2xl border border-white/[0.05]">
+            <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
               <ShoppingBag className="w-12 h-12 text-white/20 mx-auto mb-3" />
               <p className="text-white/40">Нет товаров для выбранных фильтров</p>
             </div>
@@ -448,8 +454,8 @@ export default function ZodiacPageContent({ signData, slug }: ZodiacPageContentP
         </div>
       </div>
 
-      <footer className="text-center py-8 mt-16 border-t border-white/[0.05]">
-        <p className="text-white/25 text-xs">© 2026 StellarFit. Пусть звёзды ведут тебя ✨</p>
+      <footer className="text-center py-8 mt-16 border-t border-white/10">
+        <p className="text-white/30 text-xs">© 2026 StellarFit. Пусть звёзды ведут тебя ✨</p>
       </footer>
     </div>
   )
