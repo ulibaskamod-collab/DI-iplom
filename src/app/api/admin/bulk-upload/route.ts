@@ -1,45 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const files = formData.getAll('images') as File[];
-    const folder = (formData.get('folder') as string) || 'general';
+    const formData = await req.formData()
+    const files = formData.getAll('images') as File[]
 
     if (!files || files.length === 0) {
-      return NextResponse.json({ error: 'Файлы не найдены' }, { status: 400 });
+      return NextResponse.json({ error: 'Файлы не найдены' }, { status: 400 })
     }
 
-    const uploadedUrls: string[] = [];
+    const uploadedUrls: string[] = []
 
     for (const file of files) {
-      if (file.size > 5 * 1024 * 1024) continue;
-      if (!file.type.startsWith('image/')) continue;
+      if (file.size > 5 * 1024 * 1024) continue
+      if (!file.type.startsWith('image/')) continue
 
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const timestamp = Date.now();
-      const originalName = file.name.replace(/\s/g, '_');
-      const fileName = `${timestamp}_${originalName}`;
+      const bytes = await file.arrayBuffer()
+      const buffer = Buffer.from(bytes)
+      const base64Image = `data:${file.type};base64,${buffer.toString('base64')}`
 
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', folder);
-      await mkdir(uploadDir, { recursive: true });
-      const filePath = path.join(uploadDir, fileName);
-      await writeFile(filePath, buffer);
-
-      uploadedUrls.push(`/uploads/${folder}/${fileName}`);
+      uploadedUrls.push(base64Image)
     }
 
     return NextResponse.json({
       success: true,
       uploaded: uploadedUrls.length,
       urls: uploadedUrls,
-    });
+    })
 
   } catch (error) {
-    console.error('Bulk upload error:', error);
-    return NextResponse.json({ error: 'Ошибка загрузки' }, { status: 500 });
+    console.error('Bulk upload error:', error)
+    return NextResponse.json({ error: 'Ошибка загрузки' }, { status: 500 })
   }
 }
