@@ -1,84 +1,124 @@
 'use client'
 
-import { useState } from 'react'
-import { Upload, X, Check, Loader2, Copy, Trash2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Upload, X, Loader2, Copy, Trash2, User, Tag, FileText } from 'lucide-react'
 
 interface BulkImageUploadProps {
   folder: 'clothing' | 'designers' | 'works' | 'zodiac'
-  onUploadComplete?: (urls: string[]) => void
+  onUploadComplete?: (data: any[]) => void
   maxFiles?: number
   accept?: string
-  title?: string
-  description?: string
+}
+
+interface FileWithData {
+  file: File
+  preview: string
+  name: string
+  description: string
+  // Для одежды
+  gender?: string
+  zodiac_sign_id?: number
+  // Для дизайнеров
+  designer_name?: string
+  bio?: string
+  // Для работ
+  designer_id?: number
+  work_title?: string
 }
 
 export function BulkImageUpload({ 
   folder, 
   onUploadComplete, 
   maxFiles = 10,
-  accept = 'image/*',
-  title = 'Массовая загрузка изображений',
-  description = 'Выберите несколько файлов для загрузки'
+  accept = 'image/*'
 }: BulkImageUploadProps) {
-  const [files, setFiles] = useState<File[]>([])
-  const [previews, setPreviews] = useState<string[]>([])
+  const [files, setFiles] = useState<FileWithData[]>([])
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
-  const [uploadedUrls, setUploadedUrls] = useState<string[]>([])
+  const [uploadedData, setUploadedData] = useState<any[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [zodiacSigns, setZodiacSigns] = useState<{id: number, name: string}[]>([])
+  const [designers, setDesigners] = useState<{id: number, designer_name: string}[]>([])
+
+  // Загружаем знаки зодиака для одежды
+  useEffect(() => {
+    if (folder === 'clothing') {
+      fetch('/api/admin/zodiac')
+        .then(res => res.json())
+        .then(data => setZodiacSigns(data))
+        .catch(console.error)
+    }
+  }, [folder])
+
+  // Загружаем дизайнеров для работ
+  useEffect(() => {
+    if (folder === 'works') {
+      fetch('/api/admin/designers')
+        .then(res => res.json())
+        .then(data => setDesigners(data))
+        .catch(console.error)
+    }
+  }, [folder])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || [])
     setError(null)
     
-    // Проверка на количество
     if (selectedFiles.length + files.length > maxFiles) {
       setError(`Можно загрузить максимум ${maxFiles} файлов`)
       return
     }
 
-    // Проверка на размер
     const oversized = selectedFiles.find(f => f.size > 5 * 1024 * 1024)
     if (oversized) {
       setError(`Файл ${oversized.name} слишком большой (макс. 5MB)`)
       return
     }
 
-    // Проверка на тип
     const invalidType = selectedFiles.find(f => !f.type.startsWith('image/'))
     if (invalidType) {
       setError(`Файл ${invalidType.name} не является изображением`)
       return
     }
 
-    // Создаем превью
-    const newPreviews = selectedFiles.map(f => URL.createObjectURL(f))
-    
-    setFiles([...files, ...selectedFiles])
-    setPreviews([...previews, ...newPreviews])
-    
-    // Сбрасываем input
+    const newFiles: FileWithData[] = selectedFiles.map(f => ({
+      file: f,
+      preview: URL.createObjectURL(f),
+      name: '',
+      description: '',
+      // Для одежды
+      gender: 'unisex',
+      zodiac_sign_id: zodiacSigns.length > 0 ? zodiacSigns[0].id : undefined,
+      // Для дизайнеров
+      designer_name: '',
+      bio: '',
+      // Для работ
+      designer_id: designers.length > 0 ? designers[0].id : undefined,
+      work_title: '',
+    }))
+
+    setFiles([...files, ...newFiles])
     e.target.value = ''
+  }
+
+  const updateFileData = (index: number, field: string, value: any) => {
+    const newFiles = [...files]
+    newFiles[index] = { ...newFiles[index], [field]: value }
+    setFiles(newFiles)
   }
 
   const removeFile = (index: number) => {
     const newFiles = [...files]
-    const newPreviews = [...previews]
-    
-    URL.revokeObjectURL(newPreviews[index])
+    URL.revokeObjectURL(newFiles[index].preview)
     newFiles.splice(index, 1)
-    newPreviews.splice(index, 1)
-    
     setFiles(newFiles)
-    setPreviews(newPreviews)
     setError(null)
   }
 
   const clearAll = () => {
-    previews.forEach(p => URL.revokeObjectURL(p))
+    files.forEach(f => URL.revokeObjectURL(f.preview))
     setFiles([])
-    setPreviews([])
-    setUploadedUrls([])
+    setUploadedData([])
     setUploadProgress(0)
     setError(null)
   }
@@ -88,16 +128,53 @@ export function BulkImageUpload({
       setError('Нет файлов для загрузки')
       return
     }
+
+    // Проверка заполнения обязательных полей
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i]
+      
+      if (folder === 'designers' && !f.designer_name) {
+        setError(`Для файла ${i+1} не указано имя дизайнера`)
+        return
+      }
+      
+      if (folder === 'works' && !f.work_title) {
+        setError(`Для файла ${i+1} не указано название работы`)
+        return
+      }
+      
+      if (folder === 'clothing' && !f.name) {
+        setError(`Для файла ${i+1} не указано название одежды`)
+        return
+      }
+    }
     
     setUploading(true)
     setUploadProgress(0)
     setError(null)
-    const urls: string[] = []
+    const results: any[] = []
 
     for (let i = 0; i < files.length; i++) {
+      const fileData = files[i]
       const formData = new FormData()
-      formData.append('image', files[i])
+      formData.append('image', fileData.file)
       formData.append('folder', folder)
+
+      // Добавляем дополнительные данные
+      if (folder === 'clothing') {
+        formData.append('title', fileData.name || 'Без названия')
+        formData.append('description', fileData.description || '')
+        formData.append('gender', fileData.gender || 'unisex')
+        formData.append('zodiac_sign_id', String(fileData.zodiac_sign_id || ''))
+        formData.append('season', 'summer') // можно добавить выбор сезона
+      } else if (folder === 'designers') {
+        formData.append('designer_name', fileData.designer_name || '')
+        formData.append('bio', fileData.bio || '')
+      } else if (folder === 'works') {
+        formData.append('designer_id', String(fileData.designer_id || ''))
+        formData.append('work_title', fileData.work_title || '')
+        formData.append('description', fileData.description || '')
+      }
 
       try {
         const response = await fetch('/api/admin/upload', {
@@ -107,7 +184,10 @@ export function BulkImageUpload({
         const data = await response.json()
         
         if (data.success) {
-          urls.push(data.url)
+          results.push({
+            url: data.url,
+            ...fileData
+          })
         } else {
           setError(`Ошибка загрузки: ${data.error || 'неизвестная ошибка'}`)
         }
@@ -119,26 +199,121 @@ export function BulkImageUpload({
       }
     }
 
-    setUploadedUrls(urls)
+    setUploadedData(results)
     setUploading(false)
     
     if (onUploadComplete) {
-      onUploadComplete(urls)
+      onUploadComplete(results)
     }
   }
 
-  const copyUrls = () => {
-    const urlsText = uploadedUrls.map((url, i) => `${i+1}. ${url}`).join('\n')
-    navigator.clipboard.writeText(urlsText)
-    alert(`Скопировано ${uploadedUrls.length} URL в буфер обмена`)
+  // Рендер полей для каждого типа
+  const renderFileFields = (file: FileWithData, index: number) => {
+    if (folder === 'clothing') {
+      return (
+        <div className="space-y-2 mt-2">
+          <input
+            type="text"
+            value={file.name}
+            onChange={(e) => updateFileData(index, 'name', e.target.value)}
+            placeholder="Название одежды *"
+            className="w-full px-3 py-1.5 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
+          />
+          <textarea
+            value={file.description}
+            onChange={(e) => updateFileData(index, 'description', e.target.value)}
+            placeholder="Описание (необязательно)"
+            className="w-full px-3 py-1.5 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 resize-none h-12"
+          />
+          <div className="flex gap-2">
+            <select
+              value={file.gender}
+              onChange={(e) => updateFileData(index, 'gender', e.target.value)}
+              className="flex-1 px-3 py-1.5 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
+            >
+              <option value="unisex">👥 Унисекс</option>
+              <option value="female">👩 Женский</option>
+              <option value="male">👨 Мужской</option>
+            </select>
+            <select
+              value={file.zodiac_sign_id}
+              onChange={(e) => updateFileData(index, 'zodiac_sign_id', Number(e.target.value))}
+              className="flex-1 px-3 py-1.5 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
+            >
+              {zodiacSigns.map((sign) => (
+                <option key={sign.id} value={sign.id}>{sign.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )
+    }
+
+    if (folder === 'designers') {
+      return (
+        <div className="space-y-2 mt-2">
+          <input
+            type="text"
+            value={file.designer_name}
+            onChange={(e) => updateFileData(index, 'designer_name', e.target.value)}
+            placeholder="Имя дизайнера *"
+            className="w-full px-3 py-1.5 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
+          />
+          <textarea
+            value={file.bio}
+            onChange={(e) => updateFileData(index, 'bio', e.target.value)}
+            placeholder="Биография дизайнера *"
+            className="w-full px-3 py-1.5 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 resize-none h-12"
+          />
+        </div>
+      )
+    }
+
+    if (folder === 'works') {
+      return (
+        <div className="space-y-2 mt-2">
+          <select
+            value={file.designer_id}
+            onChange={(e) => updateFileData(index, 'designer_id', Number(e.target.value))}
+            className="w-full px-3 py-1.5 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
+          >
+            {designers.map((d) => (
+              <option key={d.id} value={d.id}>{d.designer_name}</option>
+            ))}
+          </select>
+          <input
+            type="text"
+            value={file.work_title}
+            onChange={(e) => updateFileData(index, 'work_title', e.target.value)}
+            placeholder="Название работы *"
+            className="w-full px-3 py-1.5 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
+          />
+          <textarea
+            value={file.description}
+            onChange={(e) => updateFileData(index, 'description', e.target.value)}
+            placeholder="Описание работы (необязательно)"
+            className="w-full px-3 py-1.5 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 resize-none h-12"
+          />
+        </div>
+      )
+    }
+
+    return null
   }
 
   return (
     <div className="space-y-4">
       {/* Заголовок */}
       <div>
-        <h3 className="text-white font-medium">{title}</h3>
-        <p className="text-white/40 text-sm">{description}</p>
+        <h3 className="text-white font-medium">
+          {folder === 'clothing' && '👕 Массовая загрузка одежды'}
+          {folder === 'designers' && '🎨 Массовая загрузка дизайнеров'}
+          {folder === 'works' && '🖼️ Массовая загрузка работ'}
+          {folder === 'zodiac' && '⭐ Массовая загрузка знаков'}
+        </h3>
+        <p className="text-white/40 text-sm">
+          Загрузите до {maxFiles} файлов с данными
+        </p>
       </div>
 
       {/* Ошибка */}
@@ -160,7 +335,7 @@ export function BulkImageUpload({
           disabled={uploading}
         />
         <label htmlFor="bulk-upload" className="cursor-pointer block">
-          <Upload className="w-12 h-12 text-white/40 mx-auto mb-3 group-hover:scale-110 transition" />
+          <Upload className="w-12 h-12 text-white/40 mx-auto mb-3" />
           <p className="text-white/60">Нажмите или перетащите файлы</p>
           <p className="text-white/30 text-sm mt-1">
             {files.length} / {maxFiles} файлов
@@ -172,10 +347,10 @@ export function BulkImageUpload({
       </div>
 
       {/* Превью загруженных файлов */}
-      {previews.length > 0 && (
+      {files.length > 0 && (
         <div>
           <div className="flex justify-between items-center mb-2">
-            <p className="text-white/40 text-sm">Выбрано: {previews.length} файлов</p>
+            <p className="text-white/40 text-sm">Выбрано: {files.length} файлов</p>
             <button
               onClick={clearAll}
               className="text-red-400 hover:text-red-300 text-sm flex items-center gap-1"
@@ -185,23 +360,28 @@ export function BulkImageUpload({
               Очистить все
             </button>
           </div>
-          <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-60 overflow-y-auto p-1">
-            {previews.map((preview, index) => (
-              <div key={index} className="relative group">
-                <img
-                  src={preview}
-                  alt={`Preview ${index}`}
-                  className="w-full aspect-square object-cover rounded-lg border border-white/10 group-hover:border-pink-500/50 transition"
-                />
-                <button
-                  onClick={() => removeFile(index)}
-                  className="absolute -top-1 -right-1 p-1 bg-red-500 rounded-full opacity-0 group-hover:opacity-100 transition hover:scale-110"
-                  disabled={uploading}
-                >
-                  <X size={12} className="text-white" />
-                </button>
-                <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 rounded text-[10px] text-white/60">
-                  {index + 1}
+          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+            {files.map((file, index) => (
+              <div key={index} className="bg-white/5 rounded-xl p-3 border border-white/10">
+                <div className="flex gap-3">
+                  <div className="relative w-20 h-20 flex-shrink-0">
+                    <img
+                      src={file.preview}
+                      alt={`Preview ${index}`}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => removeFile(index)}
+                      className="absolute -top-1 -right-1 p-1 bg-red-500 rounded-full hover:scale-110 transition"
+                      disabled={uploading}
+                    >
+                      <X size={12} className="text-white" />
+                    </button>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white/50 text-xs truncate">{file.file.name}</p>
+                    {renderFileFields(file, index)}
+                  </div>
                 </div>
               </div>
             ))}
@@ -244,33 +424,28 @@ export function BulkImageUpload({
           )}
         </button>
         
-        {uploadedUrls.length > 0 && (
-          <>
-            <button
-              onClick={copyUrls}
-              className="px-4 py-3 bg-white/10 rounded-xl text-white hover:bg-white/20 transition flex items-center gap-2"
-            >
-              <Copy size={16} />
-              Копировать URL
-            </button>
-            <button
-              onClick={clearAll}
-              className="px-4 py-3 bg-green-500/20 rounded-xl text-green-400 hover:bg-green-500/30 transition"
-            >
-              ✅ Загружено {uploadedUrls.length}
-            </button>
-          </>
+        {uploadedData.length > 0 && (
+          <button
+            onClick={() => {
+              const text = uploadedData.map((d, i) => `${i+1}. ${d.url}`).join('\n')
+              navigator.clipboard.writeText(text)
+              alert(`Скопировано ${uploadedData.length} URL`)
+            }}
+            className="px-4 py-3 bg-white/10 rounded-xl text-white hover:bg-white/20 transition flex items-center gap-2"
+          >
+            <Copy size={16} />
+            Копировать URL
+          </button>
         )}
       </div>
 
-      {/* Список загруженных URL */}
-      {uploadedUrls.length > 0 && (
-        <div className="bg-white/5 rounded-xl p-4 max-h-40 overflow-y-auto">
-          <p className="text-white/40 text-xs mb-2">Загруженные URL:</p>
-          {uploadedUrls.map((url, i) => (
-            <div key={i} className="text-white/60 text-xs py-1 border-b border-white/5 last:border-0 flex items-center gap-2">
-              <span className="text-white/30">{i+1}.</span>
-              <span className="truncate">{url}</span>
+      {/* Результат */}
+      {uploadedData.length > 0 && (
+        <div className="bg-green-500/20 border border-green-500/30 rounded-xl p-4 max-h-40 overflow-y-auto">
+          <p className="text-green-400 text-sm mb-2">✅ Загружено: {uploadedData.length}</p>
+          {uploadedData.map((item, i) => (
+            <div key={i} className="text-white/60 text-xs py-1 border-b border-white/5 last:border-0">
+              {i+1}. {item.url}
             </div>
           ))}
         </div>

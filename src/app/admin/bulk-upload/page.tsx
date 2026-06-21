@@ -8,33 +8,25 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Upload, Image as ImageIcon, Sparkles } from 'lucide-react'
 import { BulkImageUpload } from '@/src/components/BulkImageUpload'
-import { AdminButton } from '@/src/components/AdminButton'
 
 export default function BulkUploadPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [selectedFolder, setSelectedFolder] = useState<'clothing' | 'designers' | 'works' | 'zodiac'>('clothing')
-  const [allUrls, setAllUrls] = useState<string[]>([])
-  const [zodiacSigns, setZodiacSigns] = useState<{id: number, name: string}[]>([])
+  const [selectedFolder, setSelectedFolder] = useState<'clothing' | 'designers' | 'works'>('clothing')
+  const [allData, setAllData] = useState<any[]>([])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin')
       return
     }
-
-    // Загружаем знаки зодиака для выбора
-    fetch('/api/admin/zodiac')
-      .then(res => res.json())
-      .then(data => setZodiacSigns(data))
-      .catch(console.error)
   }, [status, router])
 
-  const handleUploadComplete = (urls: string[]) => {
-    setAllUrls(prev => [...prev, ...urls])
+  const handleUploadComplete = (data: any[]) => {
+    setAllData(prev => [...prev, ...data])
     
-    // Показываем уведомление
-    alert(`✅ Успешно загружено ${urls.length} фото!\n\nURL сохранены в списке ниже.`)
+    const message = data.map((item, i) => `${i+1}. ${item.url}`).join('\n')
+    alert(`✅ Успешно загружено ${data.length} фото!\n\n${message}`)
   }
 
   if (status === 'loading') {
@@ -43,6 +35,24 @@ export default function BulkUploadPage() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500" />
       </div>
     )
+  }
+
+  const folderInfo = {
+    clothing: {
+      label: '👕 Одежда',
+      description: 'Загрузите одежду с указанием названия, пола и знака зодиака',
+      maxFiles: 10
+    },
+    designers: {
+      label: '🎨 Дизайнеры',
+      description: 'Загрузите дизайнеров с указанием имени и биографии',
+      maxFiles: 10
+    },
+    works: {
+      label: '🖼️ Работы',
+      description: 'Загрузите работы и привяжите их к существующим дизайнерам',
+      maxFiles: 10
+    }
   }
 
   return (
@@ -59,7 +69,7 @@ export default function BulkUploadPage() {
               Массовая загрузка
             </h1>
             <p className="text-white/40 text-sm mt-0.5">
-              Загрузите до 10 изображений одновременно
+              Загружайте до 10 файлов за раз с данными
             </p>
           </div>
         </div>
@@ -68,76 +78,50 @@ export default function BulkUploadPage() {
       {/* Выбор папки */}
       <div className="bg-white/5 rounded-2xl p-6 border border-white/10 mb-6">
         <label className="block text-white/70 text-sm font-medium mb-3">
-          Куда загружаем?
+          Выберите тип загрузки
         </label>
-        <div className="flex flex-wrap gap-3">
-          {[
-            { value: 'clothing', label: '👕 Одежда', color: 'green' },
-            { value: 'designers', label: '🎨 Дизайнеры', color: 'purple' },
-            { value: 'works', label: '🖼️ Работы', color: 'blue' },
-            { value: 'zodiac', label: '⭐ Знаки зодиака', color: 'yellow' },
-          ].map((item) => (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {Object.entries(folderInfo).map(([key, info]) => (
             <button
-              key={item.value}
-              onClick={() => setSelectedFolder(item.value as any)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
-                selectedFolder === item.value
-                  ? `bg-${item.color}-500/30 text-${item.color}-300 border border-${item.color}-500/30`
-                  : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+              key={key}
+              onClick={() => setSelectedFolder(key as any)}
+              className={`p-4 rounded-xl text-left transition ${
+                selectedFolder === key
+                  ? 'bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30'
+                  : 'bg-white/5 border border-white/10 hover:bg-white/10'
               }`}
             >
-              {item.label}
+              <div className="text-2xl mb-1">{info.label.split(' ')[0]}</div>
+              <div className="text-white font-medium">{info.label.split(' ').slice(1).join(' ')}</div>
+              <div className="text-white/40 text-xs mt-1">{info.description}</div>
+              <div className="text-white/20 text-xs mt-1">Макс. {info.maxFiles} файлов</div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Выбор знака зодиака (если выбрана одежда) */}
-      {selectedFolder === 'clothing' && zodiacSigns.length > 0 && (
-        <div className="bg-white/5 rounded-2xl p-6 border border-white/10 mb-6">
-          <label className="block text-white/70 text-sm font-medium mb-3">
-            Для какого знака зодиака?
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {zodiacSigns.map((sign) => (
-              <button
-                key={sign.id}
-                className="px-3 py-1.5 bg-white/5 rounded-full text-sm text-white/60 hover:bg-white/10 hover:text-white transition border border-white/5"
-              >
-                {sign.name}
-              </button>
-            ))}
-          </div>
-          <p className="text-white/30 text-xs mt-2">
-            ⚡ Выберите знак, чтобы связать загруженные фото с ним
-          </p>
-        </div>
-      )}
-
       {/* Компонент загрузки */}
       <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
         <BulkImageUpload
           folder={selectedFolder}
-          maxFiles={10}
+          maxFiles={folderInfo[selectedFolder].maxFiles}
           onUploadComplete={handleUploadComplete}
-          title={`Загрузка в папку: ${selectedFolder}`}
-          description="Выберите до 10 изображений для массовой загрузки"
         />
       </div>
 
       {/* История загрузок */}
-      {allUrls.length > 0 && (
+      {allData.length > 0 && (
         <div className="mt-6 bg-white/5 rounded-2xl p-6 border border-white/10">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white font-medium flex items-center gap-2">
               <ImageIcon size={18} className="text-green-400" />
-              Загружено: {allUrls.length} файлов
+              Загружено: {allData.length} файлов
             </h3>
             <button
               onClick={() => {
-                const urls = allUrls.map((url, i) => `${i+1}. ${url}`).join('\n')
-                navigator.clipboard.writeText(urls)
-                alert('Все URL скопированы в буфер обмена!')
+                const text = allData.map((d, i) => `${i+1}. ${d.url}`).join('\n')
+                navigator.clipboard.writeText(text)
+                alert('Все URL скопированы!')
               }}
               className="text-sm text-pink-400 hover:text-pink-300 transition"
             >
@@ -145,10 +129,10 @@ export default function BulkUploadPage() {
             </button>
           </div>
           <div className="max-h-40 overflow-y-auto space-y-1">
-            {allUrls.map((url, i) => (
+            {allData.map((item, i) => (
               <div key={i} className="text-white/50 text-xs py-1 border-b border-white/5 last:border-0 flex items-center gap-2">
                 <span className="text-white/30">{i+1}.</span>
-                <span className="truncate">{url}</span>
+                <span className="truncate">{item.url}</span>
               </div>
             ))}
           </div>
