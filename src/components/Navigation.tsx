@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import { 
   Menu, X, Sparkles, User, LogOut, Shield, 
-  Home, Star, Palette, ChevronRight 
+  Home, Star, Palette, ChevronRight, Heart 
 } from 'lucide-react'
 
 export default function Navigation() {
@@ -76,9 +76,9 @@ export default function Navigation() {
 
   const isAuthenticated = status === 'authenticated'
   const menuItems = [
-    { href: '/', label: 'Главная', icon: Home },
-    { href: '/zodiac', label: 'Все знаки', icon: Star },
-    { href: '/designers', label: 'Дизайнеры', icon: Palette },
+    { href: '/', label: 'Главная', icon: Home, color: 'text-blue-400' },
+    { href: '/zodiac', label: 'Все знаки', icon: Star, color: 'text-yellow-400' },
+    { href: '/designers', label: 'Дизайнеры', icon: Palette, color: 'text-purple-400' },
   ]
 
   return (
@@ -138,18 +138,20 @@ export default function Navigation() {
         </div>
       </nav>
 
-      {/* ===== МОБИЛЬНОЕ МЕНЮ (НА ВСЮ ШИРИНУ) ===== */}
+      {/* ===== МОБИЛЬНОЕ МЕНЮ ===== */}
       <div className={`mobile-menu-overlay ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(false)} />
       
       <div className={`mobile-menu ${isOpen ? 'open' : ''}`}>
-        {/* Заголовок */}
+        {/* Заголовок с логотипом */}
         <div className="mobile-menu-header">
           <div className="mobile-menu-logo">
-            <Sparkles className="w-6 h-6 text-pink-400" />
+            <div className="mobile-logo-icon">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
             <span>StellarFit</span>
           </div>
           <button className="mobile-menu-close" onClick={() => setIsOpen(false)}>
-            <X size={24} />
+            <X size={22} />
           </button>
         </div>
 
@@ -168,7 +170,10 @@ export default function Navigation() {
           </div>
         )}
 
-        <div className="mobile-menu-divider" />
+        {/* Разделитель с декоративной линией */}
+        <div className="mobile-menu-divider">
+          <span className="divider-dots">✦ ✦ ✦</span>
+        </div>
 
         {/* Пункты меню */}
         <div className="mobile-menu-items">
@@ -179,8 +184,10 @@ export default function Navigation() {
               className="mobile-menu-item"
               onClick={() => setIsOpen(false)}
             >
-              <item.icon size={20} />
-              <span>{item.label}</span>
+              <span className={`mobile-item-icon ${item.color}`}>
+                <item.icon size={20} />
+              </span>
+              <span className="mobile-item-label">{item.label}</span>
               <ChevronRight size={16} className="mobile-menu-arrow" />
             </Link>
           ))}
@@ -191,28 +198,32 @@ export default function Navigation() {
               className="mobile-menu-item"
               onClick={() => setIsOpen(false)}
             >
-              <User size={20} />
-              <span>Профиль</span>
+              <span className="mobile-item-icon text-pink-400">
+                <User size={20} />
+              </span>
+              <span className="mobile-item-label">Профиль</span>
               <ChevronRight size={16} className="mobile-menu-arrow" />
             </Link>
           )}
 
           {isAdmin && (
             <>
-              <div className="mobile-menu-divider" />
+              <div className="mobile-menu-divider-light" />
               <Link
                 href="/admin"
                 className="mobile-menu-item mobile-menu-admin"
                 onClick={() => setIsOpen(false)}
               >
-                <Shield size={20} />
-                <span>Админ панель</span>
-                <ChevronRight size={16} className="mobile-menu-arrow" />
+                <span className="mobile-item-icon text-pink-400">
+                  <Shield size={20} />
+                </span>
+                <span className="mobile-item-label">Админ панель</span>
+                <ChevronRight size={16} className="mobile-menu-arrow text-pink-400/30" />
               </Link>
             </>
           )}
 
-          <div className="mobile-menu-divider" />
+          <div className="mobile-menu-divider-light" />
           
           {isAuthenticated ? (
             <button 
@@ -222,8 +233,10 @@ export default function Navigation() {
               }} 
               className="mobile-menu-item mobile-menu-logout"
             >
-              <LogOut size={20} />
-              <span>Выйти</span>
+              <span className="mobile-item-icon text-red-400">
+                <LogOut size={20} />
+              </span>
+              <span className="mobile-item-label text-red-400">Выйти</span>
             </button>
           ) : (
             <>
@@ -232,18 +245,25 @@ export default function Navigation() {
                 className="mobile-menu-item mobile-menu-auth"
                 onClick={() => setIsOpen(false)}
               >
-                <LogOut size={20} />
-                <span>Войти</span>
+                <span className="mobile-item-icon text-green-400">
+                  <LogOut size={20} />
+                </span>
+                <span className="mobile-item-label">Войти</span>
               </Link>
               <Link
                 href="/auth/register"
-                className="mobile-menu-item"
+                className="mobile-menu-item mobile-menu-register"
                 onClick={() => setIsOpen(false)}
               >
-                <span className="ml-7">Регистрация</span>
+                <span className="mobile-item-label ml-9">Регистрация</span>
               </Link>
             </>
           )}
+        </div>
+
+        {/* Нижняя часть с магической фразой */}
+        <div className="mobile-menu-footer">
+          <p className="mobile-footer-text">✨ Пусть звёзды ведут тебя ✨</p>
         </div>
       </div>
 
@@ -259,7 +279,7 @@ export default function Navigation() {
           backdrop-filter: blur(20px);
           z-index: 100;
           transform: translateX(-100%);
-          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
           display: flex;
           flex-direction: column;
           overflow-y: auto;
@@ -302,28 +322,41 @@ export default function Navigation() {
           gap: 0.75rem;
           font-size: 1.25rem;
           font-weight: bold;
-          color: white;
+        }
+
+        .mobile-logo-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          background: linear-gradient(135deg, #ec4899, #8b5cf6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .mobile-menu-logo span {
-          background: linear-gradient(135deg, #f0c8a0, #e8b8a0);
+          background: linear-gradient(135deg, #f0c8a0 0%, #e8b8a0 40%, #f0c8a0 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
 
         .mobile-menu-close {
-          background: none;
-          border: none;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 10px;
           color: rgba(255, 255, 255, 0.6);
           cursor: pointer;
           padding: 0.5rem;
-          border-radius: 0.5rem;
-          transition: background 0.3s ease;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .mobile-menu-close:hover {
           background: rgba(255, 255, 255, 0.1);
+          color: white;
         }
 
         /* Информация о пользователе */
@@ -338,17 +371,18 @@ export default function Navigation() {
         }
 
         .mobile-user-avatar {
-          width: 44px;
-          height: 44px;
+          width: 48px;
+          height: 48px;
           border-radius: 50%;
           background: linear-gradient(135deg, #ec4899, #8b5cf6);
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: bold;
-          font-size: 1.1rem;
+          font-size: 1.2rem;
           color: white;
           flex-shrink: 0;
+          box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
         }
 
         .mobile-user-details {
@@ -371,10 +405,23 @@ export default function Navigation() {
           margin-top: 0.1rem;
         }
 
-        /* Разделитель */
+        /* Разделители */
         .mobile-menu-divider {
+          display: flex;
+          justify-content: center;
+          padding: 0.75rem 0;
+          flex-shrink: 0;
+        }
+
+        .divider-dots {
+          color: rgba(255, 255, 255, 0.08);
+          font-size: 0.6rem;
+          letter-spacing: 8px;
+        }
+
+        .mobile-menu-divider-light {
           height: 1px;
-          background: rgba(255, 255, 255, 0.05);
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
           margin: 0.25rem 1.5rem;
           flex-shrink: 0;
         }
@@ -394,13 +441,15 @@ export default function Navigation() {
           padding: 0.85rem 1.5rem;
           color: rgba(255, 255, 255, 0.7);
           text-decoration: none;
-          transition: all 0.2s ease;
+          transition: all 0.25s ease;
           cursor: pointer;
           background: none;
           border: none;
           width: 100%;
           text-align: left;
           font-size: 1rem;
+          border-radius: 0;
+          position: relative;
         }
 
         .mobile-menu-item:hover {
@@ -408,35 +457,83 @@ export default function Navigation() {
           color: white;
         }
 
-        .mobile-menu-item svg {
+        .mobile-menu-item:active {
+          transform: scale(0.98);
+        }
+
+        .mobile-item-icon {
+          width: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           flex-shrink: 0;
+        }
+
+        .mobile-item-label {
+          flex: 1;
         }
 
         .mobile-menu-arrow {
           margin-left: auto;
-          color: rgba(255, 255, 255, 0.15);
+          color: rgba(255, 255, 255, 0.1);
           flex-shrink: 0;
+          transition: transform 0.3s ease;
+        }
+
+        .mobile-menu-item:hover .mobile-menu-arrow {
+          transform: translateX(4px);
+          color: rgba(255, 255, 255, 0.3);
         }
 
         .mobile-menu-admin {
-          color: #f0c8a0 !important;
+          background: rgba(236, 72, 153, 0.05);
+          border-top: 1px solid rgba(236, 72, 153, 0.1);
+          border-bottom: 1px solid rgba(236, 72, 153, 0.1);
+          margin: 0.25rem 0;
+        }
+
+        .mobile-menu-admin .mobile-item-label {
+          color: #f0c8a0;
         }
 
         .mobile-menu-admin:hover {
-          background: rgba(240, 200, 160, 0.08) !important;
+          background: rgba(236, 72, 153, 0.1) !important;
         }
 
-        .mobile-menu-logout {
-          color: rgba(255, 107, 107, 0.6) !important;
+        .mobile-menu-logout .mobile-item-label {
+          color: rgba(255, 107, 107, 0.7);
         }
 
         .mobile-menu-logout:hover {
           background: rgba(255, 107, 107, 0.08) !important;
-          color: #ff6b6b !important;
         }
 
-        .mobile-menu-auth {
-          color: rgba(255, 255, 255, 0.8) !important;
+        .mobile-menu-logout:hover .mobile-item-label {
+          color: #ff6b6b;
+        }
+
+        .mobile-menu-auth .mobile-item-label {
+          color: rgba(255, 255, 255, 0.9);
+        }
+
+        .mobile-menu-register .mobile-item-label {
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 0.9rem;
+        }
+
+        /* Футер */
+        .mobile-menu-footer {
+          padding: 1.25rem 1.5rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.03);
+          flex-shrink: 0;
+          text-align: center;
+        }
+
+        .mobile-footer-text {
+          color: rgba(255, 255, 255, 0.12);
+          font-size: 0.75rem;
+          letter-spacing: 2px;
+          font-family: 'Georgia', serif;
         }
 
         /* Скрываем на десктопе */
@@ -447,10 +544,42 @@ export default function Navigation() {
           }
         }
 
-        /* Скрываем десктопное на мобильных */
         @media (max-width: 768px) {
           .nav-links-desktop {
             display: none !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .mobile-menu-header {
+            padding: 1rem 1.25rem;
+          }
+          
+          .mobile-user-info {
+            padding: 1rem 1.25rem;
+          }
+          
+          .mobile-user-avatar {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+          }
+          
+          .mobile-user-email {
+            font-size: 0.8rem;
+          }
+          
+          .mobile-menu-item {
+            padding: 0.7rem 1.25rem;
+            font-size: 0.9rem;
+          }
+          
+          .mobile-menu-footer {
+            padding: 1rem 1.25rem;
+          }
+          
+          .mobile-footer-text {
+            font-size: 0.65rem;
           }
         }
       `}</style>
