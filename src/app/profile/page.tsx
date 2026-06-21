@@ -26,6 +26,7 @@ import {
   Check,
   X
 } from 'lucide-react'
+import { StarDatePicker } from '@/src/components/StarDatePicker'
 
 interface UserProfile {
   id: string
@@ -332,22 +333,18 @@ const updateZodiac = async () => {
 
                  // В компоненте ProfilePage, в секции редактирования профиля:
 
+// В секции редактирования профиля (editing === true)
+
 <div>
   <label className="block text-white/70 text-sm mb-2 flex items-center gap-2">
     <Cake size={16} />
     Дата рождения
   </label>
-  <div className="relative">
-    <input
-      type="date"
-      value={editForm.birthDate}
-      onChange={(e) => setEditForm({ ...editForm, birthDate: e.target.value })}
-      className="w-full px-4 py-3 bg-white/10 rounded-xl text-white border border-white/10 focus:outline-none focus:border-pink-500 transition [color-scheme:dark]"
-      min="1900-01-01"
-      max="2100-12-31"
-    />
-    <Star className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400/50" />
-  </div>
+  <StarDatePicker
+    value={editForm.birthDate}
+    onChange={(date) => setEditForm({ ...editForm, birthDate: date })}
+    placeholder="ДД.ММ.ГГГГ"
+  />
   <p className="text-white/30 text-xs mt-1">✨ Выберите дату рождения</p>
 </div>
 

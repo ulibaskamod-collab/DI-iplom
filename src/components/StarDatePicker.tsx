@@ -37,6 +37,13 @@ export function StarDatePicker({
            testDate.getDate() === day
   }
 
+  // Проверка, что дата не в будущем
+  const isDateInFuture = (date: Date) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return date > today
+  }
+
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear()
     const month = date.getMonth()
@@ -50,9 +57,14 @@ export function StarDatePicker({
     }
     
     for (let i = 1; i <= lastDay.getDate(); i++) {
-      // Проверяем, что дата существует (для високосных годов и т.д.)
       if (isValidDate(year, month, i)) {
-        daysArray.push(new Date(year, month, i))
+        const dateObj = new Date(year, month, i)
+        // Добавляем только если дата не в будущем
+        if (!isDateInFuture(dateObj)) {
+          daysArray.push(dateObj)
+        } else {
+          daysArray.push(null)
+        }
       } else {
         daysArray.push(null)
       }
@@ -111,7 +123,6 @@ export function StarDatePicker({
   const formatDisplayDate = (dateStr: string) => {
     if (!dateStr) return placeholder
     const date = new Date(dateStr)
-    // Проверяем, что дата корректна
     if (isNaN(date.getTime())) return placeholder
     const day = String(date.getDate()).padStart(2, '0')
     const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -122,22 +133,22 @@ export function StarDatePicker({
   return (
     <div className="relative" ref={pickerRef}>
       <div 
-        className={`w-full px-4 py-3 bg-white/10 rounded-xl text-white border border-white/10 focus-within:border-pink-500 cursor-pointer flex items-center justify-between transition-all duration-200 hover:bg-white/15 ${className}`}
+        className={`w-full px-4 py-3 bg-white/5 rounded-xl text-white border border-white/10 focus-within:border-pink-500 cursor-pointer flex items-center justify-between transition-all duration-200 hover:bg-white/10 ${className}`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className={value ? 'text-white' : 'text-white/40'}>
+        <span className={value ? 'text-white' : 'text-white/30'}>
           {formatDisplayDate(value)}
         </span>
-        <Calendar className="w-4 h-4 text-purple-400" />
+        <Calendar className="w-4 h-4 text-white/30" />
       </div>
 
       {isOpen && (
-        <div className="absolute mt-2 p-4 bg-gradient-to-b from-purple-900/95 to-[#0d0d25]/95 backdrop-blur-xl rounded-2xl border border-purple-700/50 shadow-2xl z-50 w-full min-w-[280px] animate-fade-in">
+        <div className="absolute mt-2 p-4 bg-[#1a0a2a] backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl z-50 w-full min-w-[280px] animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
               onClick={prevMonth}
-              className="p-1.5 hover:bg-white/10 rounded-lg transition text-purple-300 hover:text-white"
+              className="p-1.5 hover:bg-white/10 rounded-lg transition text-white/50 hover:text-white"
             >
               <ChevronLeft size={18} />
             </button>
@@ -148,7 +159,7 @@ export function StarDatePicker({
               <button
                 type="button"
                 onClick={goToday}
-                className="text-xs text-purple-400 hover:text-purple-300 transition px-2.5 py-1 rounded-full bg-purple-500/20 hover:bg-purple-500/30"
+                className="text-xs text-pink-400 hover:text-pink-300 transition px-2.5 py-1 rounded-full bg-pink-500/20 hover:bg-pink-500/30"
               >
                 Сегодня
               </button>
@@ -156,7 +167,7 @@ export function StarDatePicker({
             <button
               type="button"
               onClick={nextMonth}
-              className="p-1.5 hover:bg-white/10 rounded-lg transition text-purple-300 hover:text-white"
+              className="p-1.5 hover:bg-white/10 rounded-lg transition text-white/50 hover:text-white"
             >
               <ChevronRight size={18} />
             </button>
@@ -164,7 +175,7 @@ export function StarDatePicker({
 
           <div className="grid grid-cols-7 gap-1 mb-2">
             {days.map((day) => (
-              <div key={day} className="text-center text-purple-400/40 text-xs font-medium py-1">
+              <div key={day} className="text-center text-white/30 text-xs font-medium py-1">
                 {day}
               </div>
             ))}
@@ -182,15 +193,15 @@ export function StarDatePicker({
                       ${isSelected(date) 
                         ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg shadow-pink-500/25 scale-95' 
                         : isToday(date)
-                          ? 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/20'
-                          : 'text-white/70 hover:bg-white/10 hover:text-white'
+                          ? 'bg-pink-500/20 text-pink-300 hover:bg-pink-500/30 border border-pink-500/20'
+                          : 'text-white/60 hover:bg-white/10 hover:text-white'
                       }
                       hover:scale-105 active:scale-95
                     `}
                   >
                     {date.getDate()}
                     {isToday(date) && (
-                      <Sparkles className="w-2.5 h-2.5 text-purple-400 mx-auto mt-0.5" />
+                      <Sparkles className="w-2.5 h-2.5 text-pink-400 mx-auto mt-0.5" />
                     )}
                   </button>
                 ) : (
@@ -200,9 +211,9 @@ export function StarDatePicker({
             ))}
           </div>
 
-          <div className="mt-3 pt-3 border-t border-white/5 flex justify-between items-center text-xs text-purple-400/50">
+          <div className="mt-3 pt-3 border-t border-white/5 flex justify-between items-center text-xs text-white/30">
             <span className="flex items-center gap-1">
-              <Star size={10} className="text-purple-400/30" />
+              <Star size={10} className="text-white/20" />
               звезды ведут тебя
             </span>
             <span>✨ выбери дату</span>
