@@ -110,15 +110,7 @@ export default function AdminZodiacPage() {
             icon={<RefreshCw size={16} />}
             onClick={fetchZodiacSigns}
             title="Обновить" children={undefined}          />
-          <Link href="/admin/zodiac/new">
-            <AdminButton
-              variant="primary"
-              size="md"
-              icon={<Plus size={18} />}
-            >
-              Добавить знак
-            </AdminButton>
-          </Link>
+         
         </div>
       </div>
 

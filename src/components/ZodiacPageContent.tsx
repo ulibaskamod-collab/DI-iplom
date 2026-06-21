@@ -17,12 +17,17 @@ function FavoriteButton({ itemId }: { itemId: number }) {
   const { data: session } = useSession()
   const [isFavorite, setIsFavorite] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (session && itemId) {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && session && itemId) {
       checkFavoriteStatus()
     }
-  }, [itemId, session])
+  }, [itemId, session, mounted])
 
   const checkFavoriteStatus = async () => {
     try {
@@ -71,6 +76,10 @@ function FavoriteButton({ itemId }: { itemId: number }) {
     setLoading(false)
   }
 
+  if (!mounted) {
+    return <div className="w-10 h-10" />
+  }
+
   return (
     <button
       onClick={toggleFavorite}
@@ -80,13 +89,14 @@ function FavoriteButton({ itemId }: { itemId: number }) {
           ? 'bg-red-500 text-white scale-110 shadow-lg shadow-red-500/30'
           : 'bg-black/40 text-white/60 hover:text-red-400 hover:bg-black/60 backdrop-blur-sm'
       }`}
+      suppressHydrationWarning
     >
       <Heart className={`w-4 h-4 ${isFavorite ? 'fill-white' : ''}`} />
     </button>
   )
 }
 
-// ===== КОМПОНЕНТ КАРТОЧКИ ОДЕЖДЫ (ТОЛЬКО ОДИН РАЗ!) =====
+// ===== КОМПОНЕНТ КАРТОЧКИ ОДЕЖДЫ =====
 function ClothingCard({ item, idx }: { item: any; idx: number }) {
   const [imgError, setImgError] = useState(false)
 

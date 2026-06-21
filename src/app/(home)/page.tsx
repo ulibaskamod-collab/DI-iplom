@@ -147,7 +147,7 @@ export default function HomePage() {
 
   return (
     <div className="astroliv-page">
-      {/* Заголовок с красивым фоном как на фото */}
+      {/* Заголовок с красивым фоном */}
       <section className="hero-section">
         <div className="hero-overlay">
           <div className="container hero-container">
@@ -328,9 +328,8 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* Стили */}
+      {/* Стили — ОДИН РАЗ, БЕЗ ДУБЛИРОВАНИЯ */}
       <style jsx>{`
-        /* Общие стили */
         .astroliv-page {
           font-family: 'Arial', sans-serif;
           margin: 0;
@@ -346,7 +345,6 @@ export default function HomePage() {
           padding: 20px;
         }
 
-        /* ===== ГЕРОЙ-СЕКЦИЯ ===== */
         .hero-section {
           position: relative;
           min-height: 520px;
@@ -362,7 +360,6 @@ export default function HomePage() {
           overflow: hidden;
         }
 
-        /* Звездный эффект на фоне */
         .hero-section::before {
           content: '';
           position: absolute;
@@ -380,7 +377,6 @@ export default function HomePage() {
           z-index: 0;
         }
 
-        /* Декоративные круги */
         .hero-section::after {
           content: '';
           position: absolute;
@@ -411,7 +407,6 @@ export default function HomePage() {
           text-align: center;
         }
 
-        /* ===== НЕЖНЫЙ ЗАГОЛОВОК ===== */
         .main-title {
           display: flex;
           flex-direction: column;
@@ -446,7 +441,6 @@ export default function HomePage() {
           font-family: 'Georgia', serif;
         }
 
-        /* ===== ЯРКИЕ КНОПКИ ЗНАКОВ ===== */
         .zodiac-nav {
           display: flex;
           flex-wrap: wrap;
@@ -471,7 +465,6 @@ export default function HomePage() {
           box-shadow: 0 2px 15px rgba(100, 50, 200, 0.05);
         }
 
-        /* Эффект свечения при наведении */
         .zodiac-nav-btn::after {
           content: '';
           position: absolute;
@@ -502,34 +495,6 @@ export default function HomePage() {
           transform: scale(0.95);
         }
 
-        /* Индивидуальные цвета для кнопок */
-        .zodiac-nav-btn:nth-child(1) { border-color: rgba(255, 69, 0, 0.2); }
-        .zodiac-nav-btn:nth-child(2) { border-color: rgba(46, 204, 113, 0.2); }
-        .zodiac-nav-btn:nth-child(3) { border-color: rgba(255, 215, 0, 0.2); }
-        .zodiac-nav-btn:nth-child(4) { border-color: rgba(108, 92, 231, 0.2); }
-        .zodiac-nav-btn:nth-child(5) { border-color: rgba(255, 215, 0, 0.25); }
-        .zodiac-nav-btn:nth-child(6) { border-color: rgba(149, 165, 166, 0.2); }
-        .zodiac-nav-btn:nth-child(7) { border-color: rgba(255, 182, 193, 0.2); }
-        .zodiac-nav-btn:nth-child(8) { border-color: rgba(255, 107, 107, 0.2); }
-        .zodiac-nav-btn:nth-child(9) { border-color: rgba(138, 43, 226, 0.2); }
-        .zodiac-nav-btn:nth-child(10) { border-color: rgba(112, 128, 144, 0.2); }
-        .zodiac-nav-btn:nth-child(11) { border-color: rgba(0, 255, 255, 0.15); }
-        .zodiac-nav-btn:nth-child(12) { border-color: rgba(72, 209, 204, 0.2); }
-
-        .zodiac-nav-btn:nth-child(1):hover { box-shadow: 0 8px 35px rgba(255, 69, 0, 0.2); }
-        .zodiac-nav-btn:nth-child(2):hover { box-shadow: 0 8px 35px rgba(46, 204, 113, 0.2); }
-        .zodiac-nav-btn:nth-child(3):hover { box-shadow: 0 8px 35px rgba(255, 215, 0, 0.2); }
-        .zodiac-nav-btn:nth-child(4):hover { box-shadow: 0 8px 35px rgba(108, 92, 231, 0.2); }
-        .zodiac-nav-btn:nth-child(5):hover { box-shadow: 0 8px 35px rgba(255, 215, 0, 0.25); }
-        .zodiac-nav-btn:nth-child(6):hover { box-shadow: 0 8px 35px rgba(149, 165, 166, 0.2); }
-        .zodiac-nav-btn:nth-child(7):hover { box-shadow: 0 8px 35px rgba(255, 182, 193, 0.2); }
-        .zodiac-nav-btn:nth-child(8):hover { box-shadow: 0 8px 35px rgba(255, 107, 107, 0.2); }
-        .zodiac-nav-btn:nth-child(9):hover { box-shadow: 0 8px 35px rgba(138, 43, 226, 0.2); }
-        .zodiac-nav-btn:nth-child(10):hover { box-shadow: 0 8px 35px rgba(112, 128, 144, 0.2); }
-        .zodiac-nav-btn:nth-child(11):hover { box-shadow: 0 8px 35px rgba(0, 255, 255, 0.15); }
-        .zodiac-nav-btn:nth-child(12):hover { box-shadow: 0 8px 35px rgba(72, 209, 204, 0.2); }
-
-        /* Блок знака */
         .zodiac-block {
           background-color: rgba(30, 20, 45, 0.6);
           border-radius: 16px;
@@ -550,137 +515,66 @@ export default function HomePage() {
           box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
           border-color: rgba(255, 255, 255, 0.08);
         }
-/* Цвета для каждого знака */
-.aries { 
-  background: rgba(50, 20, 30, 0.6); 
-  border-color: rgba(255, 69, 0, 0.15); 
-}
-.taurus { 
-  background: rgba(20, 50, 30, 0.6); 
-  border-color: rgba(46, 204, 113, 0.15); 
-}
-.gemini { 
-  background: rgba(50, 45, 20, 0.6); 
-  border-color: rgba(255, 215, 0, 0.25); 
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.05);
-}
-.gemini:hover {
-  box-shadow: 0 20px 50px rgba(255, 215, 0, 0.1);
-  border-color: rgba(255, 215, 0, 0.4);
-}
-.cancer { 
-  background: rgba(25, 25, 50, 0.6); 
-  border-color: rgba(108, 92, 231, 0.15); 
-}
-.leo { 
-  background: rgba(50, 35, 20, 0.6); 
-  border-color: rgba(255, 215, 0, 0.2); 
-}
-.virgo { 
-  background: rgba(30, 45, 35, 0.6); 
-  border-color: rgba(149, 165, 166, 0.15); 
-}
-.libra { 
-  background: rgba(50, 30, 55, 0.6); 
-  border-color: rgba(255, 182, 193, 0.15); 
-}
-.scorpio { 
-  background: rgba(50, 15, 35, 0.6); 
-  border-color: rgba(255, 107, 107, 0.15); 
-}
-.sagittarius { 
-  background: rgba(50, 30, 20, 0.6); 
-  border-color: rgba(138, 43, 226, 0.15); 
-}
-.capricorn { 
-  background: rgba(20, 30, 45, 0.6); 
-  border-color: rgba(112, 128, 144, 0.15); 
-}
-.aquarius { 
-  background: rgba(20, 40, 55, 0.6); 
-  border-color: rgba(0, 255, 255, 0.1); 
-}
-.pisces { 
-  background: rgba(25, 50, 40, 0.6); 
-  border-color: rgba(72, 209, 204, 0.15); 
-}
 
-/* Дополнительные стили для Близнецов */
-.gemini .zodiac-symbol {
-  filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.2));
-  transition: filter 0.4s;
-}
+        /* ===== ЦВЕТА ДЛЯ ЗНАКОВ ===== */
+        .aries { background: rgba(50, 20, 30, 0.6); border-color: rgba(255, 69, 0, 0.15); }
+        .taurus { background: rgba(20, 50, 30, 0.6); border-color: rgba(46, 204, 113, 0.15); }
+        .gemini { 
+          background: rgba(50, 45, 20, 0.6); 
+          border-color: rgba(255, 215, 0, 0.25); 
+          box-shadow: 0 0 30px rgba(255, 215, 0, 0.05);
+        }
+        .gemini:hover {
+          box-shadow: 0 20px 50px rgba(255, 215, 0, 0.1);
+          border-color: rgba(255, 215, 0, 0.4);
+        }
+        .cancer { background: rgba(25, 25, 50, 0.6); border-color: rgba(108, 92, 231, 0.15); }
+        .leo { background: rgba(50, 35, 20, 0.6); border-color: rgba(255, 215, 0, 0.2); }
+        .virgo { background: rgba(30, 45, 35, 0.6); border-color: rgba(149, 165, 166, 0.15); }
+        .libra { background: rgba(50, 30, 55, 0.6); border-color: rgba(255, 182, 193, 0.15); }
+        .scorpio { background: rgba(50, 15, 35, 0.6); border-color: rgba(255, 107, 107, 0.15); }
+        .sagittarius { background: rgba(50, 30, 20, 0.6); border-color: rgba(138, 43, 226, 0.15); }
+        .capricorn { background: rgba(20, 30, 45, 0.6); border-color: rgba(112, 128, 144, 0.15); }
+        .aquarius { background: rgba(20, 40, 55, 0.6); border-color: rgba(0, 255, 255, 0.1); }
+        .pisces { background: rgba(25, 50, 40, 0.6); border-color: rgba(72, 209, 204, 0.15); }
 
-.gemini:hover .zodiac-symbol {
-  filter: drop-shadow(0 0 50px rgba(255, 215, 0, 0.35));
-}
+        /* Дополнительные стили для Близнецов */
+        .gemini .zodiac-symbol {
+          filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.2));
+          transition: filter 0.4s;
+        }
+        .gemini:hover .zodiac-symbol {
+          filter: drop-shadow(0 0 50px rgba(255, 215, 0, 0.35));
+        }
+        .gemini .zodiac-title {
+          color: #f5d742;
+          text-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+        }
+        .gemini .zodiac-date {
+          color: rgba(255, 215, 0, 0.5);
+        }
+        .gemini .zodiac-item h3 {
+          color: #f5d742;
+          border-bottom-color: rgba(255, 215, 0, 0.15);
+        }
+        .gemini .zodiac-item {
+          border-color: rgba(255, 215, 0, 0.05);
+        }
+        .gemini .zodiac-item:hover {
+          background-color: rgba(255, 215, 0, 0.05);
+          border-color: rgba(255, 215, 0, 0.15);
+        }
+        .gemini .details-link {
+          color: #f5d742;
+        }
+        .gemini .details-link:hover {
+          color: #ffffff;
+          border-bottom-color: #f5d742;
+        }
+        .gemini .zodiac-item p {
+          color: rgba(255, 255, 255, 0.8);
+        }
 
-.gemini .zodiac-title {
-  color: #f5d742;
-  text-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
-}
-
-.gemini .zodiac-date {
-  color: rgba(255, 215, 0, 0.5);
-}
-
-.gemini .zodiac-item h3 {
-  color: #f5d742;
-  border-bottom-color: rgba(255, 215, 0, 0.15);
-}
-
-.gemini .zodiac-item {
-  border-color: rgba(255, 215, 0, 0.05);
-}
-
-.gemini .zodiac-item:hover {
-  background-color: rgba(255, 215, 0, 0.05);
-  border-color: rgba(255, 215, 0, 0.15);
-}
-
-.gemini .details-link {
-  color: #f5d742;
-}
-
-.gemini .details-link:hover {
-  color: #ffffff;
-  border-bottom-color: #f5d742;
-}
-
-.gemini .zodiac-item p {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-/* Стили для кнопки Близнецов в навигации */
-.zodiac-nav-btn:nth-child(3) { 
-  border-color: rgba(255, 215, 0, 0.25); 
-}
-.zodiac-nav-btn:nth-child(3):hover { 
-  box-shadow: 0 8px 35px rgba(255, 215, 0, 0.2);
-  border-color: rgba(255, 215, 0, 0.4);
-}
-/* Цвета для каждого знака */
-.aries { background: rgba(50, 20, 30, 0.6); border-color: rgba(255, 69, 0, 0.15); }
-.taurus { background: rgba(20, 50, 30, 0.6); border-color: rgba(46, 204, 113, 0.15); }
-.gemini { 
-  background: rgba(50, 45, 20, 0.6); 
-  border-color: rgba(255, 215, 0, 0.25); 
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.05);
-}
-.gemini:hover {
-  box-shadow: 0 20px 50px rgba(255, 215, 0, 0.1);
-  border-color: rgba(255, 215, 0, 0.4);
-}
-.cancer { background: rgba(25, 25, 50, 0.6); border-color: rgba(108, 92, 231, 0.15); }
-.leo { background: rgba(50, 35, 20, 0.6); border-color: rgba(255, 215, 0, 0.2); }
-.virgo { background: rgba(30, 45, 35, 0.6); border-color: rgba(149, 165, 166, 0.15); }
-.libra { background: rgba(50, 30, 55, 0.6); border-color: rgba(255, 182, 193, 0.15); }
-.scorpio { background: rgba(50, 15, 35, 0.6); border-color: rgba(255, 107, 107, 0.15); }
-.sagittarius { background: rgba(50, 30, 20, 0.6); border-color: rgba(138, 43, 226, 0.15); }
-.capricorn { background: rgba(20, 30, 45, 0.6); border-color: rgba(112, 128, 144, 0.15); }
-.aquarius { background: rgba(20, 40, 55, 0.6); border-color: rgba(0, 255, 255, 0.1); }
-.pisces { background: rgba(25, 50, 40, 0.6); border-color: rgba(72, 209, 204, 0.15); }
-        /* Иконка знака */
         .zodiac-icon {
           font-size: 3.8em;
           text-align: center;
@@ -698,7 +592,6 @@ export default function HomePage() {
           filter: drop-shadow(0 0 40px rgba(200, 150, 255, 0.25));
         }
 
-        /* Информация о знаке */
         .zodiac-info {
           flex: 1;
         }
@@ -718,7 +611,6 @@ export default function HomePage() {
           font-weight: 300;
         }
 
-        /* Сетка 2x2 для блоков */
         .zodiac-content {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
@@ -754,7 +646,6 @@ export default function HomePage() {
           color: rgba(255, 255, 255, 0.75);
         }
 
-        /* Ссылка "Подробнее" */
         .details-link {
           display: inline-block;
           margin-top: 18px;
@@ -990,201 +881,56 @@ export default function HomePage() {
           font-family: 'Georgia', serif;
         }
 
-        /* Адаптивность */
+        /* ===== АДАПТИВНОСТЬ ===== */
         @media (max-width: 768px) {
-          .hero-section {
-            min-height: 380px;
-          }
-
-          .hero-overlay {
-            padding: 40px 0 25px;
-          }
-
-          .title-gradient {
-            font-size: 2.4em;
-            letter-spacing: 2px;
-          }
-
-          .title-light {
-            font-size: 2em;
-            letter-spacing: 4px;
-          }
-
-          .main-title {
-            margin-bottom: 20px;
-          }
-
-          .zodiac-nav-btn {
-            padding: 8px 16px;
-            font-size: 12px;
-          }
-
-          .zodiac-nav {
-            gap: 6px;
-          }
-
-          .zodiac-block {
-            flex-direction: column;
-            width: 95%;
-            padding: 20px;
-          }
-
-          .zodiac-icon {
-            text-align: center;
-            font-size: 3em;
-            min-width: unset;
-          }
-
-          .zodiac-content {
-            grid-template-columns: 1fr;
-            gap: 12px;
-          }
-
-          .zodiac-title {
-            font-size: 2em;
-            text-align: center;
-          }
-
-          .zodiac-date {
-            text-align: center;
-          }
-
-          .footer-grid {
-            grid-template-columns: 1fr;
-            gap: 25px;
-          }
-
-          .footer-brand {
-            text-align: center;
-            align-items: center;
-          }
-
-          .footer-description {
-            text-align: center;
-            max-width: 100%;
-          }
-
-          .footer-social {
-            justify-content: center;
-          }
-
-          .footer-links h4,
-          .footer-contacts h4 {
-            text-align: center;
-          }
-
-          .footer-links ul {
-            text-align: center;
-          }
-
-          .footer-links ul li a::before {
-            display: none;
-          }
-
-          .footer-links ul li a:hover {
-            padding-left: 0;
-          }
-
-          .footer-zodiac-list {
-            justify-items: center;
-          }
-
-          .footer-contacts ul li {
-            justify-content: center;
-          }
-
-          .footer-bottom-content {
-            flex-direction: column;
-            text-align: center;
-            gap: 6px;
-          }
+          .hero-section { min-height: 380px; }
+          .hero-overlay { padding: 40px 0 25px; }
+          .title-gradient { font-size: 2.4em; letter-spacing: 2px; }
+          .title-light { font-size: 2em; letter-spacing: 4px; }
+          .main-title { margin-bottom: 20px; }
+          .zodiac-nav-btn { padding: 8px 16px; font-size: 12px; }
+          .zodiac-nav { gap: 6px; }
+          .zodiac-block { flex-direction: column; width: 95%; padding: 20px; }
+          .zodiac-icon { text-align: center; font-size: 3em; min-width: unset; }
+          .zodiac-content { grid-template-columns: 1fr; gap: 12px; }
+          .zodiac-title { font-size: 2em; text-align: center; }
+          .zodiac-date { text-align: center; }
+          .footer-grid { grid-template-columns: 1fr; gap: 25px; }
+          .footer-brand { text-align: center; align-items: center; }
+          .footer-description { text-align: center; max-width: 100%; }
+          .footer-social { justify-content: center; }
+          .footer-links h4, .footer-contacts h4 { text-align: center; }
+          .footer-links ul { text-align: center; }
+          .footer-links ul li a::before { display: none; }
+          .footer-links ul li a:hover { padding-left: 0; }
+          .footer-zodiac-list { justify-items: center; }
+          .footer-contacts ul li { justify-content: center; }
+          .footer-bottom-content { flex-direction: column; text-align: center; gap: 6px; }
         }
 
         @media (max-width: 480px) {
-          .hero-section {
-            min-height: 300px;
-          }
-
-          .hero-overlay {
-            padding: 25px 0 15px;
-          }
-
-          .title-gradient {
-            font-size: 1.8em;
-            letter-spacing: 1px;
-          }
-
-          .title-light {
-            font-size: 1.5em;
-            letter-spacing: 2px;
-          }
-
-          .zodiac-nav-btn {
-            padding: 6px 12px;
-            font-size: 10px;
-            border-radius: 20px;
-          }
-
-          .zodiac-nav {
-            gap: 4px;
-          }
-
-          .zodiac-block {
-            padding: 14px;
-            margin: 15px auto;
-          }
-
-          .zodiac-item {
-            padding: 12px 14px;
-          }
-
-          .zodiac-item h3 {
-            font-size: 0.9em;
-          }
-
-          .zodiac-item p {
-            font-size: 0.82em;
-          }
-
-          .astroliv-footer {
-            padding: 30px 0 15px;
-          }
-
-          .footer-logo {
-            font-size: 1.4em;
-          }
-
-          .footer-description {
-            font-size: 0.8em;
-          }
-
-          .footer-zodiac-list {
-            grid-template-columns: 1fr 1fr;
-            gap: 2px 8px;
-          }
-
-          .footer-zodiac-list li a {
-            font-size: 0.75em;
-          }
-
-          .footer-contacts ul li {
-            font-size: 0.8em;
-          }
+          .hero-section { min-height: 300px; }
+          .hero-overlay { padding: 25px 0 15px; }
+          .title-gradient { font-size: 1.8em; letter-spacing: 1px; }
+          .title-light { font-size: 1.5em; letter-spacing: 2px; }
+          .zodiac-nav-btn { padding: 6px 12px; font-size: 10px; border-radius: 20px; }
+          .zodiac-nav { gap: 4px; }
+          .zodiac-block { padding: 14px; margin: 15px auto; }
+          .zodiac-item { padding: 12px 14px; }
+          .zodiac-item h3 { font-size: 0.9em; }
+          .zodiac-item p { font-size: 0.82em; }
+          .astroliv-footer { padding: 30px 0 15px; }
+          .footer-logo { font-size: 1.4em; }
+          .footer-description { font-size: 0.8em; }
+          .footer-zodiac-list { grid-template-columns: 1fr 1fr; gap: 2px 8px; }
+          .footer-zodiac-list li a { font-size: 0.75em; }
+          .footer-contacts ul li { font-size: 0.8em; }
         }
 
         @media (max-width: 1024px) {
-          .footer-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-          }
-          
-          .footer-brand {
-            grid-column: 1 / -1;
-          }
-          
-          .footer-description {
-            max-width: 100%;
-          }
+          .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; }
+          .footer-brand { grid-column: 1 / -1; }
+          .footer-description { max-width: 100%; }
         }
       `}</style>
     </div>

@@ -187,14 +187,13 @@ export function BulkImageUpload({
     setTimeout(() => setSuccess(null), 3000)
   }
 
-  // ===== ГЛАВНОЕ: ЗАГРУЗКА ФОТО В ШАБЛОН =====
+  // ===== ЗАГРУЗКА ФОТО В ШАБЛОН =====
   const handleImagesSelect = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || [])
     setError(null)
 
     if (selectedFiles.length === 0) return
 
-    // Проверяем каждый файл
     for (const file of selectedFiles) {
       if (file.size > 5 * 1024 * 1024) {
         setError(`Файл ${file.name} слишком большой (макс. 5MB)`)
@@ -206,7 +205,6 @@ export function BulkImageUpload({
       }
     }
 
-    // Создаем превью
     const newPreviews = selectedFiles.map(f => URL.createObjectURL(f))
     
     const newTemplates = [...templates]
@@ -217,7 +215,6 @@ export function BulkImageUpload({
     }
     setTemplates(newTemplates)
     
-    // Очищаем input, чтобы можно было загрузить снова
     e.target.value = ''
     
     console.log(`✅ Добавлено ${selectedFiles.length} фото в шаблон ${index+1}`)
@@ -247,7 +244,6 @@ export function BulkImageUpload({
       return
     }
 
-    // Проверка заполнения
     for (let i = 0; i < templates.length; i++) {
       const t = templates[i]
       
@@ -321,7 +317,15 @@ export function BulkImageUpload({
           payload = { templates: [template], images: uploadedImages }
         } else if (folder === 'works') {
           endpoint = '/api/admin/bulk-works'
-          payload = { templates: [template], images: uploadedImages }
+          // ⚡ ФИКС: правильно передаем данные для работ
+          payload = { 
+            templates: [{
+              designer_id: Number(template.designer_id),
+              work_title: template.work_title,
+              description: template.description || '',
+            }], 
+            images: uploadedImages 
+          }
         }
 
         try {
@@ -410,7 +414,7 @@ export function BulkImageUpload({
               {/* Поля для одежды */}
               {folder === 'clothing' && (
                 <>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="text"
                       value={template.name}
@@ -427,7 +431,7 @@ export function BulkImageUpload({
                           updateTemplate(index, 'name', value)
                         }
                       }}
-                      className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 w-32"
+                      className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 sm:w-32"
                     >
                       <option value="">Шаблон</option>
                       {STYLE_TEMPLATES.map(t => (
@@ -441,7 +445,7 @@ export function BulkImageUpload({
                     placeholder="Описание"
                     className="w-full px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 resize-none h-10"
                   />
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <select
                       value={template.gender}
                       onChange={(e) => updateTemplate(index, 'gender', e.target.value)}
@@ -530,7 +534,7 @@ export function BulkImageUpload({
                   </div>
                   
                   {template.imagePreviews.length > 0 && (
-                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-2">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 mb-2">
                       {template.imagePreviews.map((preview, imgIndex) => (
                         <div key={imgIndex} className="relative group">
                           <img
@@ -553,7 +557,7 @@ export function BulkImageUpload({
                     </div>
                   )}
 
-                  <label className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-white/20 rounded-lg cursor-pointer hover:border-pink-500 hover:bg-white/5 transition">
+                  <label className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-dashed border-white/20 rounded-lg cursor-pointer hover:border-pink-500 hover:bg-white/5 transition text-sm sm:text-base">
                     <input
                       type="file"
                       multiple
@@ -562,8 +566,8 @@ export function BulkImageUpload({
                       className="hidden"
                       disabled={uploading}
                     />
-                    <Upload size={16} className="text-white/40" />
-                    <span className="text-white/40 text-sm">
+                    <Upload size={16} className="text-white/40 flex-shrink-0" />
+                    <span className="text-white/40 text-xs sm:text-sm">
                       {template.imagePreviews.length > 0 ? '➕ Добавить еще фото' : 'Выбрать фото (можно несколько)'}
                     </span>
                   </label>
@@ -578,7 +582,7 @@ export function BulkImageUpload({
                   </div>
                   
                   {template.imagePreviews.length > 0 ? (
-                    <div className="relative w-32 h-32">
+                    <div className="relative w-24 h-24 sm:w-32 sm:h-32">
                       <img
                         src={template.imagePreviews[0]}
                         alt="Фото дизайнера"
@@ -593,7 +597,7 @@ export function BulkImageUpload({
                       </button>
                     </div>
                   ) : (
-                    <label className="flex items-center justify-center gap-2 px-4 py-8 border-2 border-dashed border-white/20 rounded-lg cursor-pointer hover:border-pink-500 hover:bg-white/5 transition">
+                    <label className="flex items-center justify-center gap-2 px-4 py-6 sm:py-8 border-2 border-dashed border-white/20 rounded-lg cursor-pointer hover:border-pink-500 hover:bg-white/5 transition">
                       <input
                         type="file"
                         accept={accept}
@@ -601,7 +605,7 @@ export function BulkImageUpload({
                         className="hidden"
                         disabled={uploading}
                       />
-                      <Upload size={24} className="text-white/40" />
+                      <Upload size={20} className="text-white/40 flex-shrink-0" />
                       <span className="text-white/40 text-sm">Выбрать фото</span>
                     </label>
                   )}
@@ -726,9 +730,9 @@ export function BulkImageUpload({
       {!uploading && (
         <button
           onClick={addTemplate}
-          className="w-full py-3 border-2 border-dashed border-white/20 rounded-xl text-white/40 hover:border-pink-500 hover:text-pink-400 hover:bg-white/5 transition flex items-center justify-center gap-2"
+          className="w-full py-3 border-2 border-dashed border-white/20 rounded-xl text-white/40 hover:border-pink-500 hover:text-pink-400 hover:bg-white/5 transition flex items-center justify-center gap-2 text-sm sm:text-base"
         >
-          <Plus size={18} />
+          <Plus size={18} className="flex-shrink-0" />
           Добавить шаблон ({templates.length})
         </button>
       )}
@@ -748,23 +752,23 @@ export function BulkImageUpload({
         </div>
       )}
 
-      {/* Кнопки действий */}
+      {/* ===== КНОПКИ ДЕЙСТВИЙ (АДАПТИВНЫЕ) ===== */}
       {templates.length > 0 && (
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={uploadAll}
             disabled={uploading}
-            className="flex-1 py-3 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl text-white font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full sm:flex-1 py-3 px-4 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl text-white font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             {uploading ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Загрузка...
+                <Loader2 className="w-5 h-5 animate-spin flex-shrink-0" />
+                <span>Загрузка...</span>
               </>
             ) : (
               <>
-                <Upload size={18} />
-                Загрузить и сохранить ({templates.length} шаблонов)
+                <Upload size={18} className="flex-shrink-0" />
+                <span>Загрузить и сохранить ({templates.length} шаблонов)</span>
               </>
             )}
           </button>
@@ -772,7 +776,7 @@ export function BulkImageUpload({
           <button
             onClick={clearAll}
             disabled={uploading}
-            className="px-4 py-3 bg-white/10 rounded-xl text-white/60 hover:text-white hover:bg-white/20 transition"
+            className="w-full sm:w-auto px-4 py-3 bg-white/10 rounded-xl text-white/60 hover:text-white hover:bg-white/20 transition text-sm sm:text-base"
           >
             Очистить всё
           </button>

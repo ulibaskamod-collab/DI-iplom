@@ -658,4 +658,12 @@ input[type="date"]:focus {
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(200, 150, 255, 0.3) rgba(255, 255, 255, 0.05);
+}/* В globals.css */
+@media (max-width: 768px) {
+  .admin-add-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
 }

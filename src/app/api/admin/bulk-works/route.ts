@@ -23,18 +23,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Нет изображений' }, { status: 400 })
     }
 
+    if (templates.length !== images.length) {
+      return NextResponse.json({ 
+        error: `Количество шаблонов (${templates.length}) и фото (${images.length}) не совпадает` 
+      }, { status: 400 })
+    }
+
     const savedItems = []
 
-    for (let tIndex = 0; tIndex < templates.length; tIndex++) {
-      const template = templates[tIndex]
-      
-      let templateImages: string[] = []
-      
-      if (Array.isArray(images[0])) {
-        templateImages = images[tIndex] || []
-      } else {
-        templateImages = images
-      }
+    for (let i = 0; i < templates.length; i++) {
+      const template = templates[i]
+      const imageUrl = images[i] || ''
 
       // Проверяем существование дизайнера
       const designerCheck = await pool.query(
@@ -47,24 +46,23 @@ export async function POST(req: NextRequest) {
         continue
       }
 
-      console.log(`📝 Шаблон ${tIndex + 1}: ${template.work_title}, фото: ${templateImages.length}`)
+      console.log(`📝 Сохраняем работу ${i+1}:`, {
+        designer_id: template.designer_id,
+        work_title: template.work_title,
+        imageUrl
+      })
 
-      for (let i = 0; i < templateImages.length; i++) {
-        const imageUrl = templateImages[i] || ''
+      const result = await pool.query(
+        `INSERT INTO designer_works (designer_id, work_title, work_image, description)
+         VALUES ($1, $2, $3, $4)
+         RETURNING *`,
+        [template.designer_id, template.work_title, imageUrl, template.description || null]
+      )
 
-        const result = await pool.query(
-          `INSERT INTO designer_works (designer_id, work_title, work_image, description)
-           VALUES ($1, $2, $3, $4)
-           RETURNING *`,
-          [template.designer_id, template.work_title, imageUrl, template.description || null]
-        )
-
-        savedItems.push({
-          ...result.rows[0],
-          template: template,
-          image_index: i + 1
-        })
-      }
+      savedItems.push({
+        ...result.rows[0],
+        template: template
+      })
     }
 
     console.log(`✅ Сохранено ${savedItems.length} работ`)
