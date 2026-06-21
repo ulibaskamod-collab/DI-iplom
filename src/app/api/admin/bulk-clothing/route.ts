@@ -8,29 +8,43 @@ const pool = new Pool({
   },
 })
 
-// Массовое добавление одежды
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { items } = body
+    const { templates, images } = body
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ error: 'Нет данных для сохранения' }, { status: 400 })
+    if (!templates || !Array.isArray(templates) || templates.length === 0) {
+      return NextResponse.json({ error: 'Нет шаблонов для сохранения' }, { status: 400 })
+    }
+
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return NextResponse.json({ error: 'Нет изображений' }, { status: 400 })
     }
 
     const savedItems = []
 
-    for (const item of items) {
-      const { title, description, image_url, season, gender, zodiac_sign_id } = item
+    for (let i = 0; i < templates.length; i++) {
+      const template = templates[i]
+      const imageUrl = images[i] || ''
 
       const result = await pool.query(
         `INSERT INTO clothing_items (title, description, image_url, season, gender, zodiac_sign_id)
          VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING *`,
-        [title, description, image_url, season || 'summer', gender || 'unisex', zodiac_sign_id]
+        [
+          template.name,
+          template.description || '',
+          imageUrl,
+          template.season || 'summer',
+          template.gender || 'unisex',
+          template.zodiac_sign_id
+        ]
       )
 
-      savedItems.push(result.rows[0])
+      savedItems.push({
+        ...result.rows[0],
+        template: template
+      })
     }
 
     return NextResponse.json({

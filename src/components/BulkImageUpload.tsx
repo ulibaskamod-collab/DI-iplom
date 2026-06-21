@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Upload, X, Loader2, Copy, Trash2, Plus, Image as ImageIcon, Sparkles, Zap, Home, Shirt, Heart, Moon, Sun } from 'lucide-react'
+import { Upload, X, Loader2, Copy, Trash2, Plus, Image as ImageIcon, Sparkles } from 'lucide-react'
 
 interface BulkImageUploadProps {
   folder: 'clothing' | 'designers' | 'works'
@@ -10,7 +10,7 @@ interface BulkImageUploadProps {
   accept?: string
 }
 
-interface DataItem {
+interface Template {
   id: string
   // Для одежды
   name: string
@@ -25,23 +25,17 @@ interface DataItem {
   // Для работ
   designer_id: number
   work_title: string
-  // Фото
-  imageFile: File | null
-  imagePreview: string | null
-  isUploaded: boolean
-  imageUrl: string | null
 }
 
-// Шаблоны названий для одежды
 const STYLE_TEMPLATES = [
-  { id: 'casual', label: '👕 Повседневная', icon: '👕' },
-  { id: 'home', label: '🏠 Домашняя', icon: '🏠' },
-  { id: 'street', label: '🏙️ Уличная', icon: '🏙️' },
-  { id: 'date', label: '💑 Свидание', icon: '💑' },
-  { id: 'evening', label: '🌙 Вечерняя', icon: '🌙' },
-  { id: 'sport', label: '⚡ Спортивная', icon: '⚡' },
-  { id: 'office', label: '💼 Офисная', icon: '💼' },
-  { id: 'party', label: '🎉 Вечеринка', icon: '🎉' },
+  { id: 'casual', label: '👕 Повседневная' },
+  { id: 'home', label: '🏠 Домашняя' },
+  { id: 'street', label: '🏙️ Уличная' },
+  { id: 'date', label: '💑 Свидание' },
+  { id: 'evening', label: '🌙 Вечерняя' },
+  { id: 'sport', label: '⚡ Спортивная' },
+  { id: 'office', label: '💼 Офисная' },
+  { id: 'party', label: '🎉 Вечеринка' },
 ]
 
 export function BulkImageUpload({ 
@@ -50,7 +44,9 @@ export function BulkImageUpload({
   maxItems = 10,
   accept = 'image/*'
 }: BulkImageUploadProps) {
-  const [items, setItems] = useState<DataItem[]>([])
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [images, setImages] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadedData, setUploadedData] = useState<any[]>([])
@@ -61,20 +57,13 @@ export function BulkImageUpload({
   
   // Массовые настройки
   const [bulkSettings, setBulkSettings] = useState({
-    // Для одежды
     gender: 'unisex',
     zodiac_sign_id: 0,
     season: 'summer',
     styleTemplate: '',
-    // Для дизайнеров
-    designerTemplate: '',
-    // Для работ
     designer_id: 0,
   })
 
-  const [applyToAll, setApplyToAll] = useState(false)
-
-  // Загружаем знаки зодиака
   useEffect(() => {
     if (folder === 'clothing') {
       fetch('/api/admin/zodiac')
@@ -89,7 +78,6 @@ export function BulkImageUpload({
     }
   }, [folder])
 
-  // Загружаем дизайнеров
   useEffect(() => {
     if (folder === 'works') {
       fetch('/api/admin/designers')
@@ -104,14 +92,14 @@ export function BulkImageUpload({
     }
   }, [folder])
 
-  // Создать новый пустой элемент
-  const createEmptyItem = (): DataItem => {
+  // Создать шаблон
+  const createTemplate = (): Template => {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 4)
     
     if (folder === 'clothing') {
       return {
         id,
-        name: '',
+        name: bulkSettings.styleTemplate || '',
         description: '',
         gender: bulkSettings.gender,
         zodiac_sign_id: bulkSettings.zodiac_sign_id,
@@ -121,10 +109,6 @@ export function BulkImageUpload({
         bio: '',
         designer_id: 0,
         work_title: '',
-        imageFile: null,
-        imagePreview: null,
-        isUploaded: false,
-        imageUrl: null,
       }
     } else if (folder === 'designers') {
       return {
@@ -139,10 +123,6 @@ export function BulkImageUpload({
         bio: '',
         designer_id: 0,
         work_title: '',
-        imageFile: null,
-        imagePreview: null,
-        isUploaded: false,
-        imageUrl: null,
       }
     } else {
       return {
@@ -157,105 +137,141 @@ export function BulkImageUpload({
         bio: '',
         designer_id: bulkSettings.designer_id,
         work_title: '',
-        imageFile: null,
-        imagePreview: null,
-        isUploaded: false,
-        imageUrl: null,
       }
     }
   }
 
-  // Добавить новый элемент
-  const addItem = () => {
-    if (items.length >= maxItems) {
-      setError(`Максимум ${maxItems} записей`)
+  const addTemplate = () => {
+    if (templates.length >= maxItems) {
+      setError(`Максимум ${maxItems} шаблонов`)
       return
     }
-    setItems([...items, createEmptyItem()])
+    setTemplates([...templates, createTemplate()])
     setError(null)
   }
 
-  // Удалить элемент
-  const removeItem = (index: number) => {
-    const newItems = [...items]
-    if (newItems[index].imagePreview) {
-      URL.revokeObjectURL(newItems[index].imagePreview!)
+  const removeTemplate = (index: number) => {
+    const newTemplates = [...templates]
+    newTemplates.splice(index, 1)
+    setTemplates(newTemplates)
+    
+    // Удаляем соответствующее фото
+    if (images[index]) {
+      const newImages = [...images]
+      const newPreviews = [...imagePreviews]
+      URL.revokeObjectURL(newPreviews[index])
+      newImages.splice(index, 1)
+      newPreviews.splice(index, 1)
+      setImages(newImages)
+      setImagePreviews(newPreviews)
     }
-    newItems.splice(index, 1)
-    setItems(newItems)
   }
 
-  // Применить настройки ко всем элементам
-  const applyBulkSettingsToAll = () => {
-    const newItems = items.map(item => ({
-      ...item,
-      gender: bulkSettings.gender || item.gender,
-      zodiac_sign_id: bulkSettings.zodiac_sign_id || item.zodiac_sign_id,
-      season: bulkSettings.season || item.season,
-      styleTemplate: bulkSettings.styleTemplate || item.styleTemplate,
-      designer_id: bulkSettings.designer_id || item.designer_id,
+  const updateTemplate = (index: number, field: string, value: any) => {
+    const newTemplates = [...templates]
+    newTemplates[index] = { ...newTemplates[index], [field]: value }
+    setTemplates(newTemplates)
+  }
+
+  // Применить настройки ко всем шаблонам
+  const applyBulkSettings = () => {
+    const newTemplates = templates.map(t => ({
+      ...t,
+      gender: bulkSettings.gender || t.gender,
+      zodiac_sign_id: bulkSettings.zodiac_sign_id || t.zodiac_sign_id,
+      season: bulkSettings.season || t.season,
+      styleTemplate: bulkSettings.styleTemplate || t.styleTemplate,
+      designer_id: bulkSettings.designer_id || t.designer_id,
     }))
-    setItems(newItems)
-    setSuccess(`✅ Настройки применены ко всем ${items.length} записям`)
+    setTemplates(newTemplates)
+    setSuccess('✅ Настройки применены ко всем шаблонам')
     setTimeout(() => setSuccess(null), 3000)
   }
 
-  // Обновить элемент
-  const updateItem = (index: number, field: string, value: any) => {
-    const newItems = [...items]
-    newItems[index] = { ...newItems[index], [field]: value }
-    setItems(newItems)
+  // Загрузить фото для всех шаблонов
+  const handleImagesSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || [])
+    setError(null)
+
+    // Проверяем количество
+    if (selectedFiles.length + images.length > maxItems) {
+      setError(`Максимум ${maxItems} фото`)
+      return
+    }
+
+    // Проверяем каждый файл
+    for (const file of selectedFiles) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError(`Файл ${file.name} слишком большой (макс. 5MB)`)
+        return
+      }
+      if (!file.type.startsWith('image/')) {
+        setError(`Файл ${file.name} не является изображением`)
+        return
+      }
+    }
+
+    // Создаем превью
+    const newPreviews = selectedFiles.map(f => URL.createObjectURL(f))
+    
+    setImages([...images, ...selectedFiles])
+    setImagePreviews([...imagePreviews, ...newPreviews])
+    e.target.value = ''
   }
 
-  // Загрузить фото для элемента
-  const handleImageSelect = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const removeImage = (index: number) => {
+    const newImages = [...images]
+    const newPreviews = [...imagePreviews]
+    URL.revokeObjectURL(newPreviews[index])
+    newImages.splice(index, 1)
+    newPreviews.splice(index, 1)
+    setImages(newImages)
+    setImagePreviews(newPreviews)
+  }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError(`Файл ${file.name} слишком большой (макс. 5MB)`)
-      return
-    }
-
-    if (!file.type.startsWith('image/')) {
-      setError(`Файл ${file.name} не является изображением`)
-      return
-    }
-
-    const preview = URL.createObjectURL(file)
-    const newItems = [...items]
-    newItems[index] = { 
-      ...newItems[index], 
-      imageFile: file, 
-      imagePreview: preview,
-      isUploaded: false,
-      imageUrl: null
-    }
-    setItems(newItems)
+  const clearAll = () => {
+    imagePreviews.forEach(p => URL.revokeObjectURL(p))
+    setTemplates([])
+    setImages([])
+    setImagePreviews([])
+    setUploadedData([])
+    setUploadProgress(0)
     setError(null)
+    setSuccess(null)
   }
 
   // Загрузить все
   const uploadAll = async () => {
-    // Проверка заполнения
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i]
+    // Проверка: количество шаблонов и фото должно совпадать
+    if (templates.length === 0) {
+      setError('Сначала создайте шаблоны')
+      return
+    }
+
+    if (images.length === 0) {
+      setError('Загрузите фото для шаблонов')
+      return
+    }
+
+    if (templates.length !== images.length) {
+      setError(`Количество шаблонов (${templates.length}) и фото (${images.length}) не совпадает!`)
+      return
+    }
+
+    // Проверка заполнения обязательных полей
+    for (let i = 0; i < templates.length; i++) {
+      const t = templates[i]
       
-      if (!item.imageFile) {
-        setError(`Для записи ${i+1} не выбрано фото`)
+      if (folder === 'clothing' && !t.name) {
+        setError(`Шаблон ${i+1}: не указано название одежды`)
         return
       }
-      
-      if (folder === 'clothing' && !item.name) {
-        setError(`Для записи ${i+1} не указано название одежды`)
+      if (folder === 'designers' && !t.designer_name) {
+        setError(`Шаблон ${i+1}: не указано имя дизайнера`)
         return
       }
-      if (folder === 'designers' && !item.designer_name) {
-        setError(`Для записи ${i+1} не указано имя дизайнера`)
-        return
-      }
-      if (folder === 'works' && !item.work_title) {
-        setError(`Для записи ${i+1} не указано название работы`)
+      if (folder === 'works' && !t.work_title) {
+        setError(`Шаблон ${i+1}: не указано название работы`)
         return
       }
     }
@@ -265,16 +281,15 @@ export function BulkImageUpload({
     setError(null)
     setSuccess(null)
     
-    const results: any[] = []
+    const uploadedImages: string[] = []
 
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i]
+    // Шаг 1: Загружаем все фото
+    for (let i = 0; i < images.length; i++) {
       const formData = new FormData()
-      formData.append('image', item.imageFile!)
+      formData.append('image', images[i])
       formData.append('folder', folder)
 
       try {
-        // Шаг 1: Загружаем фото
         const response = await fetch('/api/admin/upload', {
           method: 'POST',
           body: formData,
@@ -282,33 +297,20 @@ export function BulkImageUpload({
         const data = await response.json()
         
         if (data.success) {
-          const result = {
-            url: data.url,
-            ...item
-          }
-          results.push(result)
-          
-          // Обновляем статус элемента
-          const newItems = [...items]
-          newItems[i] = { 
-            ...newItems[i], 
-            isUploaded: true, 
-            imageUrl: data.url 
-          }
-          setItems(newItems)
+          uploadedImages.push(data.url)
         } else {
-          setError(`Ошибка загрузки: ${data.error || 'неизвестная ошибка'}`)
+          setError(`Ошибка загрузки фото ${i+1}: ${data.error || 'неизвестная ошибка'}`)
         }
         
-        setUploadProgress(((i + 1) / items.length) * 100)
+        setUploadProgress(((i + 1) / images.length) * 100)
       } catch (error) {
-        setError(`Ошибка загрузки файла ${i + 1}`)
+        setError(`Ошибка загрузки фото ${i + 1}`)
         console.error('Upload failed:', error)
       }
     }
 
-    // Шаг 2: Сохраняем в БД
-    if (results.length > 0) {
+    // Шаг 2: Сохраняем в БД с привязкой фото к шаблонам
+    if (uploadedImages.length > 0) {
       try {
         let endpoint = ''
         let payload: any = {}
@@ -316,34 +318,20 @@ export function BulkImageUpload({
         if (folder === 'clothing') {
           endpoint = '/api/admin/bulk-clothing'
           payload = {
-            items: results.map(r => ({
-              title: r.name,
-              description: r.description || '',
-              image_url: r.url,
-              season: r.season || 'summer',
-              gender: r.gender || 'unisex',
-              zodiac_sign_id: r.zodiac_sign_id,
-            }))
+            templates: templates,
+            images: uploadedImages
           }
         } else if (folder === 'designers') {
           endpoint = '/api/admin/bulk-designers'
           payload = {
-            items: results.map(r => ({
-              designer_name: r.designer_name,
-              bio: r.bio || '',
-              designer_image: r.url,
-              social_links: {},
-            }))
+            templates: templates,
+            images: uploadedImages
           }
         } else if (folder === 'works') {
           endpoint = '/api/admin/bulk-works'
           payload = {
-            items: results.map(r => ({
-              designer_id: r.designer_id,
-              work_title: r.work_title,
-              description: r.description || '',
-              work_image: r.url,
-            }))
+            templates: templates,
+            images: uploadedImages
           }
         }
 
@@ -357,14 +345,13 @@ export function BulkImageUpload({
 
         if (saveResponse.ok) {
           setSuccess(`✅ Успешно загружено и сохранено ${saveData.saved} записей!`)
+          setUploadedData(saveData.items || [])
+          
+          if (onUploadComplete) {
+            onUploadComplete(saveData.items || [])
+          }
         } else {
           setError(`Ошибка сохранения: ${saveData.error || 'неизвестная ошибка'}`)
-        }
-
-        setUploadedData(results)
-        
-        if (onUploadComplete) {
-          onUploadComplete(results)
         }
 
       } catch (error) {
@@ -376,38 +363,25 @@ export function BulkImageUpload({
     setUploading(false)
   }
 
-  // Очистить все
-  const clearAll = () => {
-    items.forEach(item => {
-      if (item.imagePreview) URL.revokeObjectURL(item.imagePreview)
-    })
-    setItems([])
-    setUploadedData([])
-    setUploadProgress(0)
-    setError(null)
-    setSuccess(null)
-  }
-
-  // Рендер формы элемента
-  const renderItemForm = (item: DataItem, index: number) => {
+  // Рендер шаблона
+  const renderTemplate = (template: Template, index: number) => {
     if (folder === 'clothing') {
       return (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex gap-2">
             <input
               type="text"
-              value={item.name}
-              onChange={(e) => updateItem(index, 'name', e.target.value)}
+              value={template.name}
+              onChange={(e) => updateTemplate(index, 'name', e.target.value)}
               placeholder="Название одежды *"
               className="flex-1 px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
             />
             <select
-              value={item.styleTemplate || ''}
+              value={template.styleTemplate || ''}
               onChange={(e) => {
-                const template = e.target.value
-                const newName = template ? `${template} ${item.name}`.trim() : item.name
-                updateItem(index, 'styleTemplate', template)
-                updateItem(index, 'name', newName)
+                const value = e.target.value
+                updateTemplate(index, 'styleTemplate', value)
+                updateTemplate(index, 'name', value)
               }}
               className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 w-32"
             >
@@ -418,15 +392,15 @@ export function BulkImageUpload({
             </select>
           </div>
           <textarea
-            value={item.description}
-            onChange={(e) => updateItem(index, 'description', e.target.value)}
+            value={template.description}
+            onChange={(e) => updateTemplate(index, 'description', e.target.value)}
             placeholder="Описание"
             className="w-full px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 resize-none h-10"
           />
           <div className="flex gap-2">
             <select
-              value={item.gender}
-              onChange={(e) => updateItem(index, 'gender', e.target.value)}
+              value={template.gender}
+              onChange={(e) => updateTemplate(index, 'gender', e.target.value)}
               className="flex-1 px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
             >
               <option value="unisex">👥 Унисекс</option>
@@ -434,8 +408,8 @@ export function BulkImageUpload({
               <option value="male">👨 Мужской</option>
             </select>
             <select
-              value={item.season}
-              onChange={(e) => updateItem(index, 'season', e.target.value)}
+              value={template.season}
+              onChange={(e) => updateTemplate(index, 'season', e.target.value)}
               className="flex-1 px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
             >
               <option value="summer">☀️ Лето</option>
@@ -444,8 +418,8 @@ export function BulkImageUpload({
               <option value="autumn">🍂 Осень</option>
             </select>
             <select
-              value={item.zodiac_sign_id}
-              onChange={(e) => updateItem(index, 'zodiac_sign_id', Number(e.target.value))}
+              value={template.zodiac_sign_id}
+              onChange={(e) => updateTemplate(index, 'zodiac_sign_id', Number(e.target.value))}
               className="flex-1 px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
             >
               {zodiacSigns.map((sign) => (
@@ -459,19 +433,19 @@ export function BulkImageUpload({
 
     if (folder === 'designers') {
       return (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <input
             type="text"
-            value={item.designer_name}
-            onChange={(e) => updateItem(index, 'designer_name', e.target.value)}
+            value={template.designer_name}
+            onChange={(e) => updateTemplate(index, 'designer_name', e.target.value)}
             placeholder="Имя дизайнера *"
             className="w-full px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
           />
           <textarea
-            value={item.bio}
-            onChange={(e) => updateItem(index, 'bio', e.target.value)}
+            value={template.bio}
+            onChange={(e) => updateTemplate(index, 'bio', e.target.value)}
             placeholder="Биография дизайнера"
-            className="w-full px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 resize-none h-12"
+            className="w-full px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 resize-none h-10"
           />
         </div>
       )
@@ -479,10 +453,10 @@ export function BulkImageUpload({
 
     if (folder === 'works') {
       return (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <select
-            value={item.designer_id}
-            onChange={(e) => updateItem(index, 'designer_id', Number(e.target.value))}
+            value={template.designer_id}
+            onChange={(e) => updateTemplate(index, 'designer_id', Number(e.target.value))}
             className="w-full px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
           >
             {designers.map((d) => (
@@ -491,16 +465,16 @@ export function BulkImageUpload({
           </select>
           <input
             type="text"
-            value={item.work_title}
-            onChange={(e) => updateItem(index, 'work_title', e.target.value)}
+            value={template.work_title}
+            onChange={(e) => updateTemplate(index, 'work_title', e.target.value)}
             placeholder="Название работы *"
             className="w-full px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
           />
           <textarea
-            value={item.description}
-            onChange={(e) => updateItem(index, 'description', e.target.value)}
+            value={template.description}
+            onChange={(e) => updateTemplate(index, 'description', e.target.value)}
             placeholder="Описание работы"
-            className="w-full px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 resize-none h-12"
+            className="w-full px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500 resize-none h-10"
           />
         </div>
       )
@@ -509,148 +483,31 @@ export function BulkImageUpload({
     return null
   }
 
-  // Рендер секции загрузки фото для элемента
-  const renderImageUpload = (item: DataItem, index: number) => {
+  // Рендер фото с привязкой к шаблону
+  const renderImageWithIndex = (preview: string, index: number) => {
     return (
-      <div className="flex-shrink-0">
-        {item.imagePreview ? (
-          <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-white/10">
-            <img
-              src={item.imagePreview}
-              alt={`Preview ${index}`}
-              className="w-full h-full object-cover"
-            />
-            {item.isUploaded && (
-              <div className="absolute inset-0 bg-green-500/30 flex items-center justify-center">
-                <span className="text-white text-xs font-bold">✅</span>
-              </div>
-            )}
-            <button
-              onClick={() => {
-                const newItems = [...items]
-                if (newItems[index].imagePreview) {
-                  URL.revokeObjectURL(newItems[index].imagePreview!)
-                }
-                newItems[index] = { ...newItems[index], imageFile: null, imagePreview: null, isUploaded: false, imageUrl: null }
-                setItems(newItems)
-              }}
-              className="absolute -top-1 -right-1 p-1 bg-red-500 rounded-full hover:scale-110 transition"
-            >
-              <X size={12} className="text-white" />
-            </button>
-          </div>
-        ) : (
-          <label className="w-24 h-24 border-2 border-dashed border-white/20 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-pink-500 hover:bg-white/5 transition">
-            <input
-              type="file"
-              accept={accept}
-              onChange={(e) => handleImageSelect(index, e)}
-              className="hidden"
-            />
-            <ImageIcon size={20} className="text-white/30" />
-            <span className="text-white/20 text-[10px] mt-1">Фото</span>
-          </label>
-        )}
+      <div className="relative group">
+        <img
+          src={preview}
+          alt={`Фото ${index + 1}`}
+          className="w-full aspect-square object-cover rounded-lg border border-white/10 group-hover:border-pink-500/50 transition"
+        />
+        <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/60 rounded text-[10px] text-white/60">
+          #{index + 1}
+        </div>
+        <button
+          onClick={() => removeImage(index)}
+          className="absolute -top-1 -right-1 p-1 bg-red-500 rounded-full hover:scale-110 transition opacity-0 group-hover:opacity-100"
+          disabled={uploading}
+        >
+          <X size={12} className="text-white" />
+        </button>
       </div>
     )
   }
 
-  // Рендер массовых настроек
-  const renderBulkSettings = () => {
-    if (folder === 'clothing') {
-      return (
-        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-white/70 text-sm font-medium">⚡ Массовые настройки</h4>
-            <button
-              onClick={applyBulkSettingsToAll}
-              disabled={items.length === 0}
-              className="px-3 py-1 bg-pink-500/20 text-pink-400 rounded-lg text-xs hover:bg-pink-500/30 transition disabled:opacity-50"
-            >
-              Применить ко всем ({items.length})
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-            <select
-              value={bulkSettings.styleTemplate}
-              onChange={(e) => {
-                const template = e.target.value
-                setBulkSettings(prev => ({ ...prev, styleTemplate: template }))
-              }}
-              className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
-            >
-              <option value="">📝 Шаблон названия</option>
-              {STYLE_TEMPLATES.map(t => (
-                <option key={t.id} value={t.label}>{t.icon} {t.label}</option>
-              ))}
-            </select>
-            <select
-              value={bulkSettings.gender}
-              onChange={(e) => setBulkSettings(prev => ({ ...prev, gender: e.target.value }))}
-              className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
-            >
-              <option value="unisex">👥 Унисекс</option>
-              <option value="female">👩 Женский</option>
-              <option value="male">👨 Мужской</option>
-            </select>
-            <select
-              value={bulkSettings.season}
-              onChange={(e) => setBulkSettings(prev => ({ ...prev, season: e.target.value }))}
-              className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
-            >
-              <option value="summer">☀️ Лето</option>
-              <option value="winter">❄️ Зима</option>
-              <option value="spring">🌸 Весна</option>
-              <option value="autumn">🍂 Осень</option>
-            </select>
-            <select
-              value={bulkSettings.zodiac_sign_id}
-              onChange={(e) => setBulkSettings(prev => ({ ...prev, zodiac_sign_id: Number(e.target.value) }))}
-              className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
-            >
-              {zodiacSigns.map((sign) => (
-                <option key={sign.id} value={sign.id}>{sign.name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      )
-    }
-
-    if (folder === 'works') {
-      return (
-        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-white/70 text-sm font-medium">⚡ Массовые настройки</h4>
-            <button
-              onClick={applyBulkSettingsToAll}
-              disabled={items.length === 0}
-              className="px-3 py-1 bg-pink-500/20 text-pink-400 rounded-lg text-xs hover:bg-pink-500/30 transition disabled:opacity-50"
-            >
-              Применить ко всем ({items.length})
-            </button>
-          </div>
-          
-          <select
-            value={bulkSettings.designer_id}
-            onChange={(e) => setBulkSettings(prev => ({ ...prev, designer_id: Number(e.target.value) }))}
-            className="w-full px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
-          >
-            {designers.map((d) => (
-              <option key={d.id} value={d.id}>{d.designer_name}</option>
-            ))}
-          </select>
-        </div>
-      )
-    }
-
-    return null
-  }
-
   return (
     <div className="space-y-4">
-      {/* Заголовок */}
       <div>
         <h3 className="text-white font-medium text-lg">
           {folder === 'clothing' && '👕 Массовая загрузка одежды'}
@@ -658,18 +515,16 @@ export function BulkImageUpload({
           {folder === 'works' && '🖼️ Массовая загрузка работ'}
         </h3>
         <p className="text-white/40 text-sm">
-          Сначала заполните данные, затем добавьте фото
+          1. Создайте шаблоны с данными • 2. Загрузите фото • 3. Сохраните
         </p>
       </div>
 
-      {/* Ошибка */}
       {error && (
         <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm">
           ❌ {error}
         </div>
       )}
 
-      {/* Успех */}
       {success && (
         <div className="bg-green-500/20 border border-green-500/30 rounded-xl p-3 text-green-400 text-sm">
           {success}
@@ -677,52 +532,147 @@ export function BulkImageUpload({
       )}
 
       {/* Массовые настройки */}
-      {renderBulkSettings()}
+      {(folder === 'clothing' || folder === 'works') && (
+        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-white/70 text-sm font-medium">⚡ Массовые настройки</h4>
+            <button
+              onClick={applyBulkSettings}
+              disabled={templates.length === 0}
+              className="px-3 py-1 bg-pink-500/20 text-pink-400 rounded-lg text-xs hover:bg-pink-500/30 transition disabled:opacity-50"
+            >
+              Применить ко всем ({templates.length})
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            {folder === 'clothing' && (
+              <>
+                <select
+                  value={bulkSettings.styleTemplate}
+                  onChange={(e) => setBulkSettings(prev => ({ ...prev, styleTemplate: e.target.value }))}
+                  className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
+                >
+                  <option value="">📝 Шаблон названия</option>
+                  {STYLE_TEMPLATES.map(t => (
+                    <option key={t.id} value={t.label}>{t.icon} {t.label}</option>
+                  ))}
+                </select>
+                <select
+                  value={bulkSettings.gender}
+                  onChange={(e) => setBulkSettings(prev => ({ ...prev, gender: e.target.value }))}
+                  className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
+                >
+                  <option value="unisex">👥 Унисекс</option>
+                  <option value="female">👩 Женский</option>
+                  <option value="male">👨 Мужской</option>
+                </select>
+                <select
+                  value={bulkSettings.season}
+                  onChange={(e) => setBulkSettings(prev => ({ ...prev, season: e.target.value }))}
+                  className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
+                >
+                  <option value="summer">☀️ Лето</option>
+                  <option value="winter">❄️ Зима</option>
+                  <option value="spring">🌸 Весна</option>
+                  <option value="autumn">🍂 Осень</option>
+                </select>
+                <select
+                  value={bulkSettings.zodiac_sign_id}
+                  onChange={(e) => setBulkSettings(prev => ({ ...prev, zodiac_sign_id: Number(e.target.value) }))}
+                  className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
+                >
+                  {zodiacSigns.map((sign) => (
+                    <option key={sign.id} value={sign.id}>{sign.name}</option>
+                  ))}
+                </select>
+              </>
+            )}
+            {folder === 'works' && (
+              <select
+                value={bulkSettings.designer_id}
+                onChange={(e) => setBulkSettings(prev => ({ ...prev, designer_id: Number(e.target.value) }))}
+                className="w-full px-3 py-2 bg-white/10 rounded-lg text-white text-sm border border-white/10 focus:outline-none focus:border-pink-500"
+              >
+                {designers.map((d) => (
+                  <option key={d.id} value={d.id}>{d.designer_name}</option>
+                ))}
+              </select>
+            )}
+          </div>
+        </div>
+      )}
 
-      {/* Список записей */}
-      <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-        {items.map((item, index) => (
-          <div key={item.id} className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/20 transition">
-            <div className="flex gap-4">
-              {/* Форма с данными */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-white/30 text-xs">#{index + 1}</span>
-                  {item.isUploaded && (
-                    <span className="text-green-400 text-xs flex items-center gap-1">
-                      <span>✅</span> Загружено
-                    </span>
-                  )}
-                  <button
-                    onClick={() => removeItem(index)}
-                    className="ml-auto text-white/30 hover:text-red-400 transition"
-                    disabled={uploading}
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-                {renderItemForm(item, index)}
-              </div>
-              
-              {/* Загрузка фото */}
-              {renderImageUpload(item, index)}
+      {/* Шаблоны */}
+      <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+        {templates.map((template, index) => (
+          <div key={template.id} className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-white/30 text-xs">Шаблон #{index + 1}</span>
+              <button
+                onClick={() => removeTemplate(index)}
+                className="ml-auto text-white/30 hover:text-red-400 transition"
+                disabled={uploading}
+              >
+                <X size={14} />
+              </button>
             </div>
+            {renderTemplate(template, index)}
           </div>
         ))}
       </div>
 
-      {/* Кнопка добавить запись */}
-      {items.length < maxItems && !uploading && (
+      {/* Кнопка добавить шаблон */}
+      {templates.length < maxItems && !uploading && (
         <button
-          onClick={addItem}
+          onClick={addTemplate}
           className="w-full py-3 border-2 border-dashed border-white/20 rounded-xl text-white/40 hover:border-pink-500 hover:text-pink-400 hover:bg-white/5 transition flex items-center justify-center gap-2"
         >
           <Plus size={18} />
-          Добавить запись ({items.length}/{maxItems})
+          Добавить шаблон ({templates.length}/{maxItems})
         </button>
       )}
 
-      {/* Прогресс загрузки */}
+      {/* Загрузка фото */}
+      {templates.length > 0 && (
+        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-white/70 text-sm font-medium">📸 Загрузите фото для шаблонов</h4>
+            <span className="text-white/30 text-xs">
+              {images.length} / {templates.length} фото
+            </span>
+          </div>
+          
+          {imagePreviews.length > 0 && (
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2 mb-3">
+              {imagePreviews.map((preview, index) => (
+                <div key={index}>
+                  {renderImageWithIndex(preview, index)}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-pink-500 hover:bg-white/5 transition">
+            <input
+              type="file"
+              multiple
+              accept={accept}
+              onChange={handleImagesSelect}
+              className="hidden"
+              disabled={uploading || images.length >= templates.length}
+            />
+            <Upload size={18} className="text-white/40" />
+            <span className="text-white/40 text-sm">
+              {images.length >= templates.length 
+                ? '✅ Все фото загружены' 
+                : `Выбрать фото (${images.length}/${templates.length})`}
+            </span>
+          </label>
+        </div>
+      )}
+
+      {/* Прогресс */}
       {uploading && (
         <div className="space-y-2">
           <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
@@ -732,18 +682,18 @@ export function BulkImageUpload({
             />
           </div>
           <p className="text-white/40 text-sm text-center">
-            Загрузка... {Math.round(uploadProgress)}% ({Math.round(uploadProgress / 100 * items.length)} из {items.length})
+            Загрузка... {Math.round(uploadProgress)}%
           </p>
         </div>
       )}
 
       {/* Кнопки действий */}
-      {items.length > 0 && (
+      {templates.length > 0 && (
         <div className="flex flex-wrap gap-3">
           <button
             onClick={uploadAll}
-            disabled={uploading}
-            className="flex-1 py-3 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl text-white font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2 min-w-[120px]"
+            disabled={uploading || templates.length === 0 || images.length !== templates.length}
+            className="flex-1 py-3 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl text-white font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {uploading ? (
               <>
@@ -753,7 +703,7 @@ export function BulkImageUpload({
             ) : (
               <>
                 <Upload size={18} />
-                Загрузить и сохранить ({items.length})
+                Загрузить и сохранить ({templates.length} записей)
               </>
             )}
           </button>
@@ -763,7 +713,7 @@ export function BulkImageUpload({
             disabled={uploading}
             className="px-4 py-3 bg-white/10 rounded-xl text-white/60 hover:text-white hover:bg-white/20 transition"
           >
-            Очистить все
+            Очистить всё
           </button>
         </div>
       )}
@@ -771,10 +721,16 @@ export function BulkImageUpload({
       {/* Результат */}
       {uploadedData.length > 0 && (
         <div className="bg-green-500/20 border border-green-500/30 rounded-xl p-4 max-h-40 overflow-y-auto">
-          <p className="text-green-400 text-sm mb-2">✅ Загружено и сохранено: {uploadedData.length}</p>
+          <p className="text-green-400 text-sm mb-2">✅ Сохранено: {uploadedData.length}</p>
           {uploadedData.map((item, i) => (
-            <div key={i} className="text-white/60 text-xs py-1 border-b border-white/5 last:border-0">
-              {i+1}. {item.url}
+            <div key={i} className="text-white/60 text-xs py-1 border-b border-white/5 last:border-0 flex items-center gap-2">
+              <span className="text-white/30">{i+1}.</span>
+              <span className="truncate">
+                {folder === 'clothing' && item.template?.name}
+                {folder === 'designers' && item.template?.designer_name}
+                {folder === 'works' && item.template?.work_title}
+              </span>
+              <span className="text-white/30 text-[10px]">{item.image_url}</span>
             </div>
           ))}
         </div>

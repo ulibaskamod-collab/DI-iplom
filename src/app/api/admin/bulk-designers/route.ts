@@ -11,25 +11,29 @@ const pool = new Pool({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { items } = body
+    const { templates, images } = body
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ error: 'Нет данных для сохранения' }, { status: 400 })
+    if (!templates || !Array.isArray(templates) || templates.length === 0) {
+      return NextResponse.json({ error: 'Нет шаблонов для сохранения' }, { status: 400 })
     }
 
     const savedItems = []
 
-    for (const item of items) {
-      const { designer_name, bio, designer_image, social_links } = item
+    for (let i = 0; i < templates.length; i++) {
+      const template = templates[i]
+      const imageUrl = images[i] || ''
 
       const result = await pool.query(
         `INSERT INTO designers (designer_name, bio, designer_image, social_links)
          VALUES ($1, $2, $3, $4)
          RETURNING *`,
-        [designer_name, bio, designer_image, JSON.stringify(social_links || {})]
+        [template.designer_name, template.bio || '', imageUrl, JSON.stringify({})]
       )
 
-      savedItems.push(result.rows[0])
+      savedItems.push({
+        ...result.rows[0],
+        template: template
+      })
     }
 
     return NextResponse.json({
