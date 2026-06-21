@@ -705,3 +705,60 @@ select option {
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
 }
+/* ===== КАЛЕНДАРЬ (date input) ===== */
+
+/* Стилизация календаря для Chrome/Edge */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7) sepia(1) saturate(3) hue-rotate(250deg);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  filter: invert(0.9) sepia(1) saturate(5) hue-rotate(250deg);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Стилизация календаря для Firefox */
+input[type="date"] {
+  color-scheme: dark;
+}
+
+/* Стили для дата-пикера в Chrome */
+::-webkit-datetime-edit {
+  color: #ffffff;
+  padding: 0 4px;
+}
+
+::-webkit-datetime-edit-fields-wrapper {
+  color: #ffffff;
+}
+
+::-webkit-datetime-edit-text {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+::-webkit-datetime-edit-month-field,
+::-webkit-datetime-edit-day-field,
+::-webkit-datetime-edit-year-field {
+  color: #ffffff;
+}
+
+::-webkit-datetime-edit-month-field:focus,
+::-webkit-datetime-edit-day-field:focus,
+::-webkit-datetime-edit-year-field:focus {
+  background: rgba(200, 150, 255, 0.2);
+  border-radius: 4px;
+}
+
+/* Убираем стрелки у number input */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
