@@ -6,7 +6,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   Shield, Home, Star, Shirt, Palette, Users, Heart,
-  LogOut, Menu, X, ChevronRight, Sparkles, Globe
+  LogOut, Menu, X, ChevronRight, Sparkles, Globe,
+  Upload
 } from 'lucide-react'
 import { AdminButton } from '@/src/components/AdminButton'
 
@@ -68,6 +69,8 @@ export default function AdminLayout({
     { href: '/admin/designers', label: 'Дизайнеры', icon: Palette, color: 'text-purple-400' },
     { href: '/admin/users', label: 'Пользователи', icon: Users, color: 'text-cyan-400' },
     { href: '/admin/favorites', label: 'Избранное', icon: Heart, color: 'text-red-400' },
+      { href: '/admin/bulk-upload', label: 'Массовая загрузка', icon: Upload, color: 'text-pink-400' },
+
   ]
 
   if (status === 'loading' || checking) {
