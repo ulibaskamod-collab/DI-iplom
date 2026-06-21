@@ -32,14 +32,15 @@ export default function DesignerDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [imageError, setImageError] = useState(false)
+  // Храним ошибки загрузки каждого изображения
+  const [workImageErrors, setWorkImageErrors] = useState<Record<number, boolean>>({})
 
   useEffect(() => {
     if (!id) return
 
-    Promise.all([
-      fetch(`/api/designers/${id}`).then(res => res.json()),
-    ])
-      .then(([data]) => {
+    fetch(`/api/designers/${id}`)
+      .then(res => res.json())
+      .then(data => {
         setDesigner(data.designer || null)
         setWorks(Array.isArray(data.works) ? data.works : [])
         setLoading(false)
@@ -50,6 +51,10 @@ export default function DesignerDetailPage() {
         setLoading(false)
       })
   }, [id])
+
+  const handleWorkImageError = (workId: number) => {
+    setWorkImageErrors(prev => ({ ...prev, [workId]: true }))
+  }
 
   if (loading) {
     return (
@@ -146,17 +151,17 @@ export default function DesignerDetailPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {works.map((work) => {
-                const [workImageError, setWorkImageError] = useState(false)
+                const hasError = workImageErrors[work.id] || false
                 
                 return (
                   <div key={work.id} className="group bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition">
                     <div className="aspect-square bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center relative">
-                      {work.work_image && !workImageError ? (
+                      {work.work_image && !hasError ? (
                         <img
                           src={work.work_image}
                           alt={work.work_title || 'Работа'}
                           className="w-full h-full object-cover"
-                          onError={() => setWorkImageError(true)}
+                          onError={() => handleWorkImageError(work.id)}
                         />
                       ) : (
                         <ImageIcon className="w-12 h-12 text-purple-400 opacity-50" />

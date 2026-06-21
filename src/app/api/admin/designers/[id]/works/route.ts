@@ -14,14 +14,21 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const designerId = parseInt(params.id)
+
+    if (isNaN(designerId)) {
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
+    }
+
     const result = await pool.query(
       'SELECT * FROM designer_works WHERE designer_id = $1 ORDER BY id DESC',
-      [params.id]
+      [designerId]
     )
+
     return NextResponse.json(result.rows)
   } catch (error) {
     console.error('GET works error:', error)
-    return NextResponse.json([])
+    return NextResponse.json([], { status: 500 })
   }
 }
 
@@ -38,11 +45,17 @@ export async function POST(
       return NextResponse.json({ error: 'Название работы обязательно' }, { status: 400 })
     }
 
+    const designerId = parseInt(params.id)
+
+    if (isNaN(designerId)) {
+      return NextResponse.json({ error: 'Invalid designer ID' }, { status: 400 })
+    }
+
     const result = await pool.query(
       `INSERT INTO designer_works (designer_id, work_title, work_image, description)
        VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [params.id, work_title, work_image, description || null]
+      [designerId, work_title, work_image, description || null]
     )
 
     return NextResponse.json({ success: true, work: result.rows[0] })
@@ -58,7 +71,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   const workId = req.nextUrl.searchParams.get('id')
-  
+
   if (!workId) {
     return NextResponse.json({ error: 'ID работы обязателен' }, { status: 400 })
   }
