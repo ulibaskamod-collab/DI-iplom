@@ -14,12 +14,11 @@ const pool = new Pool({
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.email) {
       return NextResponse.json([])
     }
 
-    // Находим пользователя
     const userResult = await pool.query(
       'SELECT id FROM users WHERE email = $1',
       [session.user.email]
@@ -31,7 +30,6 @@ export async function GET() {
 
     const userId = userResult.rows[0].id
 
-    // Получаем избранное с данными о товарах
     const favoritesResult = await pool.query(
       `SELECT f.id, f.clothing_item_id, c.title, c.description, c.image_url, c.season, c.gender
        FROM favorites f
@@ -52,7 +50,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -64,7 +62,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'clothingItemId required' }, { status: 400 })
     }
 
-    // Находим пользователя
     const userResult = await pool.query(
       'SELECT id FROM users WHERE email = $1',
       [session.user.email]
@@ -76,17 +73,6 @@ export async function POST(req: NextRequest) {
 
     const userId = userResult.rows[0].id
 
-    // Проверяем, существует ли товар
-    const itemResult = await pool.query(
-      'SELECT id FROM clothing_items WHERE id = $1',
-      [clothingItemId]
-    )
-
-    if (itemResult.rows.length === 0) {
-      return NextResponse.json({ error: 'Clothing item not found' }, { status: 404 })
-    }
-
-    // Добавляем в избранное (игнорируем если уже есть)
     await pool.query(
       `INSERT INTO favorites (user_id, clothing_item_id)
        VALUES ($1, $2)
@@ -105,7 +91,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -117,7 +103,6 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'clothingItemId required' }, { status: 400 })
     }
 
-    // Находим пользователя
     const userResult = await pool.query(
       'SELECT id FROM users WHERE email = $1',
       [session.user.email]
@@ -129,7 +114,6 @@ export async function DELETE(req: NextRequest) {
 
     const userId = userResult.rows[0].id
 
-    // Удаляем из избранного
     await pool.query(
       'DELETE FROM favorites WHERE user_id = $1 AND clothing_item_id = $2',
       [userId, parseInt(clothingItemId)]

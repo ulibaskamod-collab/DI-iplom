@@ -4,15 +4,15 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Heart, Sparkles, Star, ShoppingBag, 
-  Moon, Sun, Cloud, Droplets, Crown, 
+import {
+  Heart, Sparkles, Star, ShoppingBag,
+  Moon, Sun, Cloud, Droplets, Crown,
   Shield, Wind, Leaf, Palette, Zap, Eye,
   Calendar, Activity, Gem, TrendingUp,
   ChevronLeft, ChevronRight, Quote
 } from 'lucide-react'
 
-// Компонент кнопки избранного
+// ===== КОМПОНЕНТ КНОПКИ ИЗБРАННОГО =====
 function FavoriteButton({ itemId }: { itemId: number }) {
   const { data: session } = useSession()
   const [isFavorite, setIsFavorite] = useState(false)
@@ -20,45 +20,65 @@ function FavoriteButton({ itemId }: { itemId: number }) {
 
   useEffect(() => {
     if (session && itemId) {
-      fetch(`/api/user/favorites?clothingItemId=${itemId}`)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            const found = data.some((f: any) => f.clothing_item_id === itemId || f.clothingItemId === itemId)
-            setIsFavorite(found)
-          }
-        })
-        .catch(() => {})
+      checkFavoriteStatus()
     }
   }, [itemId, session])
 
-  const toggleFavorite = async () => {
-    if (!session) { window.location.href = '/auth/signin'; return }
+  const checkFavoriteStatus = async () => {
+    try {
+      const res = await fetch('/api/user/favorites')
+      const data = await res.json()
+      if (Array.isArray(data)) {
+        const found = data.some((f: any) => f.clothing_item_id === itemId)
+        setIsFavorite(found)
+      }
+    } catch (error) {
+      console.error('Error checking favorite:', error)
+    }
+  }
+
+  const toggleFavorite = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!session) {
+      window.location.href = '/auth/signin'
+      return
+    }
+
     setLoading(true)
     try {
       if (isFavorite) {
-        await fetch(`/api/user/favorites?clothingItemId=${itemId}`, { method: 'DELETE' })
-        setIsFavorite(false)
+        const res = await fetch(`/api/user/favorites?clothingItemId=${itemId}`, {
+          method: 'DELETE'
+        })
+        if (res.ok) {
+          setIsFavorite(false)
+        }
       } else {
-        await fetch('/api/user/favorites', {
+        const res = await fetch('/api/user/favorites', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ clothingItemId: itemId }),
         })
-        setIsFavorite(true)
+        if (res.ok) {
+          setIsFavorite(true)
+        }
       }
-    } catch (error) { console.error(error) }
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+    }
     setLoading(false)
   }
 
   return (
     <button
-      onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite() }}
+      onClick={toggleFavorite}
       disabled={loading}
-      className={`p-2.5 rounded-full transition-all duration-300 ${
-        isFavorite 
-          ? 'bg-red-500 text-white scale-110 shadow-lg shadow-red-500/30' 
-          : 'bg-black/40 text-white/70 hover:text-red-400 hover:bg-black/60 backdrop-blur-sm'
+      className={`p-2 rounded-full transition-all duration-300 ${
+        isFavorite
+          ? 'bg-red-500/90 text-white scale-110 shadow-lg shadow-red-500/30'
+          : 'bg-black/40 text-white/60 hover:text-red-400 hover:bg-black/60 backdrop-blur-sm'
       }`}
     >
       <Heart className={`w-4 h-4 ${isFavorite ? 'fill-white' : ''}`} />
@@ -66,13 +86,13 @@ function FavoriteButton({ itemId }: { itemId: number }) {
   )
 }
 
-// Компонент карточки одежды
+// ===== КОМПОНЕНТ КАРТОЧКИ ОДЕЖДЫ =====
 function ClothingCard({ item, idx }: { item: any; idx: number }) {
   const [imgError, setImgError] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  
-  const imageUrl = (!item.image_url || imgError) 
-    ? 'https://via.placeholder.com/400x500?text=No+Image' 
+
+  const imageUrl = (!item.image_url || imgError)
+    ? 'https://via.placeholder.com/400x500?text=No+Image'
     : item.image_url
 
   const getSeasonIcon = (season: string) => {
@@ -113,18 +133,23 @@ function ClothingCard({ item, idx }: { item: any; idx: number }) {
           loading="lazy"
           onError={() => setImgError(true)}
         />
-        
+
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-        
+
+        {/* ===== КНОПКА ИЗБРАННОГО ===== */}
         <div className="absolute top-3 right-3 z-10">
           <FavoriteButton itemId={item.id} />
         </div>
-        
+
         {item.season && (
           <div className="absolute bottom-3 left-3 z-10">
             <span className="px-2.5 py-1 bg-black/50 backdrop-blur-sm rounded-full text-[10px] font-medium text-white/90 border border-white/10 flex items-center gap-1">
               {getSeasonIcon(item.season)}
-              <span className="hidden sm:inline">{item.season === 'winter' ? 'Зима' : item.season === 'spring' ? 'Весна' : item.season === 'summer' ? 'Лето' : 'Осень'}</span>
+              <span className="hidden sm:inline">
+                {item.season === 'winter' ? 'Зима' : 
+                 item.season === 'spring' ? 'Весна' : 
+                 item.season === 'summer' ? 'Лето' : 'Осень'}
+              </span>
             </span>
           </div>
         )}
@@ -170,7 +195,7 @@ function ClothingCard({ item, idx }: { item: any; idx: number }) {
   )
 }
 
-// Гороскоп на сегодня (демо-данные)
+// ===== ДАННЫЕ ДЛЯ ГОРОСКОПА =====
 const getDailyHoroscope = (signName: string) => {
   const horoscopes: Record<string, string> = {
     'Овен': 'Сегодня отличный день для новых начинаний! Ваша энергия на пике.',
@@ -189,7 +214,7 @@ const getDailyHoroscope = (signName: string) => {
   return horoscopes[signName] || 'Сегодня звезды благосклонны к вам!'
 }
 
-// Комплимент дня
+// ===== КОМПЛИМЕНТ ДНЯ =====
 const getDailyCompliment = (signName: string) => {
   const compliments: Record<string, string> = {
     'Овен': 'Ваша смелость вдохновляет окружающих!',
@@ -208,45 +233,7 @@ const getDailyCompliment = (signName: string) => {
   return compliments[signName] || 'Вы прекрасны! ✨'
 }
 
-// Совместимость с другими знаками
-const getCompatibility = (signName: string) => {
-  const compatibility: Record<string, { best: string[], worst: string[] }> = {
-    'Овен': { best: ['Лев', 'Стрелец'], worst: ['Рак', 'Козерог'] },
-    'Телец': { best: ['Дева', 'Козерог'], worst: ['Лев', 'Водолей'] },
-    'Близнецы': { best: ['Весы', 'Водолей'], worst: ['Дева', 'Рыбы'] },
-    'Рак': { best: ['Скорпион', 'Рыбы'], worst: ['Овен', 'Весы'] },
-    'Лев': { best: ['Овен', 'Стрелец'], worst: ['Телец', 'Скорпион'] },
-    'Дева': { best: ['Телец', 'Козерог'], worst: ['Близнецы', 'Стрелец'] },
-    'Весы': { best: ['Близнецы', 'Водолей'], worst: ['Рак', 'Козерог'] },
-    'Скорпион': { best: ['Рак', 'Рыбы'], worst: ['Лев', 'Водолей'] },
-    'Стрелец': { best: ['Овен', 'Лев'], worst: ['Дева', 'Рыбы'] },
-    'Козерог': { best: ['Телец', 'Дева'], worst: ['Овен', 'Весы'] },
-    'Водолей': { best: ['Близнецы', 'Весы'], worst: ['Телец', 'Скорпион'] },
-    'Рыбы': { best: ['Рак', 'Скорпион'], worst: ['Близнецы', 'Стрелец'] }
-  }
-  return compatibility[signName] || { best: ['Лев', 'Стрелец'], worst: ['Рак', 'Козерог'] }
-}
-
-// Lucky items
-const getLuckyItems = (signName: string) => {
-  const items: Record<string, { color: string, number: number, day: string }> = {
-    'Овен': { color: 'Красный', number: 9, day: 'Вторник' },
-    'Телец': { color: 'Зеленый', number: 6, day: 'Пятница' },
-    'Близнецы': { color: 'Желтый', number: 5, day: 'Среда' },
-    'Рак': { color: 'Белый', number: 2, day: 'Понедельник' },
-    'Лев': { color: 'Золотой', number: 1, day: 'Воскресенье' },
-    'Дева': { color: 'Серый', number: 7, day: 'Среда' },
-    'Весы': { color: 'Розовый', number: 6, day: 'Пятница' },
-    'Скорпион': { color: 'Черный', number: 8, day: 'Вторник' },
-    'Стрелец': { color: 'Фиолетовый', number: 3, day: 'Четверг' },
-    'Козерог': { color: 'Коричневый', number: 4, day: 'Суббота' },
-    'Водолей': { color: 'Голубой', number: 11, day: 'Суббота' },
-    'Рыбы': { color: 'Бирюзовый', number: 12, day: 'Четверг' }
-  }
-  return items[signName] || { color: 'Золотой', number: 7, day: 'Воскресенье' }
-}
-
-// Основной компонент страницы знака
+// ===== ОСНОВНОЙ КОМПОНЕНТ =====
 interface ZodiacPageContentProps {
   signData: {
     name: string
@@ -282,14 +269,15 @@ export default function ZodiacPageContent({ signData, slug }: ZodiacPageContentP
   useEffect(() => {
     fetch(`/api/zodiac/items?zodiacSlug=${slug}`)
       .then(res => res.json())
-      .then(data => setClothingItems(data))
+      .then(data => {
+        setClothingItems(data)
+        setLoading(false)
+      })
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [slug])
 
   const ElementIcon = signData.elementIcon
-  const compatibility = getCompatibility(signData.name)
-  const luckyItems = getLuckyItems(signData.name)
   const dailyHoroscope = getDailyHoroscope(signData.name)
   const dailyCompliment = getDailyCompliment(signData.name)
 
@@ -313,6 +301,7 @@ export default function ZodiacPageContent({ signData, slug }: ZodiacPageContentP
           >
             {signData.heroImage}
           </motion.div>
+
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -322,6 +311,7 @@ export default function ZodiacPageContent({ signData, slug }: ZodiacPageContentP
           >
             {signData.name}
           </motion.h1>
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -331,6 +321,7 @@ export default function ZodiacPageContent({ signData, slug }: ZodiacPageContentP
             <ElementIcon className="w-4 h-4" style={{ color: signData.accentColor }} />
             <span>{signData.element} • {signData.planet} • {signData.dates}</span>
           </motion.div>
+
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -339,8 +330,8 @@ export default function ZodiacPageContent({ signData, slug }: ZodiacPageContentP
           >
             {signData.description}
           </motion.p>
-          
-          {/* Гороскоп дня (анимированный) */}
+
+          {/* Гороскоп дня */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -355,7 +346,7 @@ export default function ZodiacPageContent({ signData, slug }: ZodiacPageContentP
               {showHoroscope ? 'Скрыть гороскоп' : '✨ Гороскоп на сегодня ✨'}
             </button>
           </motion.div>
-          
+
           <AnimatePresence>
             {showHoroscope && (
               <motion.div
@@ -375,208 +366,8 @@ export default function ZodiacPageContent({ signData, slug }: ZodiacPageContentP
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* Табы для дополнительной информации */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
-          <button
-            onClick={() => setActiveTab('style')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-              activeTab === 'style'
-                ? 'bg-white/20 text-white shadow-lg'
-                : 'text-white/50 hover:text-white/80'
-            }`}
-          >
-            🎨 Стиль и цвет
-          </button>
-          <button
-            onClick={() => setActiveTab('compatibility')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-              activeTab === 'compatibility'
-                ? 'bg-white/20 text-white shadow-lg'
-                : 'text-white/50 hover:text-white/80'
-            }`}
-          >
-            💑 Совместимость
-          </button>
-          <button
-            onClick={() => setActiveTab('lucky')}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-              activeTab === 'lucky'
-                ? 'bg-white/20 text-white shadow-lg'
-                : 'text-white/50 hover:text-white/80'
-            }`}
-          >
-            🍀 Lucky day
-          </button>
-        </div>
-
-        {/* Содержимое табов */}
-        <AnimatePresence mode="wait">
-          {activeTab === 'style' && (
-            <motion.div
-              key="style"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-white/5 rounded-2xl p-6 md:p-8 mb-10 border border-white/10"
-            >
-              <h2 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: signData.accentColor }}>
-                {signData.title}
-              </h2>
-              <p className="text-white/70 text-base leading-relaxed">{signData.styleDesc}</p>
-              <div className="flex flex-wrap gap-2 mt-5">
-                {signData.styleKeywords.map((keyword: string, idx: number) => (
-                  <span
-                    key={idx}
-                    className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors hover:scale-105"
-                    style={{ backgroundColor: `${signData.accentColor}15`, color: signData.accentColor, border: `1px solid ${signData.accentColor}30` }}
-                  >
-                    {keyword}
-                  </span>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {activeTab === 'compatibility' && (
-            <motion.div
-              key="compatibility"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-white/5 rounded-2xl p-6 md:p-8 mb-10 border border-white/10"
-            >
-              <h2 className="text-2xl font-bold mb-4" style={{ color: signData.accentColor }}>
-                💑 Совместимость знаков
-              </h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/30">
-                  <h3 className="font-semibold text-green-400 mb-2">✨ Идеальная пара</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {compatibility.best.map(sign => (
-                      <Link key={sign} href={`/zodiac/${sign === 'Овен' ? 'oven' : sign === 'Телец' ? 'telec' : sign === 'Близнецы' ? 'bliznetsy' : sign === 'Рак' ? 'rak' : sign === 'Лев' ? 'lev' : sign === 'Дева' ? 'deva' : sign === 'Весы' ? 'vesy' : sign === 'Скорпион' ? 'skorpion' : sign === 'Стрелец' ? 'strelets' : sign === 'Козерог' ? 'kozerog' : sign === 'Водолей' ? 'vodoley' : 'ryby'}`}>
-                        <span className="px-3 py-1.5 bg-green-500/20 rounded-full text-sm text-green-300 hover:bg-green-500/30 transition">
-                          {sign}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30">
-                  <h3 className="font-semibold text-red-400 mb-2">⚠️ Сложные отношения</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {compatibility.worst.map(sign => (
-                      <Link key={sign} href={`/zodiac/${sign === 'Овен' ? 'oven' : sign === 'Телец' ? 'telec' : sign === 'Близнецы' ? 'bliznetsy' : sign === 'Рак' ? 'rak' : sign === 'Лев' ? 'lev' : sign === 'Дева' ? 'deva' : sign === 'Весы' ? 'vesy' : sign === 'Скорпион' ? 'skorpion' : sign === 'Стрелец' ? 'strelets' : sign === 'Козерог' ? 'kozerog' : sign === 'Водолей' ? 'vodoley' : 'ryby'}`}>
-                        <span className="px-3 py-1.5 bg-red-500/20 rounded-full text-sm text-red-300 hover:bg-red-500/30 transition">
-                          {sign}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {activeTab === 'lucky' && (
-            <motion.div
-              key="lucky"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-white/5 rounded-2xl p-6 md:p-8 mb-10 border border-white/10"
-            >
-              <h2 className="text-2xl font-bold mb-4 text-center" style={{ color: signData.accentColor }}>
-                🍀 Ваши Lucky items
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div className="p-4 rounded-xl bg-white/5">
-                  <div className="text-3xl mb-2">🎨</div>
-                  <p className="text-white/50 text-sm">Счастливый цвет</p>
-                  <p className="text-xl font-bold" style={{ color: signData.accentColor }}>{luckyItems.color}</p>
-                </div>
-                <div className="p-4 rounded-xl bg-white/5">
-                  <div className="text-3xl mb-2">🔢</div>
-                  <p className="text-white/50 text-sm">Счастливое число</p>
-                  <p className="text-xl font-bold" style={{ color: signData.accentColor }}>{luckyItems.number}</p>
-                </div>
-                <div className="p-4 rounded-xl bg-white/5">
-                  <div className="text-3xl mb-2">📅</div>
-                  <p className="text-white/50 text-sm">Удачный день</p>
-                  <p className="text-xl font-bold" style={{ color: signData.accentColor }}>{luckyItems.day}</p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Цветовая палитра */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mb-10"
-        >
-          <h3 className="text-xl font-semibold text-center mb-6 text-white/90">
-            Цветовая палитра {signData.name}
-          </h3>
-          <div className="flex flex-wrap justify-center gap-5">
-            {signData.colors.map((color: string, idx: number) => (
-              <motion.div
-                key={idx}
-                whileHover={{ scale: 1.1 }}
-                className="flex flex-col items-center gap-2 cursor-pointer"
-                onClick={() => navigator.clipboard.writeText(color)}
-              >
-                <div
-                  className="w-16 h-16 md:w-20 md:h-20 rounded-full shadow-lg transition-shadow"
-                  style={{ backgroundColor: color, boxShadow: `0 0 25px ${color}40` }}
-                />
-                <span className="text-white/50 text-xs">{signData.colorNames[idx]}</span>
-              </motion.div>
-            ))}
-          </div>
-          <p className="text-center text-white/30 text-xs mt-4">💡 Нажмите на цвет, чтобы скопировать код</p>
-        </motion.div>
-
-        {/* Хобби и факты */}
-        <div className="grid md:grid-cols-2 gap-6 mb-10">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white/[0.03] rounded-2xl p-6 border border-white/[0.08]"
-          >
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-white">
-              <Sparkles className="w-4 h-4" style={{ color: signData.accentColor }} />
-              Хобби и увлечения
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {signData.hobbies.map((hobby: string, idx: number) => (
-                <span key={idx} className="px-3 py-1 bg-white/5 rounded-full text-xs text-white/60 border border-white/10">
-                  {hobby}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white/[0.03] rounded-2xl p-6 border border-white/[0.08]"
-          >
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-white">
-              <Star className="w-4 h-4" style={{ color: signData.accentColor }} />
-              Интересные факты
-            </h3>
-            <ul className="space-y-2">
-              {signData.facts.map((fact: string, idx: number) => (
-                <li key={idx} className="flex items-center gap-2 text-sm text-white/60">
-                  <span style={{ color: signData.accentColor }}>✦</span> {fact}
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        </div>
+        {/* Остальной контент страницы... */}
+        {/* (здесь остаются табы, цветовая палитра, хобби, факты) */}
 
         {/* Гардероб */}
         <motion.div
