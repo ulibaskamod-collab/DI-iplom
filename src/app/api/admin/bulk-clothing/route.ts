@@ -23,45 +23,51 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Нет изображений' }, { status: 400 })
     }
 
-    if (templates.length !== images.length) {
-      return NextResponse.json({ 
-        error: `Количество шаблонов (${templates.length}) и фото (${images.length}) не совпадает` 
-      }, { status: 400 })
-    }
-
+    // ⚡ НОВАЯ ЛОГИКА: для каждого шаблона может быть несколько фото
     const savedItems = []
 
-    for (let i = 0; i < templates.length; i++) {
-      const template = templates[i]
-      const imageUrl = images[i] || ''
+    for (let tIndex = 0; tIndex < templates.length; tIndex++) {
+      const template = templates[tIndex]
+      
+      // Получаем все фото для этого шаблона
+      // Если images - плоский массив, то берем все фото
+      // Если images - массив массивов, то берем соответствующий
+      let templateImages: string[] = []
+      
+      if (Array.isArray(images[0])) {
+        // images - массив массивов
+        templateImages = images[tIndex] || []
+      } else {
+        // images - плоский массив (все фото для одного шаблона)
+        templateImages = images
+      }
 
-      console.log(`📝 Сохраняем запись ${i+1}:`, {
-        name: template.name,
-        description: template.description,
-        gender: template.gender,
-        zodiac_sign_id: template.zodiac_sign_id,
-        season: template.season,
-        imageUrl
-      })
+      console.log(`📝 Шаблон ${tIndex + 1}: ${template.name}, фото: ${templateImages.length}`)
 
-      const result = await pool.query(
-        `INSERT INTO clothing_items (title, description, image_url, season, gender, zodiac_sign_id)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING *`,
-        [
-          template.name,
-          template.description || '',
-          imageUrl,
-          template.season || 'summer',
-          template.gender || 'unisex',
-          template.zodiac_sign_id
-        ]
-      )
+      // Сохраняем каждое фото как отдельную запись
+      for (let i = 0; i < templateImages.length; i++) {
+        const imageUrl = templateImages[i] || ''
 
-      savedItems.push({
-        ...result.rows[0],
-        template: template
-      })
+        const result = await pool.query(
+          `INSERT INTO clothing_items (title, description, image_url, season, gender, zodiac_sign_id)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           RETURNING *`,
+          [
+            template.name,
+            template.description || '',
+            imageUrl,
+            template.season || 'summer',
+            template.gender || 'unisex',
+            template.zodiac_sign_id
+          ]
+        )
+
+        savedItems.push({
+          ...result.rows[0],
+          template: template,
+          image_index: i + 1
+        })
+      }
     }
 
     console.log(`✅ Сохранено ${savedItems.length} записей`)
