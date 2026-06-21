@@ -14,7 +14,7 @@ export function StarDatePicker({
   value, 
   onChange, 
   className = '', 
-  placeholder = 'Выберите дату' 
+  placeholder = 'ДД.ММ.ГГГГ' 
 }: StarDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [viewDate, setViewDate] = useState(() => {
@@ -29,6 +29,14 @@ export function StarDatePicker({
                       'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']
   const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
+  // Проверка на существующую дату
+  const isValidDate = (year: number, month: number, day: number) => {
+    const testDate = new Date(year, month, day)
+    return testDate.getFullYear() === year && 
+           testDate.getMonth() === month && 
+           testDate.getDate() === day
+  }
+
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear()
     const month = date.getMonth()
@@ -36,15 +44,18 @@ export function StarDatePicker({
     const lastDay = new Date(year, month + 1, 0)
     const daysArray: (Date | null)[] = []
     
-    // Добавляем пустые дни для начала месяца
     const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1
     for (let i = 0; i < startDay; i++) {
       daysArray.push(null)
     }
     
-    // Добавляем дни месяца
     for (let i = 1; i <= lastDay.getDate(); i++) {
-      daysArray.push(new Date(year, month, i))
+      // Проверяем, что дата существует (для високосных годов и т.д.)
+      if (isValidDate(year, month, i)) {
+        daysArray.push(new Date(year, month, i))
+      } else {
+        daysArray.push(null)
+      }
     }
     
     return daysArray
@@ -100,12 +111,16 @@ export function StarDatePicker({
   const formatDisplayDate = (dateStr: string) => {
     if (!dateStr) return placeholder
     const date = new Date(dateStr)
-    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`
+    // Проверяем, что дата корректна
+    if (isNaN(date.getTime())) return placeholder
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+    return `${day}.${month}.${year}`
   }
 
   return (
     <div className="relative" ref={pickerRef}>
-      {/* Поле ввода */}
       <div 
         className={`w-full px-4 py-3 bg-white/10 rounded-xl text-white border border-white/10 focus-within:border-pink-500 cursor-pointer flex items-center justify-between transition-all duration-200 hover:bg-white/15 ${className}`}
         onClick={() => setIsOpen(!isOpen)}
@@ -113,13 +128,11 @@ export function StarDatePicker({
         <span className={value ? 'text-white' : 'text-white/40'}>
           {formatDisplayDate(value)}
         </span>
-        <Calendar className="w-5 h-5 text-purple-400" />
+        <Calendar className="w-4 h-4 text-purple-400" />
       </div>
 
-      {/* Выпадающий календарь */}
       {isOpen && (
         <div className="absolute mt-2 p-4 bg-gradient-to-b from-purple-900/95 to-[#0d0d25]/95 backdrop-blur-xl rounded-2xl border border-purple-700/50 shadow-2xl z-50 w-full min-w-[280px] animate-fade-in">
-          {/* Заголовок календаря */}
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
@@ -149,7 +162,6 @@ export function StarDatePicker({
             </button>
           </div>
 
-          {/* Сетка дней недели */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {days.map((day) => (
               <div key={day} className="text-center text-purple-400/40 text-xs font-medium py-1">
@@ -158,7 +170,6 @@ export function StarDatePicker({
             ))}
           </div>
 
-          {/* Сетка дней месяца */}
           <div className="grid grid-cols-7 gap-1">
             {getDaysInMonth(viewDate).map((date, index) => (
               <div key={index} className="aspect-square">
@@ -189,7 +200,6 @@ export function StarDatePicker({
             ))}
           </div>
 
-          {/* Футер календаря */}
           <div className="mt-3 pt-3 border-t border-white/5 flex justify-between items-center text-xs text-purple-400/50">
             <span className="flex items-center gap-1">
               <Star size={10} className="text-purple-400/30" />
