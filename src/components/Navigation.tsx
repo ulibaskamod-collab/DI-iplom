@@ -103,7 +103,6 @@ export default function Navigation() {
           <div className="nav-links-desktop">
             {menuItems.map((item) => (
               <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)}>
-                <item.icon size={16} className="inline mr-1" />
                 {item.label}
               </Link>
             ))}
@@ -183,7 +182,6 @@ export default function Navigation() {
               className="mobile-menu-item"
               onClick={() => setIsOpen(false)}
             >
-              <item.icon size={20} className={item.color} />
               <span>{item.label}</span>
               <ChevronRight size={16} className="mobile-menu-arrow" />
             </Link>
