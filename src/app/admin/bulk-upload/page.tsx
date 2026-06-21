@@ -3,11 +3,11 @@
 export const dynamic = 'force-dynamic'
 
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Upload, Image as ImageIcon } from 'lucide-react'
 import { BulkImageUpload } from '@/src/components/BulkImageUpload'
+import { useRouter } from 'next/router'
 
 export default function BulkUploadPage() {
   const { data: session, status } = useSession()
@@ -37,18 +37,15 @@ export default function BulkUploadPage() {
   const folderInfo = {
     clothing: {
       label: '👕 Одежда',
-      description: 'Сначала заполните данные, затем добавьте фото',
-      maxItems: 10
+      description: 'Создайте шаблон и добавьте несколько фото',
     },
     designers: {
       label: '🎨 Дизайнеры',
-      description: 'Сначала заполните данные, затем добавьте фото',
-      maxItems: 10
+      description: 'Создайте шаблон и добавьте фото',
     },
     works: {
       label: '🖼️ Работы',
-      description: 'Сначала заполните данные, затем добавьте фото',
-      maxItems: 10
+      description: 'Создайте шаблон и добавьте несколько фото',
     }
   }
 
@@ -66,7 +63,7 @@ export default function BulkUploadPage() {
               Массовая загрузка
             </h1>
             <p className="text-white/40 text-sm mt-0.5">
-              Заполните данные → Добавьте фото → Сохраните в базу
+              Создайте шаблон → Добавьте фото → Сохраните
             </p>
           </div>
         </div>
@@ -91,7 +88,6 @@ export default function BulkUploadPage() {
               <div className="text-2xl mb-1">{info.label.split(' ')[0]}</div>
               <div className="text-white font-medium">{info.label.split(' ').slice(1).join(' ')}</div>
               <div className="text-white/40 text-xs mt-1">{info.description}</div>
-              <div className="text-white/20 text-xs mt-1">Макс. {info.maxItems} записей</div>
             </button>
           ))}
         </div>
@@ -101,7 +97,6 @@ export default function BulkUploadPage() {
       <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
         <BulkImageUpload
           folder={selectedFolder}
-          maxItems={folderInfo[selectedFolder].maxItems}
           onUploadComplete={handleUploadComplete}
         />
       </div>
@@ -112,24 +107,33 @@ export default function BulkUploadPage() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-white font-medium flex items-center gap-2">
               <ImageIcon size={18} className="text-green-400" />
-              Всего загружено: {allData.length} записей
+              Всего загружено: {allData.reduce((acc, d) => acc + (d.saved?.length || 0), 0)} записей
             </h3>
             <button
               onClick={() => {
-                const text = allData.map((d, i) => `${i+1}. ${d.url}`).join('\n')
+                const text = allData.map((group, gi) => 
+                  `${gi+1}. ${group.template?.name || group.template?.work_title || group.template?.designer_name || 'Шаблон'}\n${group.images?.map((url: string, i: number) => `   ${i+1}. ${url}`).join('\n')}`
+                ).join('\n\n')
                 navigator.clipboard.writeText(text)
-                alert('Все URL скопированы!')
+                alert('Все данные скопированы!')
               }}
               className="text-sm text-pink-400 hover:text-pink-300 transition"
             >
               📋 Копировать все
             </button>
           </div>
-          <div className="max-h-40 overflow-y-auto space-y-1">
-            {allData.map((item, i) => (
-              <div key={i} className="text-white/50 text-xs py-1 border-b border-white/5 last:border-0 flex items-center gap-2">
-                <span className="text-white/30">{i+1}.</span>
-                <span className="truncate">{item.url}</span>
+          <div className="max-h-40 overflow-y-auto space-y-2">
+            {allData.map((group, gi) => (
+              <div key={gi} className="text-white/50 text-xs border-b border-white/5 pb-1">
+                <div className="font-medium text-white/70">
+                  {gi+1}. {group.template?.name || group.template?.work_title || group.template?.designer_name || 'Шаблон'}
+                  {' '}({group.images?.length || 0} фото)
+                </div>
+                {group.images?.map((url: string, i: number) => (
+                  <div key={i} className="pl-4 text-white/30">
+                    {i+1}. {url}
+                  </div>
+                ))}
               </div>
             ))}
           </div>
