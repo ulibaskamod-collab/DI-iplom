@@ -568,3 +568,19 @@ input[type="date"]:focus {
 .z-50 {
   z-index: 9999 !important;
 }
+/* Фикс для календаря - чтобы он был поверх всего */
+.fixed {
+  position: fixed !important;
+}
+
+.z-50 {
+  z-index: 9999 !important;
+}
+
+/* Для затемнения фона при открытом календаре */
+.calendar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+}

@@ -24,6 +24,7 @@ export function StarDatePicker({
   const [selectedDate, setSelectedDate] = useState<Date | null>(value ? new Date(value) : null)
   const [showYearPicker, setShowYearPicker] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
+  const calendarRef = useRef<HTMLDivElement>(null)
 
   const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
   const monthsFull = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
@@ -117,6 +118,18 @@ export function StarDatePicker({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Закрываем календарь при скролле
+  useEffect(() => {
+    if (isOpen) {
+      const handleScroll = () => {
+        setIsOpen(false)
+        setShowYearPicker(false)
+      }
+      window.addEventListener('scroll', handleScroll, true)
+      return () => window.removeEventListener('scroll', handleScroll, true)
+    }
+  }, [isOpen])
+
   const prevMonth = () => {
     setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))
   }
@@ -129,7 +142,6 @@ export function StarDatePicker({
     const today = new Date()
     setViewDate(new Date(today.getFullYear(), today.getMonth(), 1))
     setShowYearPicker(false)
-    setIsOpen(false)
   }
 
   const formatDisplayDate = (dateStr: string) => {
@@ -155,8 +167,12 @@ export function StarDatePicker({
       </div>
 
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-2 p-4 bg-gradient-to-b from-purple-900/95 to-[#0d0d25]/95 backdrop-blur-xl rounded-2xl border border-purple-700/50 shadow-2xl z-[9999] min-w-[280px] max-w-full">
-          
+        <div 
+          ref={calendarRef}
+          className="fixed left-1/2 -translate-x-1/2 mt-2 p-4 bg-gradient-to-b from-purple-900/95 to-[#0d0d25]/95 backdrop-blur-xl rounded-2xl border border-purple-700/50 shadow-2xl z-[9999] w-[320px] max-w-[calc(100vw-2rem)]"
+          style={{ top: '50%', transform: 'translate(-50%, -50%)' }}
+        >
+          {/* Заголовок */}
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
@@ -186,6 +202,7 @@ export function StarDatePicker({
             </button>
           </div>
 
+          {/* Выбор года */}
           {showYearPicker && (
             <div className="mb-3 p-2 bg-white/5 rounded-xl max-h-40 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-4 gap-1">
@@ -207,6 +224,7 @@ export function StarDatePicker({
             </div>
           )}
 
+          {/* Дни недели */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {days.map((day) => (
               <div key={day} className="text-center text-purple-400/40 text-xs font-medium py-1">
@@ -215,6 +233,7 @@ export function StarDatePicker({
             ))}
           </div>
 
+          {/* Дни месяца */}
           <div className="grid grid-cols-7 gap-1">
             {getDaysInMonth(viewDate).map((date, index) => (
               <div key={index} className="aspect-square">
@@ -242,6 +261,7 @@ export function StarDatePicker({
             ))}
           </div>
 
+          {/* Футер */}
           <div className="mt-3 pt-3 border-t border-white/5 flex justify-between items-center text-xs text-purple-400/50">
             <span className="flex items-center gap-1">
               <Star size={10} className="text-purple-400/30" />
