@@ -583,4 +583,32 @@ input[type="date"]:focus {
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 9998;
+}/* Фикс для позиционирования календаря */
+.relative {
+  position: relative !important;
+}
+
+.absolute {
+  position: absolute !important;
+}
+
+/* Убеждаемся, что календарь поверх всех элементов */
+.z-50 {
+  z-index: 9999 !important;
+}
+
+/* Для плавного появления календаря */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
 }

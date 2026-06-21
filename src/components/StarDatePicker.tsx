@@ -24,7 +24,7 @@ export function StarDatePicker({
   const [selectedDate, setSelectedDate] = useState<Date | null>(value ? new Date(value) : null)
   const [showYearPicker, setShowYearPicker] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
-  const calendarRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLDivElement>(null)
 
   const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
   const monthsFull = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
@@ -118,18 +118,6 @@ export function StarDatePicker({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Закрываем календарь при скролле
-  useEffect(() => {
-    if (isOpen) {
-      const handleScroll = () => {
-        setIsOpen(false)
-        setShowYearPicker(false)
-      }
-      window.addEventListener('scroll', handleScroll, true)
-      return () => window.removeEventListener('scroll', handleScroll, true)
-    }
-  }, [isOpen])
-
   const prevMonth = () => {
     setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))
   }
@@ -157,6 +145,7 @@ export function StarDatePicker({
   return (
     <div className="relative w-full" ref={pickerRef}>
       <div 
+        ref={inputRef}
         className={`w-full px-4 py-3 bg-white/10 rounded-xl text-white border border-white/10 focus-within:border-pink-500 cursor-pointer flex items-center justify-between transition-all duration-200 hover:bg-white/15 ${className}`}
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -168,9 +157,14 @@ export function StarDatePicker({
 
       {isOpen && (
         <div 
-          ref={calendarRef}
-          className="fixed left-1/2 -translate-x-1/2 mt-2 p-4 bg-gradient-to-b from-purple-900/95 to-[#0d0d25]/95 backdrop-blur-xl rounded-2xl border border-purple-700/50 shadow-2xl z-[9999] w-[320px] max-w-[calc(100vw-2rem)]"
-          style={{ top: '50%', transform: 'translate(-50%, -50%)' }}
+          className="absolute left-0 right-0 mt-2 p-4 bg-gradient-to-b from-purple-900/95 to-[#0d0d25]/95 backdrop-blur-xl rounded-2xl border border-purple-700/50 shadow-2xl z-[9999] min-w-[280px] max-w-full"
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            marginTop: '8px',
+          }}
         >
           {/* Заголовок */}
           <div className="flex items-center justify-between mb-4">
