@@ -18,7 +18,6 @@ function FavoriteButton({ itemId }: { itemId: number }) {
   const [isFavorite, setIsFavorite] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Проверяем статус избранного
   useEffect(() => {
     if (session && itemId) {
       checkFavoriteStatus()
@@ -122,7 +121,7 @@ function ClothingCard({ item, idx }: { item: any; idx: number }) {
           onError={() => setImgError(true)}
         />
 
-        {/* ===== КНОПКА ИЗБРАННОГО ===== */}
+        {/* ===== СЕРДЕЧКО ===== */}
         <div className="absolute top-3 right-3 z-10">
           <FavoriteButton itemId={item.id} />
         </div>

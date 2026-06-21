@@ -135,7 +135,58 @@ export default function HomePage() {
       fate: 'Судьба Рыб - это служение и исцеление. Важно научиться отличать реальность от иллюзий.'
     }
   ]
+// ===== КОМПОНЕНТ КАРТОЧКИ ОДЕЖДЫ С СЕРДЕЧКОМ =====
+function ClothingCard({ item, idx }: { item: any; idx: number }) {
+  const [imgError, setImgError] = useState(false)
 
+  const imageUrl = (!item.image_url || imgError)
+    ? 'https://via.placeholder.com/400x500?text=No+Image'
+    : item.image_url
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: idx * 0.06, duration: 0.4 }}
+      whileHover={{ y: -6 }}
+      className="group bg-white/5 rounded-xl overflow-hidden border border-white/10 hover:border-pink-500/30 transition-all duration-300"
+    >
+      <div className="aspect-square bg-gradient-to-br from-white/5 to-white/10 relative">
+        <img
+          src={imageUrl}
+          alt={item.title || 'Одежда'}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          onError={() => setImgError(true)}
+        />
+
+        {/* ===== СЕРДЕЧКО ===== */}
+        <div className="absolute top-3 right-3 z-10">
+          <FavoriteButton itemId={item.id} />
+        </div>
+
+        {/* Сезон */}
+        {item.season && (
+          <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/50 backdrop-blur-sm rounded-full text-xs text-white/80">
+            {item.season === 'winter' ? '❄️' : 
+             item.season === 'spring' ? '🌸' : 
+             item.season === 'summer' ? '☀️' : '🍂'}
+          </div>
+        )}
+      </div>
+
+      <div className="p-3">
+        <h3 className="text-white font-medium text-sm truncate">
+          {item.title || 'Без названия'}
+        </h3>
+        <p className="text-white/40 text-xs mt-1">
+          {item.gender === 'female' ? '👩 Женский' : 
+           item.gender === 'male' ? '👨 Мужской' : '👥 Унисекс'}
+        </p>
+      </div>
+    </motion.div>
+  )
+}
   const getZodiacClass = (name: string) => {
     const classMap: Record<string, string> = {
       'Овен': 'aries', 'Телец': 'taurus', 'Близнецы': 'gemini', 'Рак': 'cancer',
