@@ -270,6 +270,11 @@ export function BulkImageUpload({
         setError(`Шаблон ${i+1}: не загружено ни одного фото`)
         return
       }
+      // Для дизайнеров проверяем, что есть фото
+      if (folder === 'designers' && t.images.length === 0) {
+        setError(`Шаблон ${i+1}: не загружено фото дизайнера`)
+        return
+      }
     }
     
     setUploading(true)
@@ -278,11 +283,15 @@ export function BulkImageUpload({
     setSuccess(null)
     
     const allUploadedData: any[] = []
+    const totalImages = templates.reduce((acc, t) => acc + t.images.length, 0)
+    let uploadedSoFar = 0
 
     // Проходим по каждому шаблону
     for (let tIndex = 0; tIndex < templates.length; tIndex++) {
       const template = templates[tIndex]
       const uploadedImages: string[] = []
+
+      console.log(`📤 Загрузка шаблона ${tIndex + 1}:`, template)
 
       // Загружаем все фото для этого шаблона
       for (let i = 0; i < template.images.length; i++) {
@@ -291,21 +300,22 @@ export function BulkImageUpload({
         formData.append('folder', folder)
 
         try {
+          console.log(`📤 Загрузка фото ${i+1} из ${template.images.length} для шаблона ${tIndex+1}`)
+          
           const response = await fetch('/api/admin/upload', {
             method: 'POST',
             body: formData,
           })
           const data = await response.json()
+          console.log(`📥 Ответ загрузки фото:`, data)
           
           if (data.success) {
             uploadedImages.push(data.url)
           } else {
-            setError(`Ошибка загрузки фото ${i+1} в шаблоне ${tIndex+1}`)
+            setError(`Ошибка загрузки фото ${i+1} в шаблоне ${tIndex+1}: ${data.error || 'неизвестная ошибка'}`)
           }
           
-          // Общий прогресс
-          const totalImages = templates.reduce((acc, t) => acc + t.images.length, 0)
-          const uploadedSoFar = allUploadedData.reduce((acc, d) => acc + d.images.length, 0) + uploadedImages.length
+          uploadedSoFar++
           setUploadProgress((uploadedSoFar / totalImages) * 100)
         } catch (error) {
           setError(`Ошибка загрузки фото ${i + 1}`)
@@ -338,6 +348,8 @@ export function BulkImageUpload({
           }
         }
 
+        console.log(`📤 Отправка в API ${endpoint}:`, payload)
+
         try {
           const saveResponse = await fetch(endpoint, {
             method: 'POST',
@@ -346,6 +358,7 @@ export function BulkImageUpload({
           })
 
           const saveData = await saveResponse.json()
+          console.log(`📥 Ответ API ${endpoint}:`, saveData)
 
           if (saveResponse.ok) {
             allUploadedData.push({
@@ -354,7 +367,7 @@ export function BulkImageUpload({
               saved: saveData.items || []
             })
           } else {
-            setError(`Ошибка сохранения шаблона ${tIndex+1}`)
+            setError(`Ошибка сохранения шаблона ${tIndex+1}: ${saveData.error || 'неизвестная ошибка'}`)
           }
         } catch (error) {
           setError('Ошибка сохранения в базу данных')
@@ -370,8 +383,12 @@ export function BulkImageUpload({
       onUploadComplete(allUploadedData)
     }
 
-    const totalSaved = allUploadedData.reduce((acc, d) => acc + d.saved.length, 0)
-    setSuccess(`✅ Успешно загружено и сохранено ${totalSaved} записей в ${allUploadedData.length} шаблонах!`)
+    const totalSaved = allUploadedData.reduce((acc, d) => acc + (d.saved ? d.saved.length : 0), 0)
+    if (totalSaved > 0) {
+      setSuccess(`✅ Успешно загружено и сохранено ${totalSaved} записей в ${allUploadedData.length} шаблонах!`)
+    } else if (allUploadedData.length > 0) {
+      setSuccess(`⚠️ Фото загружены, но не сохранены в БД. Проверьте консоль для ошибок.`)
+    }
   }
 
   // Рендер шаблона
@@ -794,16 +811,16 @@ export function BulkImageUpload({
       {/* Результат */}
       {uploadedData.length > 0 && (
         <div className="bg-green-500/20 border border-green-500/30 rounded-xl p-4 max-h-40 overflow-y-auto">
-          <p className="text-green-400 text-sm mb-2">✅ Сохранено: {uploadedData.reduce((acc, d) => acc + d.saved.length, 0)} записей</p>
+          <p className="text-green-400 text-sm mb-2">✅ Сохранено: {uploadedData.reduce((acc, d) => acc + (d.saved ? d.saved.length : 0), 0)} записей</p>
           {uploadedData.map((group, gIndex) => (
             <div key={gIndex} className="mb-2">
               <div className="text-white/50 text-xs font-medium">
                 {folder === 'clothing' && group.template?.name}
                 {folder === 'designers' && group.template?.designer_name}
                 {folder === 'works' && group.template?.work_title}
-                {' '}({group.images.length} фото)
+                {' '}({group.images?.length || 0} фото)
               </div>
-              {group.images.map((url: string, i: number) => (
+              {group.images?.map((url: string, i: number) => (
                 <div key={i} className="text-white/40 text-[10px] pl-4 border-l border-white/10 ml-2 py-0.5">
                   {i+1}. {url}
                 </div>
