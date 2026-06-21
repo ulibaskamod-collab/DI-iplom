@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Palette, Trash2, Plus, Edit, Eye, Image as ImageIcon, RefreshCw } from 'lucide-react'
 import { AdminButton } from '@/src/components/AdminButton'
@@ -25,6 +25,7 @@ export default function AdminDesignersPage() {
   const [designers, setDesigners] = useState<Designer[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -69,14 +70,24 @@ export default function AdminDesignersPage() {
       setError('Не удалось загрузить дизайнеров')
     } finally {
       setLoading(false)
+      setIsRefreshing(false)
     }
+  }
+
+  const handleRefresh = () => {
+    setIsRefreshing(true)
+    fetchDesigners()
   }
 
   const deleteDesigner = async (id: number) => {
     if (confirm('Удалить дизайнера и все его работы? Это действие необратимо!')) {
       try {
-        await fetch(`/api/admin/designers?id=${id}`, { method: 'DELETE' })
-        setDesigners(designers.filter(d => d.id !== id))
+        const res = await fetch(`/api/admin/designers?id=${id}`, { method: 'DELETE' })
+        if (res.ok) {
+          setDesigners(designers.filter(d => d.id !== id))
+        } else {
+          alert('Ошибка при удалении')
+        }
       } catch (error) {
         console.error('Error deleting designer:', error)
         alert('Ошибка при удалении')
@@ -129,11 +140,12 @@ export default function AdminDesignersPage() {
 
         <div className="flex items-center gap-2">
           <button
-            onClick={fetchDesigners}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition text-white/60 hover:text-white"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition text-white/60 hover:text-white disabled:opacity-50"
             title="Обновить"
           >
-            <RefreshCw size={18} />
+            <RefreshCw size={18} className={isRefreshing ? 'animate-spin' : ''} />
           </button>
           <Link href="/admin/designers/new">
             <AdminButton
@@ -171,6 +183,7 @@ export default function AdminDesignersPage() {
                     src={designer.designer_image} 
                     alt={designer.designer_name} 
                     className="w-full h-full object-cover"
+                    loading="lazy"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none'
                     }}
