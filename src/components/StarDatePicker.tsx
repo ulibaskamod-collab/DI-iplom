@@ -30,7 +30,6 @@ export function StarDatePicker({
                       'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']
   const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
-  // Генерация годов для быстрого выбора (последние 100 лет)
   const years = Array.from({ length: 100 }, (_, i) => {
     const currentYear = new Date().getFullYear()
     return currentYear - i
@@ -143,7 +142,7 @@ export function StarDatePicker({
   }
 
   return (
-    <div className="relative" ref={pickerRef}>
+    <div className="relative w-full" ref={pickerRef}>
       <div 
         className={`w-full px-4 py-3 bg-white/10 rounded-xl text-white border border-white/10 focus-within:border-pink-500 cursor-pointer flex items-center justify-between transition-all duration-200 hover:bg-white/15 ${className}`}
         onClick={() => setIsOpen(!isOpen)}
@@ -151,35 +150,34 @@ export function StarDatePicker({
         <span className={value ? 'text-white' : 'text-white/40'}>
           {formatDisplayDate(value)}
         </span>
-        <Calendar className="w-4 h-4 text-purple-400" />
+        <Calendar className="w-4 h-4 text-purple-400 flex-shrink-0" />
       </div>
 
       {isOpen && (
-        <div className="absolute mt-2 p-4 bg-gradient-to-b from-purple-900/95 to-[#0d0d25]/95 backdrop-blur-xl rounded-2xl border border-purple-700/50 shadow-2xl z-50 w-full min-w-[280px] animate-fade-in">
+        <div className="absolute left-0 right-0 mt-2 p-4 bg-gradient-to-b from-purple-900/95 to-[#0d0d25]/95 backdrop-blur-xl rounded-2xl border border-purple-700/50 shadow-2xl z-[9999] min-w-[280px] max-w-full animate-fade-in">
           
-          {/* Заголовок с быстрым выбором года */}
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
               onClick={prevMonth}
-              className="p-1.5 hover:bg-white/10 rounded-lg transition text-purple-300 hover:text-white"
+              className="p-1.5 hover:bg-white/10 rounded-lg transition text-purple-300 hover:text-white flex-shrink-0"
             >
               <ChevronLeft size={18} />
             </button>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 justify-center">
               <button
                 type="button"
                 onClick={() => setShowYearPicker(!showYearPicker)}
-                className="text-white font-medium hover:text-pink-400 transition flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-white/5"
+                className="text-white font-medium hover:text-pink-400 transition flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-white/5 text-sm whitespace-nowrap"
               >
                 {monthsFull[viewDate.getMonth()]} {viewDate.getFullYear()}
-                <ChevronDown size={14} className="text-white/40" />
+                <ChevronDown size={14} className="text-white/40 flex-shrink-0" />
               </button>
               <button
                 type="button"
                 onClick={goToday}
-                className="text-xs text-pink-400 hover:text-pink-300 transition px-2.5 py-1 rounded-full bg-pink-500/20 hover:bg-pink-500/30"
+                className="text-xs text-pink-400 hover:text-pink-300 transition px-2.5 py-1 rounded-full bg-pink-500/20 hover:bg-pink-500/30 flex-shrink-0"
               >
                 Сегодня
               </button>
@@ -188,13 +186,12 @@ export function StarDatePicker({
             <button
               type="button"
               onClick={nextMonth}
-              className="p-1.5 hover:bg-white/10 rounded-lg transition text-purple-300 hover:text-white"
+              className="p-1.5 hover:bg-white/10 rounded-lg transition text-purple-300 hover:text-white flex-shrink-0"
             >
               <ChevronRight size={18} />
             </button>
           </div>
 
-          {/* Быстрый выбор года */}
           {showYearPicker && (
             <div className="mb-3 p-2 bg-white/5 rounded-xl max-h-40 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-4 gap-1">
@@ -216,7 +213,6 @@ export function StarDatePicker({
             </div>
           )}
 
-          {/* Дни недели */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {days.map((day) => (
               <div key={day} className="text-center text-purple-400/40 text-xs font-medium py-1">
@@ -225,7 +221,6 @@ export function StarDatePicker({
             ))}
           </div>
 
-          {/* Дни месяца */}
           <div className="grid grid-cols-7 gap-1">
             {getDaysInMonth(viewDate).map((date, index) => (
               <div key={index} className="aspect-square">
@@ -256,7 +251,6 @@ export function StarDatePicker({
             ))}
           </div>
 
-          {/* Футер */}
           <div className="mt-3 pt-3 border-t border-white/5 flex justify-between items-center text-xs text-purple-400/50">
             <span className="flex items-center gap-1">
               <Star size={10} className="text-purple-400/30" />
