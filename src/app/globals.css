@@ -2,13 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== ОСНОВНЫЕ СТИЛИ ===== */
 body {
   background: linear-gradient(135deg, #0a0a1a 0%, #0d0d25 50%, #0a0a1a 100%);
   color: #ffffff;
   min-height: 100vh;
 }
 
-/* Навигация */
+/* ===== НАВИГАЦИЯ ===== */
 .navbar {
   background-color: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(12px);
@@ -80,7 +81,7 @@ body {
   }
 }
 
-/* Звёзды */
+/* ===== ЗВЁЗДЫ ===== */
 .stars-container {
   position: fixed;
   top: 0;
@@ -104,7 +105,7 @@ body {
   50% { opacity: 0.8; }
 }
 
-/* Формы */
+/* ===== ФОРМЫ ===== */
 input, textarea, select {
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -119,13 +120,12 @@ input:focus, textarea:focus, select:focus {
   border-color: #ec4899;
 }
 
-/* Стили для форм и селектов в админ-панели */
+/* Стили для селектов */
 select option {
   background-color: #1a1a2e;
   color: #ffffff;
 }
 
-/* Для всех селектов в админке */
 .admin-page select,
 .admin-page select option,
 select option {
@@ -155,7 +155,6 @@ select option {
   box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2) !important;
 }
 
-/* Стили для селектов в формах добавления */
 .bg-white\/10 select,
 .bg-white\/10 select option {
   background-color: #1a1a2e !important;
@@ -170,7 +169,8 @@ select option {
   background-color: #1a1a2e !important;
   color: #ffffff !important;
 }
-/* Адаптивные таблицы для админки */
+
+/* ===== АДАПТИВНЫЕ ТАБЛИЦЫ ДЛЯ АДМИНКИ ===== */
 @media (max-width: 768px) {
   .admin-table-wrapper {
     overflow-x: auto;
@@ -203,7 +203,6 @@ select option {
     padding: 0.4rem !important;
   }
 
-  /* Карточки вместо таблиц на мобильных */
   .admin-cards {
     display: grid;
     grid-template-columns: 1fr;
@@ -243,7 +242,7 @@ select option {
   }
 }
 
-/* Адаптивные формы */
+/* ===== АДАПТИВНЫЕ ФОРМЫ ===== */
 @media (max-width: 768px) {
   .admin-form-grid {
     grid-template-columns: 1fr !important;
@@ -252,7 +251,7 @@ select option {
   .admin-form input,
   .admin-form textarea,
   .admin-form select {
-    font-size: 16px !important; /* Предотвращает зум на iOS */
+    font-size: 16px !important;
     padding: 0.75rem !important;
   }
 
@@ -271,7 +270,6 @@ select option {
     justify-content: center;
   }
 
-  /* Модальные окна на мобильных */
   .admin-modal {
     margin: 1rem !important;
     max-width: 100% !important;
@@ -285,7 +283,7 @@ select option {
   }
 }
 
-/* Статистика на мобильных */
+/* ===== СТАТИСТИКА НА МОБИЛЬНЫХ ===== */
 @media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -319,40 +317,9 @@ select option {
   .stats-card {
     padding: 0.75rem !important;
   }
-}/* Адаптивная таблица одежды */
-@media (max-width: 768px) {
-  .admin-table-wrapper {
-    margin: 0 -1rem;
-    padding: 0 1rem;
-  }
+}
 
-  .admin-table {
-    min-width: 550px;
-  }
-
-  .admin-table th,
-  .admin-table td {
-    padding: 0.6rem 0.4rem !important;
-    font-size: 0.75rem !important;
-  }
-
-  .admin-table .actions-cell {
-    display: flex;
-    gap: 0.25rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .admin-table .actions-cell button,
-  .admin-table .actions-cell a {
-    padding: 0.3rem !important;
-  }
-
-  .admin-table .actions-cell svg {
-    width: 14px !important;
-    height: 14px !important;
-  }
-}/* Админ-панель - мобильная адаптация */
+/* ===== АДМИН-ПАНЕЛЬ - МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
 @media (max-width: 640px) {
   .admin-page .stats-grid {
     grid-template-columns: repeat(2, 1fr) !important;
@@ -393,7 +360,6 @@ select option {
     font-size: 0.8rem !important;
   }
 
-  /* Таблицы */
   .admin-table-wrapper {
     margin: 0 -1rem;
     padding: 0 1rem;
@@ -427,7 +393,7 @@ select option {
   }
 }
 
-/* Планшеты */
+/* ===== ПЛАНШЕТЫ ===== */
 @media (min-width: 641px) and (max-width: 1024px) {
   .admin-page .stats-grid {
     grid-template-columns: repeat(3, 1fr) !important;
@@ -436,11 +402,10 @@ select option {
   .admin-page .menu-grid {
     grid-template-columns: repeat(2, 1fr) !important;
   }
-}/* ===== АДАПТИВНЫЕ УТИЛИТЫ ===== */
+}
 
-/* Мобильные брейкпоинты */
+/* ===== УТИЛИТЫ ===== */
 @layer utilities {
-  /* Показывать на очень маленьких экранах (телефоны) */
   .xs\:inline {
     @media (min-width: 480px) {
       display: inline;
@@ -453,9 +418,7 @@ select option {
   }
 }
 
-/* ===== АДМИН-ПАНЕЛЬ ===== */
-
-/* Кнопки в админке - единый стиль */
+/* ===== КНОПКИ В АДМИНКЕ ===== */
 .admin-btn {
   @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200;
 }
@@ -476,31 +439,7 @@ select option {
   @apply bg-white/5 text-white/60 hover:text-white hover:bg-white/10;
 }
 
-/* Карточки для мобильной версии таблиц */
-.admin-mobile-card {
-  @apply bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/20 transition;
-}
-
-/* Адаптивные отступы */
-@layer components {
-  .admin-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
-  
-  .admin-header {
-    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6;
-  }
-  
-  .admin-title {
-    @apply text-2xl sm:text-3xl font-bold text-white flex items-center gap-3;
-  }
-  
-  .admin-stats-badge {
-    @apply px-2.5 py-1 rounded-full text-xs font-medium;
-  }
-}
-
-/* ===== СКРОЛЛБАР ДЛЯ САЙДБАРА ===== */
+/* ===== СКРОЛЛБАРЫ ===== */
 .admin-sidebar::-webkit-scrollbar {
   width: 4px;
 }
@@ -511,203 +450,45 @@ select option {
   @apply bg-white/20 rounded-full;
 }
 
-/* ===== АНИМАЦИИ ===== */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.admin-enter {
-  animation: slideIn 0.3s ease-out;
-}
-
-/* ===== МОБИЛЬНАЯ ВЕРХНЯЯ ПАНЕЛЬ ===== */
-.admin-mobile-header {
-  @apply lg:hidden fixed top-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-xl border-b border-white/10 px-4 py-3;
-}
-
-.admin-mobile-header-content {
-  @apply flex items-center justify-between;
-}
-
-.admin-mobile-menu-btn {
-  @apply p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-200 text-white;
-}
-
-/* ===== ТАБЛИЦЫ НА МОБИЛЬНЫХ ===== */
-@layer components {
-  .admin-table-wrap {
-    @apply bg-white/5 rounded-2xl overflow-hidden border border-white/10;
-  }
-  
-  .admin-table {
-    @apply w-full;
-  }
-  
-  .admin-table thead {
-    @apply bg-white/10 border-b border-white/10;
-  }
-  
-  .admin-table th {
-    @apply px-6 py-4 text-left text-white text-xs font-medium uppercase tracking-wider;
-  }
-  
-  .admin-table td {
-    @apply px-6 py-4 text-sm;
-  }
-  
-  .admin-table tr {
-    @apply border-b border-white/5 hover:bg-white/5 transition;
-  }
-}
-
-/* ===== МОБИЛЬНЫЕ КАРТОЧКИ ===== */
-@layer components {
-  .admin-mobile-list {
-    @apply md:hidden divide-y divide-white/5;
-  }
-  
-  .admin-mobile-item {
-    @apply p-4 hover:bg-white/5 transition;
-  }
-  
-  .admin-mobile-item-header {
-    @apply flex items-start justify-between gap-3;
-  }
-  
-  .admin-mobile-item-info {
-    @apply flex-1 min-w-0;
-  }
-  
-  .admin-mobile-item-title {
-    @apply flex items-center gap-2 mb-1;
-  }
-  
-  .admin-mobile-item-tags {
-    @apply flex flex-wrap gap-2 text-xs;
-  }
-  
-  .admin-mobile-item-actions {
-    @apply flex items-center gap-1.5 flex-shrink-0;
-  }
-}
-
-/* ===== ФОРМЫ ===== */
-@layer components {
-  .admin-form {
-    @apply space-y-6 bg-white/5 rounded-2xl p-6 border border-white/10;
-  }
-  
-  .admin-form-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
-  }
-  
-  .admin-form-label {
-    @apply block text-white/70 text-sm font-medium mb-2;
-  }
-  
-  .admin-form-input {
-    @apply w-full px-4 py-2.5 bg-white/10 rounded-xl text-white border border-white/10 focus:outline-none focus:border-pink-500 transition placeholder-white/30;
-  }
-  
-  .admin-form-select {
-    @apply w-full px-4 py-2.5 bg-white/10 rounded-xl text-white border border-white/10 focus:outline-none focus:border-pink-500 transition appearance-none cursor-pointer;
-  }
-  
-  .admin-form-textarea {
-    @apply w-full px-4 py-2.5 bg-white/10 rounded-xl text-white border border-white/10 focus:outline-none focus:border-pink-500 transition resize-none;
-  }
-}
-
-/* ===== КНОПКИ ДЕЙСТВИЙ ===== */
-@layer components {
-  .admin-action-btn {
-    @apply p-2 rounded-lg transition-all duration-200;
-  }
-  
-  .admin-action-btn-edit {
-    @apply bg-white/5 hover:bg-green-500/20;
-  }
-  
-  .admin-action-btn-delete {
-    @apply bg-red-500/10 hover:bg-red-500/30;
-  }
-  
-  .admin-action-btn-view {
-    @apply bg-white/5 hover:bg-blue-500/20;
-  }
-}@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* ... ваш существующий код ... */
-
-/* ===== УТИЛИТЫ ДЛЯ АДМИНКИ ===== */
-@layer utilities {
-  .xs\:inline {
-    @media (min-width: 480px) {
-      display: inline;
-    }
-  }
-  .xs\:hidden {
-    @media (max-width: 479px) {
-      display: none;
-    }
-  }
-}
-
-/* ===== СКРОЛЛБАР ДЛЯ САЙДБАРА ===== */
-.admin-sidebar::-webkit-scrollbar {
+.custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
-.admin-sidebar::-webkit-scrollbar-track {
-  background: transparent;
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
 }
-.admin-sidebar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 9999px;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(200, 150, 255, 0.3);
+  border-radius: 10px;
 }
-.admin-sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 150, 255, 0.5);
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(200, 150, 255, 0.3) rgba(255, 255, 255, 0.05);
 }
 
 /* ===== АНИМАЦИИ ===== */
 @keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .animate-slide-in {
   animation: slideIn 0.3s ease-out;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.2s ease-out;
 }
-/* ===== СТИЛИ ДЛЯ ЗВЕЗДНОГО КАЛЕНДАРЯ ===== */
 
-/* Стили для input type="date" */
+/* ===== СТИЛИ ДЛЯ ЗВЕЗДНОГО КАЛЕНДАРЯ ===== */
 input[type="date"] {
   color-scheme: dark;
   position: relative;
@@ -727,7 +508,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   transform: scale(1.1);
 }
 
-/* Стили для календаря в браузере */
 input[type="date"]::-webkit-datetime-edit {
   color: #ffffff;
   padding: 0 4px;
@@ -757,7 +537,6 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus {
   color: #f0c8ff;
 }
 
-/* Стили для календаря (popup) */
 ::-webkit-calendar-picker {
   background: #1a0a2a;
   border: 1px solid rgba(200, 150, 255, 0.2);
@@ -766,7 +545,6 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus {
   backdrop-filter: blur(20px);
 }
 
-/* Firefox */
 input[type="date"]::-moz-calendar-picker-indicator {
   filter: invert(0.8) sepia(1) saturate(3) hue-rotate(250deg) brightness(0.8);
   cursor: pointer;
@@ -776,166 +554,17 @@ input[type="date"]:hover::-moz-calendar-picker-indicator {
   filter: invert(0.9) sepia(1) saturate(5) hue-rotate(250deg) brightness(1);
 }
 
-/* Для всех браузеров - затемнение фона календаря */
 input[type="date"]:focus {
   outline: none;
   border-color: rgba(200, 150, 255, 0.4);
   box-shadow: 0 0 30px rgba(200, 150, 255, 0.05);
-}@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
-}@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
-}@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
-}/* Кастомный скролл для выбора года */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(200, 150, 255, 0.3);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(200, 150, 255, 0.5);
-}
-
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(200, 150, 255, 0.3) rgba(255, 255, 255, 0.05);
-}/* Анимация для календаря */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
-}
-
-/* Кастомный скролл для выбора года */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(200, 150, 255, 0.3);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(200, 150, 255, 0.5);
-}
-
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(200, 150, 255, 0.3) rgba(255, 255, 255, 0.05);
-}
-
-/* Фикс для позиционирования календаря в форме */
+/* ===== ФИКСЫ ДЛЯ КАЛЕНДАРЯ ===== */
 .relative .absolute {
   position: absolute !important;
 }
 
-/* Убеждаемся, что календарь поверх всех элементов */
-.z-50 {
-  z-index: 9999 !important;
-}/* Анимация для календаря */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
-}
-
-/* Кастомный скролл для выбора года */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(200, 150, 255, 0.3);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(200, 150, 255, 0.5);
-}
-
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(200, 150, 255, 0.3) rgba(255, 255, 255, 0.05);
-}
-
-/* Фикс для позиционирования календаря */
-.relative .absolute {
-  position: absolute !important;
-}
-
-/* Убеждаемся, что календарь поверх всех элементов */
 .z-50 {
   z-index: 9999 !important;
 }
