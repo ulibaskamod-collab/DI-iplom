@@ -21,9 +21,11 @@ export default function AddDesignerPage() {
   })
 
   const {
+    imageFile,
     imagePreview,
     isUploading,
     uploadError,
+    uploadedUrl,
     handleImageChange,
     uploadImage,
     removeImage,
@@ -31,6 +33,7 @@ export default function AddDesignerPage() {
     folder: 'designers',
     maxSizeMB: 5,
     onError: (error) => alert(error),
+    // ✅ НЕТ onSuccess
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,7 +52,7 @@ export default function AddDesignerPage() {
       const payload = {
         designer_name: formData.designer_name,
         bio: formData.bio,
-        designer_image: imageUrl || '', // ✅ Может быть пустым
+        designer_image: imageUrl || '',
         social_links,
       }
 

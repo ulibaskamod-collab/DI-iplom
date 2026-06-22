@@ -1,13 +1,8 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Shirt, Trash2, Plus, Search, Edit, RefreshCw } from 'lucide-react'
-import { AdminButton } from '@/src/components/AdminButton'
+import { Plus, Edit, Trash2, Search, X, Eye } from 'lucide-react'
 
 interface ClothingItem {
   id: number
@@ -17,203 +12,202 @@ interface ClothingItem {
   season: string
   gender: string
   zodiac_sign_id: number
-  created_at: string
+  zodiac_sign?: {
+    name: string
+  }
 }
 
 export default function AdminClothingPage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
   const [items, setItems] = useState<ClothingItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
+  // Загрузка данных
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin')
-      return
-    }
+    fetch('/api/admin/clothing')
+      .then(res => res.json())
+      .then(data => {
+        setItems(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
 
-    if (session?.user?.email) {
-      fetch(`/api/user/role?email=${session.user.email}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.role !== 'admin') router.push('/')
-        })
-        .catch(() => router.push('/'))
-    }
-
-    fetchItems()
-  }, [session, status, router])
-
-  const fetchItems = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/admin/clothing')
-      const data = await res.json()
-      setItems(Array.isArray(data) ? data : [])
-    } catch (error) {
-      console.error('Error fetching items:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const deleteItem = async (id: number) => {
-    if (confirm('Удалить этот предмет одежды?')) {
-      await fetch(`/api/admin/clothing?id=${id}`, { method: 'DELETE' })
-      setItems(items.filter(i => i.id !== id))
-    }
-  }
-
+  // Фильтрация
   const filteredItems = items.filter(item =>
-    item.title?.toLowerCase().includes(searchTerm.toLowerCase())
+    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const getSeasonEmoji = (season: string) => {
-    switch (season) {
-      case 'winter': return '❄️'
-      case 'spring': return '🌸'
-      case 'summer': return '☀️'
-      case 'autumn': return '🍂'
-      default: return '👕'
+  // Удаление
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(`/api/admin/clothing/${id}`, {
+        method: 'DELETE',
+      })
+      if (response.ok) {
+        setItems(items.filter(item => item.id !== id))
+        setShowDeleteModal(false)
+        setSelectedItem(null)
+      } else {
+        alert('Ошибка при удалении')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('Ошибка при удалении')
     }
   }
 
+  // Получение названия сезона
   const getSeasonLabel = (season: string) => {
-    switch (season) {
-      case 'winter': return 'Зима'
-      case 'spring': return 'Весна'
-      case 'summer': return 'Лето'
-      case 'autumn': return 'Осень'
-      default: return season
+    const labels: Record<string, string> = {
+      spring: 'Весна',
+      summer: 'Лето',
+      autumn: 'Осень',
+      winter: 'Зима'
     }
+    return labels[season] || season
   }
 
+  // Получение названия пола
   const getGenderLabel = (gender: string) => {
-    switch (gender) {
-      case 'female': return '👩 Женский'
-      case 'male': return '👨 Мужской'
-      default: return '👥 Унисекс'
+    const labels: Record<string, string> = {
+      male: 'Мужской',
+      female: 'Женский',
+      unisex: 'Унисекс'
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500" />
-      </div>
-    )
+    return labels[gender] || gender
   }
 
   return (
     <div>
       {/* Заголовок */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <Link href="/admin" className="text-gray-400 hover:text-white transition p-2 rounded-lg hover:bg-white/5">
-            <ArrowLeft size={20} />
-          </Link>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
-              <Shirt className="w-7 h-7 text-green-400" />
-              Одежда
-            </h1>
-            <p className="text-white/40 text-sm mt-0.5 flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-green-500/20 text-green-300 rounded-full text-xs">
-                {items.length} предметов
-              </span>
-            </p>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-white">Одежда</h1>
+          <p className="text-white/40 text-sm mt-1">Управление предметами одежды</p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <AdminButton
-            variant="ghost"
-            size="sm"
-            icon={<RefreshCw size={16} />}
-            onClick={fetchItems}
-            title="Обновить" children={undefined}          />
-          <Link href="/admin/clothing/new">
-            <AdminButton
-              variant="success"
-              size="md"
-              icon={<Plus size={18} />}
-            >
-              <span className="hidden xs:inline">Добавить</span>
-            </AdminButton>
-          </Link>
-        </div>
+        <Link
+          href="/admin/clothing/new"
+          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl text-white font-medium hover:opacity-90 transition shadow-lg shadow-pink-500/25 whitespace-nowrap"
+        >
+          <Plus className="w-4 h-4" />
+          Добавить предмет
+        </Link>
       </div>
 
       {/* Поиск */}
       <div className="relative mb-6">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
         <input
           type="text"
           placeholder="Поиск по названию..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-white/5 rounded-xl border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-green-500 transition"
+          className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-pink-500/50 transition"
         />
+        {searchTerm && (
+          <button
+            onClick={() => setSearchTerm('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Таблица */}
-      {filteredItems.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-white/20 border-t-pink-500" />
+        </div>
+      ) : filteredItems.length === 0 ? (
         <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
-          <Shirt className="w-16 h-16 text-white/20 mx-auto mb-4" />
-          <p className="text-white/40">
-            {searchTerm ? 'Ничего не найдено' : 'Предметов одежды пока нет'}
-          </p>
-          {!searchTerm && (
-            <Link href="/admin/clothing/new" className="inline-block mt-4">
-              <AdminButton variant="success" icon={<Plus size={18} />}>
-                Добавить первый предмет
-              </AdminButton>
-            </Link>
-          )}
+          <div className="text-6xl mb-4">👕</div>
+          <p className="text-white/50">Предметы одежды не найдены</p>
+          <Link
+            href="/admin/clothing/new"
+            className="inline-block mt-4 text-pink-400 hover:text-pink-300 transition"
+          >
+            Добавить первый предмет →
+          </Link>
         </div>
       ) : (
-        <div className="bg-white/5 rounded-2xl overflow-hidden border border-white/10">
-          {/* Десктопная таблица */}
-          <div className="hidden md:block overflow-x-auto">
+        <div className="bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
+          <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-white/10 border-b border-white/10">
-                <tr>
-                  <th className="px-6 py-4 text-left text-white text-xs font-medium uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-4 text-left text-white text-xs font-medium uppercase tracking-wider">Название</th>
-                  <th className="px-6 py-4 text-left text-white text-xs font-medium uppercase tracking-wider">Сезон</th>
-                  <th className="px-6 py-4 text-left text-white text-xs font-medium uppercase tracking-wider">Пол</th>
-                  <th className="px-6 py-4 text-left text-white text-xs font-medium uppercase tracking-wider">Знак ID</th>
-                  <th className="px-6 py-4 text-center text-white text-xs font-medium uppercase tracking-wider">Действия</th>
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider">Предмет</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider hidden md:table-cell">Описание</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider">Сезон</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider">Пол</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-white/40 uppercase tracking-wider hidden lg:table-cell">Знак</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-white/40 uppercase tracking-wider">Действия</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredItems.map((item) => (
                   <tr key={item.id} className="border-b border-white/5 hover:bg-white/5 transition">
-                    <td className="px-6 py-4 text-white/60 text-sm">{item.id}</td>
-                    <td className="px-6 py-4 text-white font-medium text-sm">{item.title || 'Без названия'}</td>
-                    <td className="px-6 py-4 text-white/80 text-sm">
-                      <span className="flex items-center gap-1.5">
-                        {getSeasonEmoji(item.season)} {getSeasonLabel(item.season)}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        {item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt={item.title}
+                            className="w-12 h-12 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center text-2xl">
+                            👕
+                          </div>
+                        )}
+                        <span className="text-white font-medium">{item.title}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-white/50 text-sm hidden md:table-cell max-w-[200px] truncate">
+                      {item.description || '—'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        {getSeasonLabel(item.season)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-white/80 text-sm">{getGenderLabel(item.gender)}</td>
-                    <td className="px-6 py-4 text-white/60 text-sm">{item.zodiac_sign_id}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <Link href={`/admin/clothing/${item.id}/edit`}>
-                          <AdminButton
-                            variant="ghost"
-                            size="sm"
-                            icon={<Edit size={16} className="text-green-400" />}
-                            title="Редактировать" children={undefined}                          />
+                    <td className="px-4 py-3">
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium border
+                        ${item.gender === 'male' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : ''}
+                        ${item.gender === 'female' ? 'bg-pink-500/10 text-pink-400 border-pink-500/20' : ''}
+                        ${item.gender === 'unisex' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : ''}
+                      `}>
+                        {getGenderLabel(item.gender)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 hidden lg:table-cell">
+                      <span className="text-white/50 text-sm">
+                        {item.zodiac_sign?.name || '—'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/admin/clothing/${item.id}/edit`}
+                          className="p-2 rounded-lg hover:bg-white/10 transition text-white/40 hover:text-white"
+                          title="Редактировать"
+                        >
+                          <Edit className="w-4 h-4" />
                         </Link>
-                        <AdminButton
-                          variant="danger"
-                          size="sm"
-                          icon={<Trash2 size={16} className="text-red-400" />}
-                          onClick={() => deleteItem(item.id)}
-                          title="Удалить" children={undefined}                        />
+                        <button
+                          onClick={() => {
+                            setSelectedItem(item)
+                            setShowDeleteModal(true)
+                          }}
+                          className="p-2 rounded-lg hover:bg-red-500/10 transition text-white/40 hover:text-red-400"
+                          title="Удалить"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -221,45 +215,41 @@ export default function AdminClothingPage() {
               </tbody>
             </table>
           </div>
+          <div className="px-4 py-3 border-t border-white/10 text-white/30 text-sm">
+            Всего: {filteredItems.length} предметов
+          </div>
+        </div>
+      )}
 
-          {/* Мобильные карточки */}
-          <div className="md:hidden divide-y divide-white/5">
-            {filteredItems.map((item) => (
-              <div key={item.id} className="p-4 hover:bg-white/5 transition">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-white/40 text-xs">#{item.id}</span>
-                      <span className="text-white font-medium truncate">{item.title || 'Без названия'}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      <span className="px-2 py-0.5 bg-white/10 rounded-full text-white/60">
-                        {getSeasonEmoji(item.season)} {getSeasonLabel(item.season)}
-                      </span>
-                      <span className="px-2 py-0.5 bg-white/10 rounded-full text-white/60">
-                        {getGenderLabel(item.gender)}
-                      </span>
-                      <span className="px-2 py-0.5 bg-white/10 rounded-full text-white/60">
-                        Знак: {item.zodiac_sign_id}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <Link href={`/admin/clothing/${item.id}/edit`}>
-                      <AdminButton
-                        variant="ghost"
-                        size="sm"
-                        icon={<Edit size={15} className="text-green-400" />} children={undefined}                      />
-                    </Link>
-                    <AdminButton
-                      variant="danger"
-                      size="sm"
-                      icon={<Trash2 size={15} className="text-red-400" />}
-                      onClick={() => deleteItem(item.id)} children={undefined}                    />
-                  </div>
-                </div>
+      {/* Модалка удаления */}
+      {showDeleteModal && selectedItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)} />
+          <div className="relative bg-gray-900 rounded-2xl border border-white/10 p-6 max-w-md w-full shadow-2xl">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
+                <Trash2 className="w-8 h-8 text-red-400" />
               </div>
-            ))}
+              <h3 className="text-xl font-bold text-white mb-2">Удаление предмета</h3>
+              <p className="text-white/60 mb-6">
+                Вы уверены, что хотите удалить <span className="text-white font-medium">{selectedItem.title}</span>?<br />
+                <span className="text-red-400/60 text-sm">Это действие нельзя отменить.</span>
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white transition"
+                >
+                  Отмена
+                </button>
+                <button
+                  onClick={() => handleDelete(selectedItem.id)}
+                  className="px-6 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white transition shadow-lg shadow-red-500/25"
+                >
+                  Удалить
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

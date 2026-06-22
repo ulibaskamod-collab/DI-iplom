@@ -49,7 +49,6 @@ export function useImageUpload({ folder, maxSizeMB = 5, onError }: UseImageUploa
 
   const uploadImage = useCallback(async (): Promise<string | null> => {
     if (!imageFile) {
-      // Если нет нового файла, но есть загруженный URL - возвращаем его
       return uploadedUrl
     }
 
@@ -58,7 +57,7 @@ export function useImageUpload({ folder, maxSizeMB = 5, onError }: UseImageUploa
 
     try {
       const formData = new FormData()
-      formData.append('image', imageFile) // ✅ Используем 'image' как имя поля
+      formData.append('image', imageFile)
       formData.append('folder', folder)
 
       const response = await fetch('/api/admin/upload', {
@@ -74,7 +73,7 @@ export function useImageUpload({ folder, maxSizeMB = 5, onError }: UseImageUploa
 
       if (data.success && data.url) {
         setUploadedUrl(data.url)
-        setImageFile(null) // Очищаем файл после загрузки
+        setImageFile(null)
         return data.url
       } else {
         throw new Error('Неверный ответ сервера')
@@ -108,5 +107,6 @@ export function useImageUpload({ folder, maxSizeMB = 5, onError }: UseImageUploa
     handleImageChange,
     uploadImage,
     removeImage,
+    setImagePreview, // ✅ ДОБАВЛЯЕМ ЭТУ ФУНКЦИЮ
   }
 }
