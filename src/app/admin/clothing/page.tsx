@@ -23,7 +23,6 @@ export default function AdminClothingPage() {
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
-  // Загрузка данных
   useEffect(() => {
     fetchItems()
   }, [])
@@ -41,7 +40,6 @@ export default function AdminClothingPage() {
       
       const data = await response.json()
       
-      // ✅ Убеждаемся, что data - это массив
       if (Array.isArray(data)) {
         setItems(data)
       } else {
@@ -58,13 +56,11 @@ export default function AdminClothingPage() {
     }
   }
 
-  // Фильтрация
   const filteredItems = items.filter(item =>
     item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  // Удаление
   const handleDelete = async (id: number) => {
     try {
       const response = await fetch(`/api/admin/clothing/${id}`, {
@@ -85,7 +81,6 @@ export default function AdminClothingPage() {
     }
   }
 
-  // Получение названия сезона
   const getSeasonLabel = (season: string) => {
     const labels: Record<string, string> = {
       spring: 'Весна',
@@ -96,7 +91,6 @@ export default function AdminClothingPage() {
     return labels[season] || season
   }
 
-  // Получение названия пола
   const getGenderLabel = (gender: string) => {
     const labels: Record<string, string> = {
       male: 'Мужской',
@@ -108,7 +102,6 @@ export default function AdminClothingPage() {
 
   return (
     <div>
-      {/* Заголовок */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-white">Одежда</h1>
@@ -123,7 +116,6 @@ export default function AdminClothingPage() {
         </Link>
       </div>
 
-      {/* Поиск */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
         <input
@@ -143,7 +135,6 @@ export default function AdminClothingPage() {
         )}
       </div>
 
-      {/* Ошибка */}
       {error && (
         <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
           {error}
@@ -156,7 +147,6 @@ export default function AdminClothingPage() {
         </div>
       )}
 
-      {/* Таблица */}
       {loading ? (
         <div className="flex justify-center py-20">
           <div className="animate-spin rounded-full h-10 w-10 border-2 border-white/20 border-t-pink-500" />
@@ -191,20 +181,14 @@ export default function AdminClothingPage() {
                   <tr key={item.id} className="border-b border-white/5 hover:bg-white/5 transition">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        {item.image_url ? (
-                          <img
-                            src={item.image_url}
-                            alt={item.title}
-                            className="w-12 h-12 rounded-lg object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/placeholder.svg'
-                            }}
-                          />
-                        ) : (
-                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center text-2xl">
-                            👕
-                          </div>
-                        )}
+                        <img
+                          src={item.image_url || '/images/clothing/placeholder.svg'}
+                          alt={item.title}
+                          className="w-12 h-12 rounded-lg object-cover bg-gray-800"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/images/clothing/placeholder.svg'
+                          }}
+                        />
                         <span className="text-white font-medium">{item.title}</span>
                       </div>
                     </td>
@@ -262,7 +246,6 @@ export default function AdminClothingPage() {
         </div>
       )}
 
-      {/* Модалка удаления */}
       {showDeleteModal && selectedItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)} />
