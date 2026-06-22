@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { MongoClient, GridFSBucket } from 'mongodb'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
-const client = new MongoClient(process.env.MONGODB_URI!)
+const s3 = new S3Client({
+  region: process.env.AWS_REGION!,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+})
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,22 +17,19 @@ export async function POST(req: NextRequest) {
 
     if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 })
 
-    await client.connect()
-    const db = client.db('stellarfit')
-    const bucket = new GridFSBucket(db, { bucketName: 'uploads' })
-
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
+    const key = `${folder}/${Date.now()}_${file.name}`
 
-    // Сохраняем в GridFS
-    const uploadStream = bucket.openUploadStream(
-      `${Date.now()}_${file.name}`,
-      { metadata: { folder } }
-    )
-    uploadStream.write(buffer)
-    uploadStream.end()
+    await s3.send(new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME!,
+      Key: key,
+      Body: buffer,
+      ContentType: file.type,
+      ACL: 'public-read',
+    }))
 
-    const url = `/api/image/${uploadStream.id}`
+    const url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
     
     return NextResponse.json({ 
       success: true, 
