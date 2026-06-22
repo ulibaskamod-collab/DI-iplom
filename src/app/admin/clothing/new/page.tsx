@@ -56,43 +56,44 @@ export default function AddClothingPage() {
       .catch(console.error)
   }, [status, router])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setLoading(true)
 
-    try {
-      // Загружаем изображение
-      const imageUrl = await uploadImage()
+  try {
+    // Загружаем изображение в Base64
+    const imageUrl = await uploadImage()
 
-      const payload = {
-        title: formData.title,
-        description: formData.description,
-        season: formData.season,
-        gender: formData.gender,
-        zodiac_sign_id: formData.zodiac_sign_id,
-        image_url: imageUrl || '',
-      }
-
-      const res = await fetch('/api/admin/clothing', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-
-      if (res.ok) {
-        alert('✅ Одежда добавлена!')
-        router.push('/admin/clothing')
-      } else {
-        const error = await res.json()
-        alert('❌ Ошибка: ' + (error.error || 'Не удалось добавить'))
-      }
-    } catch (error) {
-      console.error('Ошибка:', error)
-      alert('❌ Ошибка соединения с сервером')
+    const payload = {
+      title: formData.title,
+      description: formData.description,
+      season: formData.season,
+      gender: formData.gender,
+      zodiac_sign_id: formData.zodiac_sign_id,
+      image_url: imageUrl || '',
+      image_base64: imageUrl?.startsWith('data:') ? imageUrl : null, // Сохраняем Base64
     }
 
-    setLoading(false)
+    const res = await fetch('/api/admin/clothing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+
+    if (res.ok) {
+      alert('✅ Одежда добавлена!')
+      router.push('/admin/clothing')
+    } else {
+      const error = await res.json()
+      alert('❌ Ошибка: ' + (error.error || 'Не удалось добавить'))
+    }
+  } catch (error) {
+    console.error('Ошибка:', error)
+    alert('❌ Ошибка соединения с сервером')
   }
+
+  setLoading(false)
+}
 
   if (status === 'unauthenticated') {
     return null

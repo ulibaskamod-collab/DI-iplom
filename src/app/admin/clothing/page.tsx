@@ -9,6 +9,7 @@ interface ClothingItem {
   title: string
   description: string
   image_url: string
+  image_base64?: string // ✅ ДОБАВЛЕНО: для Base64 изображений
   season: string
   gender: string
   zodiac_sign_id: number
@@ -181,8 +182,9 @@ export default function AdminClothingPage() {
                   <tr key={item.id} className="border-b border-white/5 hover:bg-white/5 transition">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
+                        {/* ✅ ИЗМЕНЕНО: сначала пробуем Base64, потом URL, потом заглушку */}
                         <img
-                          src={item.image_url || '/images/clothing/placeholder.svg'}
+                          src={item.image_base64 || item.image_url || '/images/clothing/placeholder.svg'}
                           alt={item.title}
                           className="w-12 h-12 rounded-lg object-cover bg-gray-800"
                           onError={(e) => {

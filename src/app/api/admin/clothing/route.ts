@@ -17,6 +17,7 @@ export async function GET() {
         c.title,
         c.description,
         c.image_url,
+        c.image_base64,
         c.season,
         c.gender,
         c.zodiac_sign_id,
@@ -26,11 +27,9 @@ export async function GET() {
       ORDER BY c.id DESC
     `)
     
-    // ✅ Убеждаемся, что возвращаем массив
     return NextResponse.json(result.rows || [])
   } catch (error) {
     console.error('GET clothing error:', error)
-    // ✅ В случае ошибки возвращаем пустой массив, а не ошибку
     return NextResponse.json([])
   }
 }
@@ -39,22 +38,13 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    console.log('📦 Создание одежды:', body)
-
-    const { title, description, image_url, season, gender, zodiac_sign_id } = body
-
-    if (!title) {
-      return NextResponse.json(
-        { error: 'Название обязательно' },
-        { status: 400 }
-      )
-    }
+    const { title, description, image_url, image_base64, season, gender, zodiac_sign_id } = body
 
     const result = await pool.query(
-      `INSERT INTO clothing_items (title, description, image_url, season, gender, zodiac_sign_id)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO clothing_items (title, description, image_url, image_base64, season, gender, zodiac_sign_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [title, description || '', image_url || '', season || 'summer', gender || 'unisex', zodiac_sign_id || null]
+      [title, description || '', image_url || '', image_base64 || '', season || 'summer', gender || 'unisex', zodiac_sign_id || null]
     )
 
     return NextResponse.json(result.rows[0], { status: 201 })
