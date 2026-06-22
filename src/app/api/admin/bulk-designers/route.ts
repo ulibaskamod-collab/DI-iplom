@@ -35,17 +35,20 @@ export async function POST(req: NextRequest) {
       const template = templates[i]
       const imageUrl = images[i] || ''
 
+      // ✅ Убедимся, что URL начинается с /uploads/
+      const finalImageUrl = imageUrl.startsWith('/uploads/') ? imageUrl : `/uploads/designers/${imageUrl}`
+
       console.log(`📝 Сохраняем дизайнера ${i+1}:`, {
         designer_name: template.designer_name,
         bio: template.bio,
-        imageUrl
+        imageUrl: finalImageUrl
       })
 
       const result = await pool.query(
         `INSERT INTO designers (designer_name, bio, designer_image, social_links)
          VALUES ($1, $2, $3, $4)
          RETURNING *`,
-        [template.designer_name, template.bio || '', imageUrl, JSON.stringify({})]
+        [template.designer_name, template.bio || '', finalImageUrl, JSON.stringify({})]
       )
 
       savedItems.push({

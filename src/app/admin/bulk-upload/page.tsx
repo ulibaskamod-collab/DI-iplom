@@ -1,144 +1,147 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'  // ← ПРАВИЛЬНЫЙ ИМПОРТ
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { ArrowLeft, Upload, Image as ImageIcon } from 'lucide-react'
-import { BulkImageUpload } from '@/src/components/BulkImageUpload'
+import { useState } from 'react'
+import { Upload, X, Check } from 'lucide-react'
 
 export default function BulkUploadPage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [selectedFolder, setSelectedFolder] = useState<'clothing' | 'designers' | 'works'>('clothing')
-  const [allData, setAllData] = useState<any[]>([])
+  const [files, setFiles] = useState<File[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [folder, setFolder] = useState('clothing')
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin')
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || [])
+    setFiles(prev => [...prev, ...selectedFiles])
+  }
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleUpload = async () => {
+    if (files.length === 0) {
+      setError('Выберите файлы для загрузки')
       return
     }
-  }, [status, router])
 
-  const handleUploadComplete = (data: any[]) => {
-    setAllData(prev => [...prev, ...data])
-  }
+    setUploading(true)
+    setError(null)
 
-  if (status === 'loading') {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500" />
-      </div>
-    )
-  }
+    const formData = new FormData()
+    files.forEach(file => {
+      formData.append('images', file)
+    })
+    formData.append('folder', folder)
 
-  const folderInfo = {
-    clothing: {
-      label: '👕 Одежда',
-      description: 'Создайте шаблон и добавьте несколько фото',
-    },
-    designers: {
-      label: '🎨 Дизайнеры',
-      description: 'Создайте шаблон и добавьте фото',
-    },
-    works: {
-      label: '🖼️ Работы',
-      description: 'Создайте шаблон и добавьте несколько фото',
+    try {
+      const response = await fetch('/api/admin/bulk-upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setUploadedUrls(data.urls)
+        alert(`✅ Загружено ${data.uploaded} файлов`)
+        setFiles([])
+      } else {
+        setError(data.error || 'Ошибка загрузки')
+      }
+    } catch (err) {
+      setError('Ошибка соединения с сервером')
+    } finally {
+      setUploading(false)
     }
   }
 
   return (
-    <div>
-      {/* Заголовок */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <Link href="/admin" className="text-gray-400 hover:text-white transition p-2 rounded-lg hover:bg-white/5">
-            <ArrowLeft size={20} />
-          </Link>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
-              <Upload className="w-7 h-7 text-pink-400" />
-              Массовая загрузка
-            </h1>
-            <p className="text-white/40 text-sm mt-0.5">
-              Создайте шаблон → Добавьте фото → Сохраните
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold text-white mb-6">Массовая загрузка</h1>
 
-      {/* Выбор типа */}
-      <div className="bg-white/5 rounded-2xl p-6 border border-white/10 mb-6">
-        <label className="block text-white/70 text-sm font-medium mb-3">
-          Выберите тип загрузки
-        </label>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {Object.entries(folderInfo).map(([key, info]) => (
-            <button
-              key={key}
-              onClick={() => setSelectedFolder(key as any)}
-              className={`p-4 rounded-xl text-left transition ${
-                selectedFolder === key
-                  ? 'bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30'
-                  : 'bg-white/5 border border-white/10 hover:bg-white/10'
-              }`}
-            >
-              <div className="text-2xl mb-1">{info.label.split(' ')[0]}</div>
-              <div className="text-white font-medium">{info.label.split(' ').slice(1).join(' ')}</div>
-              <div className="text-white/40 text-xs mt-1">{info.description}</div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Компонент загрузки */}
       <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-        <BulkImageUpload
-          folder={selectedFolder}
-          onUploadComplete={handleUploadComplete}
-        />
-      </div>
-
-      {/* История загрузок */}
-      {allData.length > 0 && (
-        <div className="mt-6 bg-white/5 rounded-2xl p-6 border border-white/10">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-white font-medium flex items-center gap-2">
-              <ImageIcon size={18} className="text-green-400" />
-              Всего загружено: {allData.reduce((acc, d) => acc + (d.saved?.length || 0), 0)} записей
-            </h3>
-            <button
-              onClick={() => {
-                const text = allData.map((group, gi) => 
-                  `${gi+1}. ${group.template?.name || group.template?.work_title || group.template?.designer_name || 'Шаблон'}\n${group.images?.map((url: string, i: number) => `   ${i+1}. ${url}`).join('\n')}`
-                ).join('\n\n')
-                navigator.clipboard.writeText(text)
-                alert('Все данные скопированы!')
-              }}
-              className="text-sm text-pink-400 hover:text-pink-300 transition"
-            >
-              📋 Копировать все
-            </button>
-          </div>
-          <div className="max-h-40 overflow-y-auto space-y-2">
-            {allData.map((group, gi) => (
-              <div key={gi} className="text-white/50 text-xs border-b border-white/5 pb-1">
-                <div className="font-medium text-white/70">
-                  {gi+1}. {group.template?.name || group.template?.work_title || group.template?.designer_name || 'Шаблон'}
-                  {' '}({group.images?.length || 0} фото)
-                </div>
-                {group.images?.map((url: string, i: number) => (
-                  <div key={i} className="pl-4 text-white/30">
-                    {i+1}. {url}
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
+        <div className="mb-4">
+          <label className="block text-white/60 text-sm mb-2">Папка для загрузки</label>
+          <select
+            value={folder}
+            onChange={(e) => setFolder(e.target.value)}
+            className="w-full md:w-48 px-4 py-2 bg-white/10 rounded-lg text-white border border-white/10"
+          >
+            <option value="clothing">Одежда</option>
+            <option value="designers">Дизайнеры</option>
+            <option value="zodiac">Знаки зодиака</option>
+            <option value="works">Работы</option>
+          </select>
         </div>
-      )}
+
+        <div className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:border-purple-500 transition">
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+            id="fileInput"
+          />
+          <label htmlFor="fileInput" className="cursor-pointer">
+            <Upload className="w-12 h-12 text-white/40 mx-auto mb-4" />
+            <p className="text-white/60">Нажмите для выбора файлов</p>
+            <p className="text-white/30 text-sm">или перетащите их сюда</p>
+          </label>
+        </div>
+
+        {files.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-white/60 text-sm mb-2">Выбрано файлов: {files.length}</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-60 overflow-y-auto">
+              {files.map((file, index) => (
+                <div key={index} className="relative group">
+                  <div className="bg-white/5 rounded-lg p-2">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={file.name}
+                      className="w-full h-24 object-cover rounded"
+                    />
+                    <p className="text-white/50 text-xs truncate mt-1">{file.name}</p>
+                  </div>
+                  <button
+                    onClick={() => removeFile(index)}
+                    className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full hover:bg-red-600"
+                  >
+                    <X size={14} className="text-white" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+
+        <button
+          onClick={handleUpload}
+          disabled={uploading || files.length === 0}
+          className="mt-6 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-semibold hover:opacity-90 transition disabled:opacity-50"
+        >
+          {uploading ? 'Загрузка...' : `Загрузить ${files.length} файлов`}
+        </button>
+
+        {uploadedUrls.length > 0 && (
+          <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <p className="text-green-400 text-sm">✅ Загружено: {uploadedUrls.length} файлов</p>
+            <div className="mt-2 max-h-32 overflow-y-auto">
+              {uploadedUrls.map((url, i) => (
+                <p key={i} className="text-white/40 text-xs truncate">{url}</p>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

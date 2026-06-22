@@ -41,6 +41,9 @@ export async function POST(req: NextRequest) {
       for (let i = 0; i < templateImages.length; i++) {
         const imageUrl = templateImages[i] || ''
 
+        // ✅ Убедимся, что URL начинается с /uploads/
+        const finalImageUrl = imageUrl.startsWith('/uploads/') ? imageUrl : `/uploads/clothing/${imageUrl}`
+
         const result = await pool.query(
           `INSERT INTO clothing_items (title, description, image_url, season, gender, zodiac_sign_id)
            VALUES ($1, $2, $3, $4, $5, $6)
@@ -48,7 +51,7 @@ export async function POST(req: NextRequest) {
           [
             template.name,
             template.description || '',
-            imageUrl,
+            finalImageUrl, // ✅ Сохраняем путь к файлу
             template.season || 'summer',
             template.gender || 'unisex',
             template.zodiac_sign_id
