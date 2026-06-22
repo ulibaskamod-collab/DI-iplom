@@ -6,39 +6,34 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false,
   },
-  // Добавляем пул соединений для ускорения
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
 })
 
-// GET - получить всех дизайнеров (оптимизированный)
+// ✅ ДОБАВЬТЕ GET МЕТОД
 export async function GET() {
   try {
-    // Оптимизированный запрос без лишних подзапросов
     const result = await pool.query(`
       SELECT 
-        d.id,
-        d.designer_name,
-        d.bio,
-        d.designer_image,
-        d.social_links,
-        d.created_at,
-        COUNT(dw.id) as works_count
-      FROM designers d
-      LEFT JOIN designer_works dw ON d.id = dw.designer_id
-      GROUP BY d.id
-      ORDER BY d.id DESC
+        id, 
+        designer_name, 
+        bio, 
+        designer_image, 
+        social_links,
+        created_at
+      FROM designers 
+      ORDER BY id DESC
     `)
     
     return NextResponse.json(result.rows)
   } catch (error) {
     console.error('GET designers error:', error)
-    return NextResponse.json([], { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to fetch designers' },
+      { status: 500 }
+    )
   }
 }
 
-// POST - создать дизайнера (оптимизированный)
+// POST метод у вас уже есть
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -65,7 +60,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// DELETE - удалить дизайнера
+// DELETE метод
 export async function DELETE(req: NextRequest) {
   const id = req.nextUrl.searchParams.get('id')
 
@@ -74,7 +69,6 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    // Сначала удаляем работы, потом дизайнера (каскадно)
     await pool.query('DELETE FROM designer_works WHERE designer_id = $1', [id])
     await pool.query('DELETE FROM designers WHERE id = $1', [id])
     return NextResponse.json({ success: true })
