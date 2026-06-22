@@ -1,167 +1,143 @@
-'use client'
-export const dynamic = 'force-dynamic'
+'use client';
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { Palette, Globe, ArrowRight, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Palette } from 'lucide-react';
 
 interface Designer {
-  id: number
-  designer_name: string
-  bio: string
-  designer_image: string
-  social_links: {
-    instagram?: string
-    website?: string
-  }
+  id: number;
+  designer_name: string;
+  bio: string;
+  designer_image: string;
+  social_links: any;
+  works_count?: number;
 }
 
 export default function DesignersPage() {
-  const [designers, setDesigners] = useState<Designer[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [designers, setDesigners] = useState<Designer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    fetchDesigners()
-  }, [])
+    fetch('/api/designers')
+      .then(res => {
+        if (!res.ok) throw new Error('Ошибка загрузки');
+        return res.json();
+      })
+      .then(data => {
+        setDesigners(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
 
-  const fetchDesigners = async () => {
-    setLoading(true)
-    setError(null)
-    
-    try {
-      const res = await fetch('/api/designers')
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`)
-      }
-      const data = await res.json()
-      console.log('Получены дизайнеры:', data)
-      setDesigners(Array.isArray(data) ? data : [])
-    } catch (error) {
-      console.error('Error fetching designers:', error)
-      setError('Не удалось загрузить дизайнеров')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const handleImageError = (id: number) => {
+    setImageErrors(prev => ({ ...prev, [id]: true }));
+  };
+
+  const getImageUrl = (path: string | null | undefined) => {
+    if (!path) return null;
+    // Если путь уже начинается с /, оставляем
+    if (path.startsWith('/')) return path;
+    // Если путь начинается с uploads, добавляем /
+    if (path.startsWith('uploads/')) return `/${path}`;
+    // Если это просто имя файла
+    return `/uploads/designers/${path}`;
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
-          <p className="text-white/50">Загрузка дизайнеров...</p>
-        </div>
+      <div className="flex justify-center items-center h-screen bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25] px-4">
         <div className="text-center">
-          <div className="text-red-400 text-xl mb-4">⚠️ {error}</div>
-          <button 
-            onClick={fetchDesigners}
-            className="px-4 py-2 bg-purple-500 rounded-lg text-white hover:bg-purple-600 transition"
+          <div className="text-6xl mb-4">😕</div>
+          <p className="text-white/50 text-lg mb-4">Не удалось загрузить дизайнеров</p>
+          <p className="text-white/30 text-sm mb-6">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl text-white font-medium hover:opacity-90 transition"
           >
             Попробовать снова
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25]">
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        
-        <div className="text-center mb-16">
-          <Palette className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-          <h1 className="text-5xl font-bold text-white mb-4">Дизайнеры</h1>
-          <p className="text-purple-300 text-lg max-w-2xl mx-auto">
-            Великие кутюрье, чьи творения вдохновляют стиль знаков зодиака
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#0a0a1a] to-[#0d0d25] py-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-4xl md:text-5xl font-bold text-center text-white mb-4">
+          Дизайнеры
+        </h1>
+        <p className="text-center text-white/50 text-lg mb-12 max-w-2xl mx-auto">
+          Великие кутюрье, чьи творения вдохновляют стиль знаков зодиака
+        </p>
 
         {designers.length === 0 ? (
-          <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
-            <Palette className="w-20 h-20 text-purple-500 mx-auto mb-4 opacity-50" />
-            <p className="text-2xl text-purple-300">Дизайнеры скоро появятся</p>
-            <p className="text-purple-400 mt-2">Добавьте дизайнеров через админ-панель</p>
-            <Link href="/admin/designers" className="inline-block mt-6 px-6 py-2 bg-purple-500 rounded-full text-white hover:bg-purple-600 transition">
-              Добавить дизайнера
-            </Link>
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">👗</div>
+            <p className="text-white/50">Дизайнеры не найдены</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {designers.map((designer) => (
-              <div
-                key={designer.id}
-                className="group bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition-all duration-300 hover:scale-105"
-              >
-                <div className="aspect-square bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center relative overflow-hidden">
-                  {designer.designer_image ? (
-                    <img 
-                      src={designer.designer_image} 
-                      alt={designer.designer_name} 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        console.error('Image failed to load:', designer.designer_image)
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                  ) : (
-                    <div className="text-center">
-                      <Palette className="w-24 h-24 text-purple-400 opacity-50 mx-auto" />
-                      <p className="text-purple-300 mt-2 text-sm">{designer.designer_name}</p>
-                    </div>
-                  )}
-                </div>
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold text-white mb-3">{designer.designer_name}</h3>
-                  <p className="text-purple-300/80 text-sm leading-relaxed line-clamp-3 mb-4">
-                    {designer.bio}
-                  </p>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-3">
-                      {designer.social_links?.instagram && (
-                        <a 
-                          href={designer.social_links.instagram} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="p-2 rounded-full bg-pink-500/20 text-pink-400 hover:bg-pink-500/40 transition"
-                        >
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
-                          </svg>
-                        </a>
-                      )}
-                      {designer.social_links?.website && (
-                        <a 
-                          href={designer.social_links.website} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="p-2 rounded-full bg-purple-500/20 text-purple-400 hover:bg-purple-500/40 transition"
-                        >
-                          <Globe size={18} />
-                        </a>
-                      )}
-                    </div>
-                    <Link
-                      href={`/designers/${designer.id}`}
-                      className="flex items-center gap-1 text-purple-400 hover:text-purple-300 transition text-sm"
-                    >
-                      Подробнее <ArrowRight size={16} />
-                    </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {designers.map((designer) => {
+              const imageUrl = getImageUrl(designer.designer_image);
+              const hasError = imageErrors[designer.id];
+
+              return (
+                <Link
+                  key={designer.id}
+                  href={`/designers/${designer.id}`}
+                  className="group bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-[1.02]"
+                >
+                  <div className="aspect-[4/3] bg-gradient-to-br from-white/5 to-white/10 relative overflow-hidden">
+                    {imageUrl && !hasError ? (
+                      <img
+                        src={imageUrl}
+                        alt={designer.designer_name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={() => handleImageError(designer.id)}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center text-4xl">
+                          {designer.designer_name?.charAt(0)?.toUpperCase() || '👤'}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              </div>
-            ))}
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-pink-400 transition">
+                      {designer.designer_name}
+                    </h3>
+                    <p className="text-white/50 text-sm line-clamp-2">
+                      {designer.bio || 'Дизайнер'}
+                    </p>
+                    {designer.works_count !== undefined && (
+                      <p className="text-white/30 text-xs mt-2">
+                        Работ: {designer.works_count}
+                      </p>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
