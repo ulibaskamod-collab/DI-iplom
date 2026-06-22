@@ -78,7 +78,6 @@ export default function Navigation() {
     { href: '/admin/zodiac', label: 'Знаки зодиака', icon: Star, color: 'text-yellow-400' },
     { href: '/admin/clothing', label: 'Одежда', icon: Shirt, color: 'text-green-400' },
     { href: '/admin/designers', label: 'Дизайнеры', icon: Palette, color: 'text-purple-400' },
-    { href: '/admin/bulk-upload', label: 'Массовая загрузка', icon: Upload, color: 'text-pink-400' },
     { href: '/admin/users', label: 'Пользователи', icon: Users, color: 'text-cyan-400' },
     { href: '/admin/favorites', label: 'Избранное', icon: Heart, color: 'text-red-400' },
   ]
