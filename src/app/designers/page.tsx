@@ -40,12 +40,19 @@ export default function DesignersPage() {
     setImageErrors(prev => ({ ...prev, [id]: true }));
   };
 
+  // ✅ ИСПРАВЛЕНО: правильное определение пути к изображению
   const getImageUrl = (path: string | null | undefined) => {
     if (!path) return null;
+    
+    // Если это Base64 - возвращаем как есть
+    if (path.startsWith('data:image')) return path;
+    
     // Если путь уже начинается с /, оставляем
     if (path.startsWith('/')) return path;
+    
     // Если путь начинается с uploads, добавляем /
     if (path.startsWith('uploads/')) return `/${path}`;
+    
     // Если это просто имя файла
     return `/uploads/designers/${path}`;
   };
@@ -104,18 +111,20 @@ export default function DesignersPage() {
                   className="group bg-white/5 rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-[1.02]"
                 >
                   <div className="aspect-[4/3] bg-gradient-to-br from-white/5 to-white/10 relative overflow-hidden">
-                    {imageUrl && !hasError ? (
-                      <img
-                        src={imageUrl}
-                        alt={designer.designer_name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={() => handleImageError(designer.id)}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center text-4xl">
-                          {designer.designer_name?.charAt(0)?.toUpperCase() || '👤'}
-                        </div>
+                    {/* ✅ ОСНОВНОЕ ИЗМЕНЕНИЕ: всегда показываем img, даже с заглушкой */}
+                    <img
+                      src={imageUrl || '/images/designers/placeholder.svg'}
+                      alt={designer.designer_name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={() => handleImageError(designer.id)}
+                    />
+                    
+                    {/* Если изображение не загрузилось - показываем инициалы поверх */}
+                    {hasError && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-pink-500/20 to-purple-500/20">
+                        <span className="text-6xl font-bold text-white/50">
+                          {designer.designer_name?.charAt(0)?.toUpperCase() || '?'}
+                        </span>
                       </div>
                     )}
                   </div>
