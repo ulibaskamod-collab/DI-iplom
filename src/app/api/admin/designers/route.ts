@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { Pool } from 'pg'
 
 const pool = new Pool({
@@ -8,59 +8,31 @@ const pool = new Pool({
   },
 })
 
-// GET - получить всех дизайнеров
-export async function GET() {
+export async function POST(request: Request) {
   try {
-    const result = await pool.query(
-      `SELECT d.*, 
-              (SELECT COUNT(*) FROM designer_works WHERE designer_id = d.id) as works_count
-       FROM designers d 
-       ORDER BY d.id DESC`
-    )
-    return NextResponse.json(result.rows)
-  } catch (error) {
-    console.error('GET designers error:', error)
-    return NextResponse.json([], { status: 500 })
-  }
-}
-
-// POST - создать дизайнера
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json()
+    const body = await request.json()
     const { designer_name, bio, designer_image, social_links } = body
 
     if (!designer_name || !bio) {
-      return NextResponse.json({ error: 'Имя и био обязательны' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Имя и биография обязательны' },
+        { status: 400 }
+      )
     }
 
     const result = await pool.query(
-      `INSERT INTO designers (designer_name, bio, designer_image, social_links)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO designers (designer_name, bio, designer_image, social_links) 
+       VALUES ($1, $2, $3, $4) 
        RETURNING *`,
-      [designer_name, bio, designer_image || '', JSON.stringify(social_links || {})]
+      [designer_name, bio, designer_image || null, social_links || {}]
     )
 
-    return NextResponse.json({ success: true, designer: result.rows[0] })
-  } catch (error: any) {
-    console.error('POST designer error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-}
-
-// DELETE - удалить дизайнера
-export async function DELETE(req: NextRequest) {
-  const id = req.nextUrl.searchParams.get('id')
-
-  if (!id) {
-    return NextResponse.json({ error: 'ID required' }, { status: 400 })
-  }
-
-  try {
-    await pool.query('DELETE FROM designers WHERE id = $1', [id])
-    return NextResponse.json({ success: true })
+    return NextResponse.json(result.rows[0], { status: 201 })
   } catch (error) {
-    console.error('DELETE designer error:', error)
-    return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
+    console.error('Error creating designer:', error)
+    return NextResponse.json(
+      { error: 'Failed to create designer' },
+      { status: 500 }
+    )
   }
 }

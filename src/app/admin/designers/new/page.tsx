@@ -37,28 +37,24 @@ export default function AddDesignerPage() {
     e.preventDefault()
     setLoading(true)
 
-    // Загружаем изображение
-    const imageUrl = await uploadImage()
-
-    // Правильное создание объекта social_links с типами
-    const social_links: { website?: string; instagram?: string } = {}
-    if (formData.website) {
-      social_links.website = formData.website
-    }
-    if (formData.instagram) {
-      social_links.instagram = formData.instagram
-    }
-
-    const payload = {
-      designer_name: formData.designer_name,
-      bio: formData.bio,
-      designer_image: imageUrl || '',
-      social_links,
-    }
-
-    console.log('Отправляю дизайнера:', payload)
-
     try {
+      // Загружаем изображение
+      const imageUrl = await uploadImage()
+
+      // Создаем объект social_links
+      const social_links: { website?: string; instagram?: string } = {}
+      if (formData.website) social_links.website = formData.website
+      if (formData.instagram) social_links.instagram = formData.instagram
+
+      const payload = {
+        designer_name: formData.designer_name,
+        bio: formData.bio,
+        designer_image: imageUrl || '', // ✅ Может быть пустым
+        social_links,
+      }
+
+      console.log('📤 Отправляю дизайнера:', payload)
+
       const res = await fetch('/api/admin/designers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -68,14 +64,14 @@ export default function AddDesignerPage() {
       const data = await res.json()
 
       if (res.ok) {
-        alert('Дизайнер успешно добавлен!')
+        alert('✅ Дизайнер успешно добавлен!')
         router.push('/admin/designers')
       } else {
-        alert('Ошибка: ' + (data.error || 'Не удалось добавить'))
+        alert('❌ Ошибка: ' + (data.error || 'Не удалось добавить'))
       }
     } catch (error) {
       console.error('Ошибка:', error)
-      alert('Ошибка соединения с сервером')
+      alert('❌ Ошибка соединения с сервером')
     }
 
     setLoading(false)
@@ -111,7 +107,7 @@ export default function AddDesignerPage() {
                   <button
                     type="button"
                     onClick={removeImage}
-                    className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full"
+                    className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full hover:bg-red-600 transition"
                   >
                     <X size={14} />
                   </button>
@@ -120,7 +116,12 @@ export default function AddDesignerPage() {
                 <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-purple-500 transition">
                   <Upload className="w-6 h-6 text-white/40" />
                   <span className="text-white/40 text-xs mt-1">Загрузить</span>
-                  <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageChange} 
+                    className="hidden" 
+                  />
                 </label>
               )}
               {isUploading && <span className="text-white/50 text-sm">Загрузка...</span>}
@@ -183,7 +184,7 @@ export default function AddDesignerPage() {
             <button
               type="submit"
               disabled={loading || isUploading}
-              className="flex-1 py-3 bg-purple-500 rounded-xl text-white font-semibold hover:bg-purple-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <Save size={18} />
               {loading || isUploading ? 'Сохранение...' : 'Сохранить дизайнера'}

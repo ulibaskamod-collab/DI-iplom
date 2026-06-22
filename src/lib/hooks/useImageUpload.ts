@@ -1,88 +1,56 @@
 import { useState, useCallback, ChangeEvent } from 'react'
 
-interface UseImageUploadOptions {
+interface UseImageUploadProps {
+  folder: string
   maxSizeMB?: number
-  allowedTypes?: string[]
-  folder?: 'clothing' | 'designers' | 'works' | 'zodiac' | 'general'
-  onSuccess?: (url: string) => void
   onError?: (error: string) => void
 }
 
-interface UseImageUploadReturn {
-  imageFile: File | null
-  imagePreview: string | null
-  isUploading: boolean
-  uploadError: string | null
-  handleImageChange: (e: ChangeEvent<HTMLInputElement>) => void
-  uploadImage: () => Promise<string | null>
-  removeImage: () => void
-  setImagePreview: (url: string | null) => void
-  setImageFile: (file: File | null) => void
-  validateFile: (file: File) => boolean
-  reset: () => void
-}
-
-export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUploadReturn {
-  const {
-    maxSizeMB = 5,
-    allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'],
-    folder = 'general',
-    onSuccess,
-    onError,
-  } = options
-
+export function useImageUpload({ folder, maxSizeMB = 5, onError }: UseImageUploadProps) {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
-
-  const validateFile = useCallback((file: File): boolean => {
-    const maxSizeBytes = maxSizeMB * 1024 * 1024
-    if (file.size > maxSizeBytes) {
-      const errorMsg = `Файл слишком большой! Максимальный размер: ${maxSizeMB}MB`
-      setUploadError(errorMsg)
-      onError?.(errorMsg)
-      return false
-    }
-
-    if (!allowedTypes.includes(file.type)) {
-      const errorMsg = `Неподдерживаемый формат. Разрешены: ${allowedTypes.join(', ')}`
-      setUploadError(errorMsg)
-      onError?.(errorMsg)
-      return false
-    }
-
-    setUploadError(null)
-    return true
-  }, [maxSizeMB, allowedTypes, onError])
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null)
 
   const handleImageChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    
-    if (!file) {
-      return
-    }
+    if (!file) return
 
-    if (!validateFile(file)) {
+    // Проверка размера
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      const error = `Файл слишком большой (макс ${maxSizeMB}MB)`
+      setUploadError(error)
+      onError?.(error)
       e.target.value = ''
       return
     }
 
-    const previewUrl = URL.createObjectURL(file)
-    
+    // Проверка типа
+    if (!file.type.startsWith('image/')) {
+      const error = 'Пожалуйста, выберите изображение'
+      setUploadError(error)
+      onError?.(error)
+      e.target.value = ''
+      return
+    }
+
+    // Создаем превью
     if (imagePreview && imagePreview.startsWith('blob:')) {
       URL.revokeObjectURL(imagePreview)
     }
 
+    const previewUrl = URL.createObjectURL(file)
     setImageFile(file)
     setImagePreview(previewUrl)
     setUploadError(null)
-  }, [validateFile, imagePreview])
+    setUploadedUrl(null)
+  }, [maxSizeMB, onError, imagePreview])
 
   const uploadImage = useCallback(async (): Promise<string | null> => {
-    // Если нет файла - возвращаем null (не ошибка)
     if (!imageFile) {
-      return null
+      // Если нет нового файла, но есть загруженный URL - возвращаем его
+      return uploadedUrl
     }
 
     setIsUploading(true)
@@ -90,7 +58,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
 
     try {
       const formData = new FormData()
-      formData.append('image', imageFile)
+      formData.append('image', imageFile) // ✅ Используем 'image' как имя поля
       formData.append('folder', folder)
 
       const response = await fetch('/api/admin/upload', {
@@ -101,24 +69,25 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Ошибка загрузки изображения')
+        throw new Error(data.error || 'Ошибка загрузки')
       }
 
       if (data.success && data.url) {
-        onSuccess?.(data.url)
+        setUploadedUrl(data.url)
+        setImageFile(null) // Очищаем файл после загрузки
         return data.url
       } else {
-        throw new Error('Не удалось получить URL загруженного изображения')
+        throw new Error('Неверный ответ сервера')
       }
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Неизвестная ошибка при загрузке'
-      setUploadError(errorMsg)
-      onError?.(errorMsg)
+      const message = error instanceof Error ? error.message : 'Ошибка загрузки изображения'
+      setUploadError(message)
+      onError?.(message)
       return null
     } finally {
       setIsUploading(false)
     }
-  }, [imageFile, folder, onSuccess, onError])
+  }, [imageFile, folder, onError, uploadedUrl])
 
   const removeImage = useCallback(() => {
     if (imagePreview && imagePreview.startsWith('blob:')) {
@@ -127,16 +96,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     setImageFile(null)
     setImagePreview(null)
     setUploadError(null)
-  }, [imagePreview])
-
-  const reset = useCallback(() => {
-    if (imagePreview && imagePreview.startsWith('blob:')) {
-      URL.revokeObjectURL(imagePreview)
-    }
-    setImageFile(null)
-    setImagePreview(null)
-    setIsUploading(false)
-    setUploadError(null)
+    setUploadedUrl(null)
   }, [imagePreview])
 
   return {
@@ -144,12 +104,9 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
     imagePreview,
     isUploading,
     uploadError,
+    uploadedUrl,
     handleImageChange,
     uploadImage,
     removeImage,
-    setImagePreview,
-    setImageFile,
-    validateFile,
-    reset,
   }
 }
