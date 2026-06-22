@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Plus, Edit, Trash2, Search, X, Eye } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, X } from 'lucide-react'
 
 interface ClothingItem {
   id: number
@@ -12,32 +12,55 @@ interface ClothingItem {
   season: string
   gender: string
   zodiac_sign_id: number
-  zodiac_sign?: {
-    name: string
-  }
+  zodiac_sign_name?: string
 }
 
 export default function AdminClothingPage() {
   const [items, setItems] = useState<ClothingItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   // Загрузка данных
   useEffect(() => {
-    fetch('/api/admin/clothing')
-      .then(res => res.json())
-      .then(data => {
-        setItems(data)
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+    fetchItems()
   }, [])
+
+  const fetchItems = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const response = await fetch('/api/admin/clothing')
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      // ✅ Убеждаемся, что data - это массив
+      if (Array.isArray(data)) {
+        setItems(data)
+      } else {
+        console.error('API вернул не массив:', data)
+        setItems([])
+        setError('Неверный формат данных')
+      }
+    } catch (err) {
+      console.error('Error fetching clothing:', err)
+      setError('Не удалось загрузить данные')
+      setItems([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Фильтрация
   const filteredItems = items.filter(item =>
-    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.description?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
@@ -47,12 +70,14 @@ export default function AdminClothingPage() {
       const response = await fetch(`/api/admin/clothing/${id}`, {
         method: 'DELETE',
       })
+      
       if (response.ok) {
         setItems(items.filter(item => item.id !== id))
         setShowDeleteModal(false)
         setSelectedItem(null)
       } else {
-        alert('Ошибка при удалении')
+        const error = await response.json()
+        alert('Ошибка при удалении: ' + (error.error || 'Неизвестная ошибка'))
       }
     } catch (error) {
       console.error('Error:', error)
@@ -118,6 +143,19 @@ export default function AdminClothingPage() {
         )}
       </div>
 
+      {/* Ошибка */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
+          {error}
+          <button 
+            onClick={fetchItems}
+            className="ml-4 text-pink-400 hover:text-pink-300 transition"
+          >
+            Попробовать снова
+          </button>
+        </div>
+      )}
+
       {/* Таблица */}
       {loading ? (
         <div className="flex justify-center py-20">
@@ -158,6 +196,9 @@ export default function AdminClothingPage() {
                             src={item.image_url}
                             alt={item.title}
                             className="w-12 h-12 rounded-lg object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/placeholder.svg'
+                            }}
                           />
                         ) : (
                           <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center text-2xl">
@@ -186,7 +227,7 @@ export default function AdminClothingPage() {
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">
                       <span className="text-white/50 text-sm">
-                        {item.zodiac_sign?.name || '—'}
+                        {item.zodiac_sign_name || '—'}
                       </span>
                     </td>
                     <td className="px-4 py-3">

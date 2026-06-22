@@ -8,118 +8,60 @@ const pool = new Pool({
   },
 })
 
-// GET - получить один предмет одежды
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// GET - получить все предметы одежды
+export async function GET() {
   try {
-    const id = parseInt(params.id)
+    const result = await pool.query(`
+      SELECT 
+        c.id,
+        c.title,
+        c.description,
+        c.image_url,
+        c.season,
+        c.gender,
+        c.zodiac_sign_id,
+        z.name as zodiac_sign_name
+      FROM clothing_items c
+      LEFT JOIN zodiac_signs z ON c.zodiac_sign_id = z.id
+      ORDER BY c.id DESC
+    `)
     
-    const result = await pool.query(
-      `SELECT 
-        id, 
-        title, 
-        description, 
-        image_url, 
-        season, 
-        gender, 
-        zodiac_sign_id
-      FROM clothing_items 
-      WHERE id = $1`,
-      [id]
-    )
-
-    if (result.rows.length === 0) {
-      return NextResponse.json(
-        { error: 'Item not found' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json(result.rows[0])
+    // ✅ Убеждаемся, что возвращаем массив
+    return NextResponse.json(result.rows || [])
   } catch (error) {
-    console.error('GET clothing item error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch item' },
-      { status: 500 }
-    )
+    console.error('GET clothing error:', error)
+    // ✅ В случае ошибки возвращаем пустой массив, а не ошибку
+    return NextResponse.json([])
   }
 }
 
-// PUT - обновить предмет одежды
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// POST - создать предмет одежды
+export async function POST(req: NextRequest) {
   try {
-    const id = parseInt(params.id)
     const body = await req.json()
+    console.log('📦 Создание одежды:', body)
+
     const { title, description, image_url, season, gender, zodiac_sign_id } = body
 
+    if (!title) {
+      return NextResponse.json(
+        { error: 'Название обязательно' },
+        { status: 400 }
+      )
+    }
+
     const result = await pool.query(
-      `UPDATE clothing_items 
-       SET 
-         title = $1,
-         description = $2,
-         image_url = $3,
-         season = $4,
-         gender = $5,
-         zodiac_sign_id = $6
-       WHERE id = $7
+      `INSERT INTO clothing_items (title, description, image_url, season, gender, zodiac_sign_id)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [title, description, image_url, season, gender, zodiac_sign_id, id]
+      [title, description || '', image_url || '', season || 'summer', gender || 'unisex', zodiac_sign_id || null]
     )
 
-    if (result.rows.length === 0) {
-      return NextResponse.json(
-        { error: 'Item not found' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json(result.rows[0])
-  } catch (error) {
-    console.error('PUT clothing item error:', error)
+    return NextResponse.json(result.rows[0], { status: 201 })
+  } catch (error: any) {
+    console.error('POST clothing error:', error)
     return NextResponse.json(
-      { error: 'Failed to update item' },
-      { status: 500 }
-    )
-  }
-}
-
-// DELETE - удалить предмет одежды
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const id = parseInt(params.id)
-
-    // Проверяем существование
-    const checkResult = await pool.query(
-      'SELECT id FROM clothing_items WHERE id = $1',
-      [id]
-    )
-
-    if (checkResult.rows.length === 0) {
-      return NextResponse.json(
-        { error: 'Item not found' },
-        { status: 404 }
-      )
-    }
-
-    // Удаляем
-    await pool.query('DELETE FROM clothing_items WHERE id = $1', [id])
-
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Item deleted successfully' 
-    })
-  } catch (error) {
-    console.error('DELETE clothing item error:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete item' },
+      { error: error.message },
       { status: 500 }
     )
   }
